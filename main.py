@@ -3,7 +3,6 @@ from PIL import Image
 from language import Locale
 import subprocess
 import json
-from secrets import token_hex
 from gc import collect as gc_collect
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis'], 'UTC': None}
@@ -32,7 +31,7 @@ class Notification(CTkToplevel):
 class App(CTk):
     def __init__(self):
         super().__init__()
-        self.title("SECUX")
+        self.title(DISTRO_NAME)
 
         # Available languages: ["ru", "en"]
         self.language = "ru"
@@ -231,23 +230,16 @@ class App(CTk):
 
         efi_partition_label = CTkLabel(self, text=self.lang.efipart)
         self.efi_partition_optionmenu = CTkOptionMenu(self, values=self.partitions)
-        
 
         root_partition_label = CTkLabel(self, text=self.lang.rootfs)
         self.root_partition_optionmenu = CTkOptionMenu(self, values=self.partitions, command=self.change_max_swapfile)
-        
-
         self.use_swap = StringVar(value="on")
         self.swap_checkbox = CTkCheckBox(self, text=self.lang.useswap, variable=self.use_swap, onvalue="on", offvalue="off", command=self.swapfile_handler)
         
 
         swap_label = CTkLabel(self, text=self.lang.swapsize)
-        
-
         self.swap_entry = CTkEntry(self)
-        
         self.swap_entry.insert(0, "8")
-
         self.swap_scrollbar = CTkSlider(self, command=self.scroll_handler, to=16)
         
 
@@ -350,15 +342,12 @@ class App(CTk):
     
     def admin_creation_stage(self):
         if self.system_partition_encryption_key_entry.get() != self.system_partition_encryption_key_entry2.get():
-            print("Password mismatch!")
-            Notification(title="Password mismatch!", icon="warning.png", message="Passwords mismatch. Please try again!", message_bold=True, exit_btn_msg="Exit")
+            Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
             return
         self.setup_information["EncryptionKey"] = self.system_partition_encryption_key_entry.get()
         
         self.system_partition_encryption_key_entry.delete(0, 'end')
         self.system_partition_encryption_key_entry2.delete(0, 'end')
-        self.system_partition_encryption_key_entry.insert(0, token_hex(len(self.setup_information["EncryptionKey"])))
-        self.system_partition_encryption_key_entry2.insert(0, token_hex(len(self.setup_information["EncryptionKey"])))
         gc_collect()
 
         for widget in self.winfo_children():
@@ -366,16 +355,16 @@ class App(CTk):
                 widget.destroy()
         self.progressbar.set(0.86)
 
-        label = CTkLabel(self, text="Создание администратора", font=(None, 16, "bold"))
-        your_name_label = CTkLabel(self, text="Ваше имя")
+        label = CTkLabel(self, text=self.lang.admin_creation, font=(None, 16, "bold"))
+        your_name_label = CTkLabel(self, text=self.lang.yourname)
         self.your_name_entry = CTkEntry(self)
-        hostname_label = CTkLabel(self, text="Название устройства")
+        hostname_label = CTkLabel(self, text=self.lang.hostname)
         self.hostname_entry = CTkEntry(self)
-        username_label = CTkLabel(self, text="Имя пользователя")
+        username_label = CTkLabel(self, text=self.lang.username)
         self.username_entry = CTkEntry(self)
-        password_label = CTkLabel(self, text="Пароль")
+        password_label = CTkLabel(self, text=self.lang.password1)
         self.password_entry = CTkEntry(self, show='*')
-        password_label2 = CTkLabel(self, text="Пароль (проверка)")
+        password_label2 = CTkLabel(self, text=self.lang.password2)
         self.password_entry2 = CTkEntry(self, show="*")
         next_btn = CTkButton(self, text=self.lang.next, command=self.final_stage)
 
@@ -394,7 +383,7 @@ class App(CTk):
     
     def final_stage(self):
         if self.password_entry.get() != self.password_entry2.get():
-            print("Password mismatch!")
+            Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
             return
         self.setup_information["FullName"] = self.your_name_entry.get()
         self.setup_information["Hostname"] = self.hostname_entry.get()
@@ -406,71 +395,71 @@ class App(CTk):
                 widget.destroy()
         self.progressbar.set(1)
 
-        label = CTkLabel(self, text="Итого", font=(None, 16, "bold"))
-        timezone_label = CTkLabel(self, text="Часовой пояс")
+        label = CTkLabel(self, text=self.lang.final, font=(None, 16, "bold"))
+        timezone_label = CTkLabel(self, text=self.lang.fulltimezone)
         timezone_entry = CTkEntry(self)
         timezone_entry.insert(0, self.setup_information["Timezone"])
         timezone_entry.configure(state="disabled")
 
-        installation_type_label = CTkLabel(self, text="Вариант установки")
+        installation_type_label = CTkLabel(self, text=self.lang.installoption)
         installation_type_entry = CTkEntry(self)
         installation_type_entry.insert(0, self.setup_information["InstallationType"])
         installation_type_entry.configure(state="disabled")
 
-        de_label = CTkLabel(self, text="Графическое окружение")
+        de_label = CTkLabel(self, text=self.lang.de)
         de_entry = CTkEntry(self)
         de_entry.insert(0, self.setup_information["DE"])
         de_entry.configure(state="disabled")
 
-        partitioning_type_label = CTkLabel(self, text="Вид разметки диска")
+        partitioning_type_label = CTkLabel(self, text=self.lang.partitioningtype)
         partitioning_type_entry = CTkEntry(self)
         if self.setup_information["Partitioning"] == "Automatic":
-            partitioning_type_entry.insert(0, "Автоматический")
-            drive_to_format_label = CTkLabel(self, text="Диск, на который будет установлена система")
+            partitioning_type_entry.insert(0, self.lang.automatic)
+            drive_to_format_label = CTkLabel(self, text=self.lang.systeminstallto)
             drive_to_format_entry = CTkEntry(self)
             drive_to_format_entry.insert(0, self.setup_information["DriveToFormat"])
             drive_to_format_entry.configure(state="disabled")
         else:
-            partitioning_type_entry.insert(0, "Собственный")
-            loader_label = CTkLabel(self, text="Загрузочный раздел")
+            partitioning_type_entry.insert(0, self.lang.manual)
+            loader_label = CTkLabel(self, text=self.lang.efipart)
             loader_entry = CTkEntry(self)
             loader_entry.insert(0, self.setup_information["EfiPartition"])
             loader_entry.configure(state="disabled")
 
-            system_label = CTkLabel(self, text="Системный раздел")
+            system_label = CTkLabel(self, text=self.lang.rootfs)
             system_entry = CTkEntry(self)
             system_entry.insert(0, self.setup_information["SystemPartition"])
             system_entry.configure(state="disabled")
         partitioning_type_entry.configure(state="disabled")
 
-        use_swap_label = CTkLabel(self, text="Использование раздела подкачки")
+        use_swap_label = CTkLabel(self, text=self.lang.useswap)
         use_swap_entry = CTkEntry(self)
         if self.setup_information["UseSwap"]:
-            use_swap_entry.insert(0, "Да")
-            swap_size_label = CTkLabel(self, text="Размер раздела подкачки (ГиБ)")
+            use_swap_entry.insert(0, self.lang.yes)
+            swap_size_label = CTkLabel(self, text=self.lang.swapsize_final)
             swap_size_entry = CTkEntry(self)
             swap_size_entry.insert(0, self.setup_information["SwapSize"])
             swap_size_entry.configure(state="disabled")
         else:
-            use_swap_entry.insert(0, "Нет")
+            use_swap_entry.insert(0, self.lang.no)
         use_swap_entry.configure(state="disabled")
 
-        hostname_label =CTkLabel(self, text="Название устройства")
+        hostname_label =CTkLabel(self, text=self.lang.hostname)
         hostname_entry = CTkEntry(self)
         hostname_entry.insert(0, self.setup_information["Hostname"])
         hostname_entry.configure(state="disabled")
 
-        fullname_label = CTkLabel(self, text="Полное имя")
+        fullname_label = CTkLabel(self, text=self.lang.yourname)
         fullname_entry = CTkEntry(self)
         fullname_entry.insert(0, self.setup_information["FullName"])
         fullname_entry.configure(state="disabled")
 
-        username_label = CTkLabel(self, text="Имя пользователя")
+        username_label = CTkLabel(self, text=self.lang.username)
         username_entry = CTkEntry(self)
         username_entry.insert(0, self.setup_information['Username'])
         username_entry.configure(state="disabled")
 
-        begin_installation_button = CTkButton(self, text="Начать установку")
+        begin_installation_button = CTkButton(self, text=self.lang.begin_install)
 
         i = 1
         label.grid(row=i, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
