@@ -389,7 +389,7 @@ class App(CTk):
         self.setup_information["Hostname"] = self.hostname_entry.get()
         self.setup_information["Username"] = self.username_entry.get()
         self.setup_information["Password"] = self.password_entry.get()
-        print(self.setup_information)
+        if DEBUG: print(self.setup_information)
         for widget in self.winfo_children():
             if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
                 widget.destroy()
@@ -403,7 +403,14 @@ class App(CTk):
 
         installation_type_label = CTkLabel(self, text=self.lang.installoption)
         installation_type_entry = CTkEntry(self)
-        installation_type_entry.insert(0, self.setup_information["InstallationType"])
+        match self.setup_information["InstallationType"]:
+            case "Secure":
+                installation_type_entry.insert(0, self.lang.securetype)
+            case "InSecure":
+                installation_type_entry.insert(0, self.lang.insecuretype)
+            case "LessSecure":
+                installation_type_entry.insert(0, self.lang.lessecuretype)
+        
         installation_type_entry.configure(state="disabled")
 
         de_label = CTkLabel(self, text=self.lang.de)
