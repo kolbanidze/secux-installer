@@ -550,7 +550,7 @@ class App(CTk):
                 self.console_output.see("end")
 
     def _execute(self, command):
-        threading.Thread(target=self.__execute_command, args=(command,)).start()
+        self.__execute_command(command)
 
     def begin_installation(self):
         print(self.setup_information)
@@ -558,7 +558,7 @@ class App(CTk):
             widget.destroy()
         self.console_output = CTkTextbox(self)
         self.console_output.pack(padx=10, pady=10, expand=True, fill="both")
-        
+        exit()
         if self.setup_information["Partitioning"] == "Automatic":
             if not DEBUG: self._execute(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
             if not DEBUG: self._execute(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
