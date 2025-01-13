@@ -569,8 +569,8 @@ class App(CTk):
             efi_partition = self.setup_information["EfiPartition"]
             rootfs_partition = self.setup_information["SystemPartition"]
         
-        if not DEBUG: self._execute(f"cryptsetup luksFormat {rootfs_partition}")
-        if not DEBUG: self._execute(f"cryptsetup luksOpen {rootfs_partition} cryptlvm")
+        if not DEBUG: self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksFormat {rootfs_partition}")
+        if not DEBUG: self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksOpen {rootfs_partition} cryptlvm")
         
         # if self.setup_information["UseSwap"] == False:
         #     if not DEBUG: self._execute("mkfs.ext4 /dev/mapper/cryptlvm")
