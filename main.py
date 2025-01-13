@@ -558,7 +558,7 @@ class App(CTk):
             widget.destroy()
         self.console_output = CTkTextbox(self)
         self.console_output.pack(padx=10, pady=10, expand=True, fill="both")
-        exit()
+
         if self.setup_information["Partitioning"] == "Automatic":
             if not DEBUG: self._execute(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
             if not DEBUG: self._execute(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
@@ -599,7 +599,7 @@ class App(CTk):
                 self._execute("swapon /dev/volumegroup/swap")
         if not DEBUG: self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
-        if not DEBUG: self._execute("pacstrap -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager")
+        if not DEBUG: self._execute("pacstrap --noconfirm -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager")
         if not DEBUG: self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
 
         if not DEBUG: self._execute(f"useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
