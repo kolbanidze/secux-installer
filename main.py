@@ -601,7 +601,18 @@ class App(CTk):
 
         if not DEBUG: self._execute("pacstrap -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager")
         if not DEBUG: self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
+
+        if not DEBUG: self._execute(f"useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
         
+        if not DEBUG:
+            process = subprocess.run(
+                    ['passwd', self.setup_information["Username"]],
+                    input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n",  # Pass the password twice for confirmation
+                    text=True,  # Enables passing string as input
+                    check=True  # Raises an exception if the command fails
+                )
+        
+                    
 if __name__ == "__main__":
     App().mainloop()
         
