@@ -4,6 +4,7 @@ from language import Locale
 import subprocess
 import json
 from gc import collect as gc_collect
+import os
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis'], 'UTC': None}
 
@@ -12,11 +13,13 @@ DEBUG = False
 
 DISTRO_NAME="SECUX"
 
+WORKDIR = os.path.dirname(os.path.abspath(__file__))
+
 class Notification(CTkToplevel):
     def __init__(self, title: str, icon: str, message: str, message_bold: bool, exit_btn_msg: str):
         super().__init__()
         self.title(title)
-        image = CTkImage(light_image=Image.open(f'images/{icon}'), dark_image=Image.open(f'images/{icon}'), size=(80, 80))
+        image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/{icon}'), dark_image=Image.open(f'{WORKDIR}/images/{icon}'), size=(80, 80))
         image_label = CTkLabel(self, text="", image=image)
         label = CTkLabel(self, text=message)
         if message_bold:
@@ -35,9 +38,9 @@ class App(CTk):
 
         # Available languages: ["ru", "en"]
         self.language = "ru"
-
+        
         self.setup_information = {}
-        welcome_image = CTkImage(light_image=Image.open('images/waving_hand.png'), dark_image=Image.open('images/waving_hand.png'), size=(80,80))
+        welcome_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), dark_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), size=(80,80))
         welcome_image_label = CTkLabel(self, text="", image=welcome_image)
         welcome_entry_label = CTkLabel(self, text=f"Добро пожаловать в установщик дистрибутива {DISTRO_NAME}\nWelcome to {DISTRO_NAME} distribution installer")
         
@@ -466,7 +469,7 @@ class App(CTk):
         username_entry.insert(0, self.setup_information['Username'])
         username_entry.configure(state="disabled")
 
-        begin_installation_button = CTkButton(self, text=self.lang.begin_install)
+        begin_installation_button = CTkButton(self, text=self.lang.begin_install, command=self.begin_installation)
 
         i = 1
         label.grid(row=i, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
@@ -521,6 +524,60 @@ class App(CTk):
 
         i += 1
         begin_installation_button.grid(row=i, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+    
+    def _list_partitions(drive):
+        result = subprocess.run(['lsblk', '-ln', '-o', 'NAME,TYPE'], stdout=subprocess.PIPE, text=True)
+        partitions = []
+        for line in result.stdout.splitlines():
+            name, type_ = line.split()
+            if type_ == 'part' and name.startswith(drive.replace('/dev/', '')):
+                partitions.append(f"/dev/{name}")
+        return partitions
+
+    def begin_installation(self):
+        print(self.setup_information)
+        if self.setup_information["Partitioning"] == "Automatic":
+            if not DEBUG: os.system(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
+            if not DEBUG: os.system(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
+            partitions = self._list_partitions(self.setup_information["DriveToFormat"])
+            efi_partition = partitions[0]
+            rootfs_partition = partitions[1]
+        else:
+            efi_partition = self.setup_information["EfiPartition"]
+            rootfs_partition = self.setup_information["SystemPartition"]
+        
+        if not DEBUG: os.system(f"cryptsetup luksFormat {self.setup_information["SystemPartition"]}")
+        if not DEBUG: os.system(f"cryptsetup luksOpen {self.setup_information["SystemPartition"]} cryptlvm")
+        
+        # if self.setup_information["UseSwap"] == False:
+        #     if not DEBUG: os.system("mkfs.ext4 /dev/mapper/cryptlvm")
+        #     rootfs = "/dev/mapper/cryptlvm"
+        # else:
+        if not DEBUG: os.system("pvcreate /dev/mapper/cryptlvm")
+        if not DEBUG: os.system("vgcreate volumegroup /dev/mapper/cryptlvm")
+        
+        if self.setup_information["UseSwap"] == False:
+            if not DEBUG: os.system("lvcreate -l 100%FREE volumegroup -n root")
+        else:
+            if not DEBUG: os.system(f"lvcreate -L {self.setup_information["SwapSize"]}G volumegroup -n swap")
+            if not DEBUG: os.system("lvcreate -l 100%FREE volumegroup -n root")
+        
+        if not DEBUG: os.system("mkfs.ext4 /dev/volumegroup/root")
+        if not DEBUG: os.system("mkswap /dev/volumegroup/root")
+            # rootfs = "/dev/volumegroup/root"
+        
+        if self.setup_information["Partitioning"] == "Automatic":
+            if not DEBUG: os.system("mkfs.fat -F32 /dev/sda1")
+
+        if not DEBUG: os.system(f"mount /dev/volumegroup/root /mnt")
+        if self.setup_information["UseSwap"]:
+            if not DEBUG: 
+                os.system("swapon /dev/volumegroup/swap")
+        if not DEBUG: os.system(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
+
+        if not DEBUG: os.system("pacstrap -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager")
+        if not DEBUG: os.system("genfstab -U /mnt >> /mnt/etc/fstab")
+        
 if __name__ == "__main__":
     App().mainloop()
         
