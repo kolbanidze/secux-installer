@@ -557,7 +557,7 @@ class App(CTk):
         for widget in self.winfo_children():
             widget.destroy()
         self.console_output = CTkTextbox(self)
-        self.console_output.pack(padx=10, pady=10)
+        self.console_output.pack(padx=10, pady=10, expand=True, fill="both")
         
         if self.setup_information["Partitioning"] == "Automatic":
             if not DEBUG: self._execute(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
@@ -569,6 +569,7 @@ class App(CTk):
             efi_partition = self.setup_information["EfiPartition"]
             rootfs_partition = self.setup_information["SystemPartition"]
         
+        print(efi_partition, rootfs_partition)
         if not DEBUG: self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksFormat {rootfs_partition}")
         if not DEBUG: self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksOpen {rootfs_partition} cryptlvm")
         
@@ -590,7 +591,7 @@ class App(CTk):
             # rootfs = "/dev/volumegroup/root"
         
         if self.setup_information["Partitioning"] == "Automatic":
-            if not DEBUG: self._execute("mkfs.fat -F32 /dev/sda1")
+            if not DEBUG: self._execute(f"mkfs.fat -F32 {efi_partition}")
 
         if not DEBUG: self._execute(f"mount /dev/volumegroup/root /mnt")
         if self.setup_information["UseSwap"]:
