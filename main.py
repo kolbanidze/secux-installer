@@ -205,7 +205,7 @@ class App(CTk):
                 self.setup_information["Partitioning"] = "Automatic"
                 self.setup_information["DriveToFormat"] = disk
                 self.setup_information["UseSwap"] = True
-                self.setup_information["SwapSize"] = "8"
+                self.setup_information["SwapSize"] = "1"
                 self.encryption_key_stage(manual=False)
             case 1:
                 self.setup_information["Partitioning"] = "Manual"
@@ -243,7 +243,7 @@ class App(CTk):
 
         swap_label = CTkLabel(self, text=self.lang.swapsize)
         self.swap_entry = CTkEntry(self)
-        self.swap_entry.insert(0, "8")
+        self.swap_entry.insert(0, "1")
         self.swap_scrollbar = CTkSlider(self, command=self.scroll_handler, to=16)
         
 
@@ -615,7 +615,7 @@ class App(CTk):
             self._execute("lvcreate -l 100%FREE volumegroup -n root")
         
         self._execute("mkfs.ext4 /dev/volumegroup/root")
-        self._execute("mkswap /dev/volumegroup/root")
+        self._execute("mkswap /dev/volumegroup/swap")
             # rootfs = "/dev/volumegroup/root"
         
         if self.setup_information["Partitioning"] == "Automatic":
@@ -632,13 +632,13 @@ class App(CTk):
 
         self._execute(f"useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
         
-        if not DEBUG:
-            process = subprocess.run(
-                    ['passwd', self.setup_information["Username"]],
-                    input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n",  # Pass the password twice for confirmation
-                    text=True,  # Enables passing string as input
-                    check=True  # Raises an exception if the command fails
-                )
+        # if not DEBUG:
+        #     process = subprocess.run(
+        #             ['passwd', self.setup_information["Username"]],
+        #             input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n",  # Pass the password twice for confirmation
+        #             text=True,  # Enables passing string as input
+        #             check=True  # Raises an exception if the command fails
+        #         )
         self._execute("echo \"%wheel ALL=(ALL:ALL) ALL\" >> /mnt/etc/sudoers ")
         self._execute(f"arch-chroot /mnt ln -sf /usr/share/zoneinfo/{self.setup_information['Timezone']} /etc/localtime")
         self._execute("echo \"MODULES=()\" > /mnt/etc/mkinitcpio.conf")
@@ -684,6 +684,9 @@ class App(CTk):
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux.efi")
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
 
+        for i in self.commands_to_execute:
+            print(i)
+            print()
         self._execute("")
         # self._execute("")
 if __name__ == "__main__":
