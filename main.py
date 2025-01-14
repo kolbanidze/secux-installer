@@ -553,8 +553,8 @@ class App(CTk):
             exit(1)
 
     def _execute(self, command):
-        self.commands_to_execute.append(command)
-        # self.__execute_command(command)
+        # self.commands_to_execute.append(command)
+        self.__execute_command(command)
 
     def get_crypto_luks_uuid(self):
         try:
@@ -627,19 +627,20 @@ class App(CTk):
                 self._execute("swapon /dev/volumegroup/swap")
         self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
-        self._execute("pacstrap --noconfirm -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl")
+        self._execute("pacstrap -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl")
         self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
 
         self._execute(f"useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
         
-        # if not DEBUG:
-        #     process = subprocess.run(
-        #             ['passwd', self.setup_information["Username"]],
-        #             input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n",  # Pass the password twice for confirmation
-        #             text=True,  # Enables passing string as input
-        #             check=True  # Raises an exception if the command fails
-        #         )
+        if not DEBUG:
+            process = subprocess.run(
+                    ['passwd', self.setup_information["Username"]],
+                    input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n",  # Pass the password twice for confirmation
+                    text=True,  # Enables passing string as input
+                    check=True  # Raises an exception if the command fails
+                )
         self._execute("echo \"%wheel ALL=(ALL:ALL) ALL\" >> /mnt/etc/sudoers ")
+        self._execute(f"arch-chroot /mnt usermod -aG wheel {self.setup_information["Username"]}")
         self._execute(f"arch-chroot /mnt ln -sf /usr/share/zoneinfo/{self.setup_information['Timezone']} /etc/localtime")
         self._execute("echo \"MODULES=()\" > /mnt/etc/mkinitcpio.conf")
         self._execute("echo \"BINARIES=()\" >> /mnt/etc/mkinitcpio.conf")
@@ -659,15 +660,15 @@ class App(CTk):
 
         self._execute("arch-chroot /mnt ukify genkey --config=/etc/kernel/uki.conf")
 
-        self._execute("sed -i '/^default_config/s/^/#/' /mnt/etc/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^default_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^#default_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^#default_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^default_config/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
+        self._execute("sed -i '/^default_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
+        self._execute("sed -i '/^#default_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
+        self._execute("sed -i '/^#default_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
         
-        self._execute("sed -i '/^fallback_config/s/^/#/' /mnt/etc/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^fallback_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^fallback_config/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
+        self._execute("sed -i '/^fallback_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
+        self._execute("sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
+        self._execute("sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
 
         self._execute("mkdir -p /mnt/efi/EFI/Linux")
         self._execute("arch-chroot /mnt mkinitcpio -p linux")
@@ -677,17 +678,17 @@ class App(CTk):
         if self.setup_information["InstallationType"] == "LessSecure":
             self._execute("arch-chroot /mnt sbctl enroll-keys -m")
         elif self.setup_information["InstallationType"] == "Secure":
-            self._execute("arch-chroot /mnt sbctl enroll-keys --yes-i-know-what-i-am-doing")
+            self._execute("arch-chroot /mnt sbctl enroll-keys --yes-this-might-brick-my-machine")
         
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux-fallback.efi")
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux.efi")
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
 
-        for i in self.commands_to_execute:
-            print(i)
-            print()
-        self._execute("")
+        # for i in self.commands_to_execute:
+        #     print(i)
+        #     print()
+        self._execute("echo Good job bro!")
         # self._execute("")
 if __name__ == "__main__":
     App().mainloop()
