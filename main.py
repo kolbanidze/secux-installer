@@ -552,16 +552,38 @@ class App(CTk):
     def _execute(self, command):
         self.__execute_command(command)
 
+    def get_crypto_luks_uuid(self):
+        try:
+            # Run blkid command and capture output
+            result = subprocess.run(["blkid"], capture_output=True, text=True, check=True)
+            blkid_output = result.stdout
+
+            # Parse blkid output for crypto_LUKS devices
+            for line in blkid_output.splitlines():
+                if "TYPE=\"crypto_LUKS\"" in line:
+                    # Extract UUID
+                    for part in line.split():
+                        if part.startswith("UUID="):
+                            return part.split("=")[1].strip('"')  # Strip quotes around UUID
+
+        except subprocess.CalledProcessError as e:
+            print(f"Error running blkid: {e}")
+
+        return None
+
     def begin_installation(self):
         print(self.setup_information)
+        if DEBUG:
+            print("DEBUG MODE. EXITING...")
+            exit(1)
         for widget in self.winfo_children():
             widget.destroy()
         self.console_output = CTkTextbox(self)
         self.console_output.pack(padx=10, pady=10, expand=True, fill="both")
 
         if self.setup_information["Partitioning"] == "Automatic":
-            if not DEBUG: self._execute(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
-            if not DEBUG: self._execute(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
+            self._execute(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
+            self._execute(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
             partitions = self._list_partitions(self.setup_information["DriveToFormat"])
             efi_partition = partitions[0]
             rootfs_partition = partitions[1]
@@ -570,39 +592,39 @@ class App(CTk):
             rootfs_partition = self.setup_information["SystemPartition"]
         
         print(efi_partition, rootfs_partition)
-        if not DEBUG: self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksFormat {rootfs_partition}")
-        if not DEBUG: self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksOpen {rootfs_partition} cryptlvm")
+        self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksFormat {rootfs_partition}")
+        self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksOpen {rootfs_partition} cryptlvm")
         
         # if self.setup_information["UseSwap"] == False:
         #     if not DEBUG: self._execute("mkfs.ext4 /dev/mapper/cryptlvm")
         #     rootfs = "/dev/mapper/cryptlvm"
         # else:
-        if not DEBUG: self._execute("pvcreate /dev/mapper/cryptlvm")
-        if not DEBUG: self._execute("vgcreate volumegroup /dev/mapper/cryptlvm")
+        self._execute("pvcreate /dev/mapper/cryptlvm")
+        self._execute("vgcreate volumegroup /dev/mapper/cryptlvm")
         
         if self.setup_information["UseSwap"] == False:
-            if not DEBUG: self._execute("lvcreate -l 100%FREE volumegroup -n root")
+            self._execute("lvcreate -l 100%FREE volumegroup -n root")
         else:
-            if not DEBUG: self._execute(f"lvcreate -L {self.setup_information["SwapSize"]}G volumegroup -n swap")
-            if not DEBUG: self._execute("lvcreate -l 100%FREE volumegroup -n root")
+            self._execute(f"lvcreate -L {self.setup_information["SwapSize"]}G volumegroup -n swap")
+            self._execute("lvcreate -l 100%FREE volumegroup -n root")
         
-        if not DEBUG: self._execute("mkfs.ext4 /dev/volumegroup/root")
-        if not DEBUG: self._execute("mkswap /dev/volumegroup/root")
+        self._execute("mkfs.ext4 /dev/volumegroup/root")
+        self._execute("mkswap /dev/volumegroup/root")
             # rootfs = "/dev/volumegroup/root"
         
         if self.setup_information["Partitioning"] == "Automatic":
-            if not DEBUG: self._execute(f"mkfs.fat -F32 {efi_partition}")
+            self._execute(f"mkfs.fat -F32 {efi_partition}")
 
-        if not DEBUG: self._execute(f"mount /dev/volumegroup/root /mnt")
+        self._execute(f"mount /dev/volumegroup/root /mnt")
         if self.setup_information["UseSwap"]:
-            if not DEBUG: 
+
                 self._execute("swapon /dev/volumegroup/swap")
-        if not DEBUG: self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
+        self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
-        if not DEBUG: self._execute("pacstrap --noconfirm -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager")
-        if not DEBUG: self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
+        self._execute("pacstrap --noconfirm -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl")
+        self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
 
-        if not DEBUG: self._execute(f"useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
+        self._execute(f"useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
         
         if not DEBUG:
             process = subprocess.run(
@@ -611,8 +633,53 @@ class App(CTk):
                     text=True,  # Enables passing string as input
                     check=True  # Raises an exception if the command fails
                 )
+        self._execute("echo \"%wheel ALL=(ALL:ALL) ALL\" >> /mnt/etc/sudoers ")
+        self._execute(f"arch-chroot /mnt ln -sf /usr/share/zoneinfo/{self.setup_information['Timezone']} /etc/localtime")
+        self._execute("echo \"MODULES=()\" > /mnt/etc/mkinitcpio.conf")
+        self._execute("echo \"BINARIES=()\" >> /mnt/etc/mkinitcpio.conf")
+        self._execute("echo \"FILES=()\" >> /mnt/etc/mkinitcpio.conf")
+        self._execute("echo \"HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt lvm2 filesystems fsck)\" >> /mnt/etc/mkinitcpio.conf")
+        uuid = self.get_crypto_luks_uuid()
+        self._execute("mkdir /mnt/etc/cmdline.d")
+        self._execute(f"echo \"rd.luks.name={uuid}=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet\" > /mnt/etc/cmdline.d/root.conf")
+
+        self._execute("echo \"[UKI]\" > /mnt/etc/kernel/uki.conf")
+        self._execute("echo \"OSRelease=@/etc/os-release\" >> /mnt/etc/kernel/uki.conf")
+        self._execute("echo \"PCRBanks=sha256\" >> /mnt/etc/kernel/uki.conf")
+        self._execute("echo \"[PCRSignature:initrd]\" >> /mnt/etc/kernel/uki.conf")
+        self._execute("echo \"Phases=enter-initrd\" >> /mnt/etc/kernel/uki.conf")
+        self._execute("echo \"PCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\" >> /mnt/etc/kernel/uki.conf")
+        self._execute("echo \"PCRPublicKey=/etc/kernel/pcr-initrd.pub.pem\" >> /mnt/etc/kernel/uki.conf")
+
+        self._execute("arch-chroot /mnt ukify genkey --config=/etc/kernel/uki.conf")
+
+        self._execute("sed -i '/^default_config/s/^/#/' /mnt/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^default_image/s/^/#/' /mnt/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^#default_uki/s/^#//' /mnt/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^#default_options/s/^#//' /mnt/mkinitcpio.d/linux.present")
         
-                    
+        self._execute("sed -i '/^fallback_config/s/^/#/' /mnt/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^fallback_image/s/^/#/' /mnt/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^#fallback_uki/s/^#//' /mnt/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^#fallback_options/s/^#//' /mnt/mkinitcpio.d/linux.present")
+
+        self._execute("mkdir -p /mnt/efi/EFI/Linux")
+        self._execute("arch-chroot /mnt mkinitcpio -p linux")
+        self._execute("arch-chroot /mnt systemctl enable NetworkManager")
+        self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
+        self._execute("arch-chroot /mnt sbctl create-keys")
+        if self.setup_information["InstallationType"] == "LessSecure":
+            self._execute("arch-chroot /mnt sbctl enroll-keys -m")
+        elif self.setup_information["InstallationType"] == "Secure":
+            self._execute("arch-chroot /mnt sbctl enroll-keys --yes-i-know-what-i-am-doing")
+        
+        self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
+        self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux-fallback.efi")
+        self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux.efi")
+        self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
+
+        self._execute("")
+        # self._execute("")
 if __name__ == "__main__":
     App().mainloop()
         
