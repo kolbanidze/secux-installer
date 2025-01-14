@@ -4,8 +4,9 @@ from language import Locale
 import subprocess
 import json
 from gc import collect as gc_collect
+from requests import get
+from requests.exceptions import ConnectionError
 import os
-import threading
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis'], 'UTC': None}
 
@@ -314,6 +315,16 @@ class App(CTk):
     def encryption_key_stage(self, manual):
         if manual:
             efi_partition = "/dev/" + self.efi_partition_optionmenu.get().split(" | ")[0]
+            disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
+            for disk in disks:
+                if 'children' in disk:
+                    for partition in disk['children']:
+                        if partition['name'] == efi_partition:
+                            efi_partition_size = partition['size']
+                            break
+            if efi_partition_size < 209715200:
+                Notification(title=self.lang.efi_small_title, icon="warning.png", message=self.lang.efi_small, message_bold=True, exit_btn_msg=self.lang.exit)
+                return
             system_partition = "/dev/" + self.root_partition_optionmenu.get().split(" | ")[0]
             use_swapfile = ("on" == self.swap_checkbox.get())
             self.setup_information["Partitioning"] = "Manual"
@@ -347,6 +358,9 @@ class App(CTk):
     def admin_creation_stage(self):
         if self.system_partition_encryption_key_entry.get() != self.system_partition_encryption_key_entry2.get():
             Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        if len(self.system_partition_encryption_key_entry.get()) < 8:
+            Notification(title=self.lang.pwd_length_title, icon="warning.png", message=self.lang.pwd_length, message_bold=True, exit_btn_msg=self.lang.exit)
             return
         self.setup_information["EncryptionKey"] = self.system_partition_encryption_key_entry.get()
         
@@ -388,6 +402,9 @@ class App(CTk):
     def final_stage(self):
         if self.password_entry.get() != self.password_entry2.get():
             Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        if len(self.password_entry.get()) < 8:
+            Notification(title=self.lang.pwd_length_title, icon="warning.png", message=self.lang.pwd_length, message_bold=True, exit_btn_msg=self.lang.exit)
             return
         self.setup_information["FullName"] = self.your_name_entry.get()
         self.setup_information["Hostname"] = self.hostname_entry.get()
@@ -548,9 +565,6 @@ class App(CTk):
             if error:
                 self.console_output.insert("end", error, "error")
                 self.console_output.see("end")
-        if process.returncode != 0:
-            print("RUNTIME ERROR ON COMMAND:", command)
-            exit(1)
 
     def _execute(self, command):
         # self.commands_to_execute.append(command)
@@ -575,8 +589,46 @@ class App(CTk):
 
         return None
 
+    def check_secure_boot_and_setup_mode(self):
+        secure_boot_path = "/sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c"
+        setup_mode_path = "/sys/firmware/efi/efivars/SetupMode-8be4df61-93ca-11d2-aa0d-00e098032b8c"
+
+        def read_efi_var(path):
+            try:
+                with open(path, "rb") as f:
+                    # EFI variable data starts after the first 4 bytes of metadata
+                    return ord(f.read()[4:5])  # Convert byte to int
+            except FileNotFoundError:
+                return None
+
+        secure_boot = read_efi_var(secure_boot_path)
+        setup_mode = read_efi_var(setup_mode_path)
+
+        if secure_boot is None or setup_mode is None:
+            print("Secure Boot or Setup Mode variables not found. Is the system EFI-enabled?")
+            return (False, 0, 0)
+
+        return (True, secure_boot, setup_mode)
+
     def begin_installation(self):
         print(self.setup_information)
+        
+        try:
+            answ = get("http://gstatic.com/generate_204", timeout=5)
+        except ConnectionError:
+            Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        if answ.status_code != 204:
+            Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        
+        uefi_info = self.check_secure_boot_and_setup_mode()
+        if not uefi_info[0]:
+            Notification(title=self.lang.not_uefi_title, icon="warning.png", message=self.lang.not_uefi, message_bold=True, exit_btn_msg=self.lang.exit)
+            return 
+        if uefi_info[1] != 0 and uefi_info[2] != 1:
+            Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
         if DEBUG:
             print("DEBUG MODE. EXITING...")
             exit(1)
@@ -585,7 +637,6 @@ class App(CTk):
         self.console_output = CTkTextbox(self)
         self.console_output.pack(padx=10, pady=10, expand=True, fill="both")
 
-        self.commands_to_execute = []
 
         if self.setup_information["Partitioning"] == "Automatic":
             self._execute(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
@@ -601,10 +652,6 @@ class App(CTk):
         self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksFormat {rootfs_partition}")
         self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksOpen {rootfs_partition} cryptlvm")
         
-        # if self.setup_information["UseSwap"] == False:
-        #     if not DEBUG: self._execute("mkfs.ext4 /dev/mapper/cryptlvm")
-        #     rootfs = "/dev/mapper/cryptlvm"
-        # else:
         self._execute("pvcreate /dev/mapper/cryptlvm")
         self._execute("vgcreate volumegroup /dev/mapper/cryptlvm")
         
@@ -616,7 +663,6 @@ class App(CTk):
         
         self._execute("mkfs.ext4 /dev/volumegroup/root")
         self._execute("mkswap /dev/volumegroup/swap")
-            # rootfs = "/dev/volumegroup/root"
         
         if self.setup_information["Partitioning"] == "Automatic":
             self._execute(f"mkfs.fat -F32 {efi_partition}")
@@ -684,11 +730,7 @@ class App(CTk):
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux.efi")
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
 
-        # for i in self.commands_to_execute:
-        #     print(i)
-        #     print()
         self._execute("echo Good job bro!")
-        # self._execute("")
 if __name__ == "__main__":
     App().mainloop()
         
