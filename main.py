@@ -630,15 +630,14 @@ class App(CTk):
         self._execute("pacstrap -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl")
         self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
 
-        self._execute(f"useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
+        self._execute(f"arch-chroot /mnt useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
         
-        if not DEBUG:
-            process = subprocess.run(
-                    ['passwd', self.setup_information["Username"]],
-                    input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n",  # Pass the password twice for confirmation
-                    text=True,  # Enables passing string as input
-                    check=True  # Raises an exception if the command fails
-                )
+        subprocess.run(
+                ['arch-chroot', '/mnt', 'passwd', self.setup_information["Username"]],
+                input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n",  # Pass the password twice for confirmation
+                text=True,  # Enables passing string as input
+                check=True  # Raises an exception if the command fails
+            )
         self._execute("echo \"%wheel ALL=(ALL:ALL) ALL\" >> /mnt/etc/sudoers ")
         self._execute(f"arch-chroot /mnt usermod -aG wheel {self.setup_information["Username"]}")
         self._execute(f"arch-chroot /mnt ln -sf /usr/share/zoneinfo/{self.setup_information['Timezone']} /etc/localtime")
