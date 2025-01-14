@@ -553,7 +553,8 @@ class App(CTk):
             exit(1)
 
     def _execute(self, command):
-        self.__execute_command(command)
+        self.commands_to_execute.append(command)
+        # self.__execute_command(command)
 
     def get_crypto_luks_uuid(self):
         try:
@@ -583,6 +584,8 @@ class App(CTk):
             widget.destroy()
         self.console_output = CTkTextbox(self)
         self.console_output.pack(padx=10, pady=10, expand=True, fill="both")
+
+        self.commands_to_execute = []
 
         if self.setup_information["Partitioning"] == "Automatic":
             self._execute(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
