@@ -548,6 +548,9 @@ class App(CTk):
             if error:
                 self.console_output.insert("end", error, "error")
                 self.console_output.see("end")
+        if process.returncode != 0:
+            print("RUNTIME ERROR ON COMMAND:", command)
+            exit(1)
 
     def _execute(self, command):
         self.__execute_command(command)
@@ -653,15 +656,15 @@ class App(CTk):
 
         self._execute("arch-chroot /mnt ukify genkey --config=/etc/kernel/uki.conf")
 
-        self._execute("sed -i '/^default_config/s/^/#/' /mnt/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^default_image/s/^/#/' /mnt/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^#default_uki/s/^#//' /mnt/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^#default_options/s/^#//' /mnt/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^default_config/s/^/#/' /mnt/etc/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^default_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^#default_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^#default_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.present")
         
-        self._execute("sed -i '/^fallback_config/s/^/#/' /mnt/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^fallback_image/s/^/#/' /mnt/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^#fallback_uki/s/^#//' /mnt/mkinitcpio.d/linux.present")
-        self._execute("sed -i '/^#fallback_options/s/^#//' /mnt/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^fallback_config/s/^/#/' /mnt/etc/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^fallback_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.present")
+        self._execute("sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.present")
 
         self._execute("mkdir -p /mnt/efi/EFI/Linux")
         self._execute("arch-chroot /mnt mkinitcpio -p linux")
