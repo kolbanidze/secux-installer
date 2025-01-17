@@ -66,9 +66,8 @@ class TestApp(CTk):
 
     def begin_installation(self):
         self.commands = []
-        self._execute("echo Hello, World!")
-        self._execute("ping google.com -c 3")
-        self._execute("sudo passwd jdoe", input="12345678\n12345678\n")
+        self._execute("cryptsetup luksFormat lukstest.bin", input="12345678")
+        self._execute("cryptsetup luksOpen lukstest.bin yo", input="12345678")
         self._execute("echo Hello, World! Again...")
 
         self._execute_commands(self.commands)

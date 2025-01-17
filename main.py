@@ -730,8 +730,8 @@ class App(CTk):
         # Preparing commands for execution
 
         # Creating LUKS partition
-        self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=f"YES\n{self.setup_information["EncryptionKey"]}\n{self.setup_information["EncryptionKey"]}\n")
-        self._execute(f"cryptsetup luksOpen {rootfs_partition} cryptlvm", input=f"{self.setup_information["EncryptionKey"]}\n")
+        self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=f"{self.setup_information["EncryptionKey"]}")
+        self._execute(f"cryptsetup luksOpen {rootfs_partition} cryptlvm", input=f"{self.setup_information["EncryptionKey"]}")
         
         # Creating LVM
         self._execute("pvcreate /dev/mapper/cryptlvm")
@@ -852,7 +852,6 @@ class App(CTk):
 
         # Execute commands
         self._execute_commands(self.commands)
-        print("[DELETE ME] Интересно, отобразится ли это сообщение до завершения выполнения установки?")
 if __name__ == "__main__":
     App().mainloop()
         
