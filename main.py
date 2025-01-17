@@ -794,9 +794,8 @@ class App(CTk):
         self._execute('echo -e "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt lvm2 filesystems fsck)" > /mnt/etc/mkinitcpio.conf')
         
         # Creating cmdline
-        uuid = self.__get_crypto_luks_uuid(rootfs_partition)
         self._execute("mkdir /mnt/etc/cmdline.d")
-        self._execute(f"echo \"rd.luks.name={uuid}=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet\" > /mnt/etc/cmdline.d/root.conf")
+        self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet\" > /mnt/etc/cmdline.d/root.conf")
 
         # Creating UKI config
         self._execute('echo -e "[UKI]\nOSRelease=@/etc/os-release\nPCRBanks=sha256\n\n[PCRSignature:initrd]\nPhases=enter-initrd\nPCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\nPCRPublicKey=/etc/kernel/pcr-initrd.pub.pem" > /mnt/etc/kernel/uki.conf')
