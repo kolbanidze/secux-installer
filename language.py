@@ -57,6 +57,14 @@ class Locale:
             self.not_setup_mode = "Setup Mode is not enabled in Secure Boot"
             self.not_setup_mode_title = "The system is not in Setup Mode"
             self.installing = "The system is being installed. For now, you can sit back in your chair.\nTechnical information about the installation process:"
+            self.swap_part_too_small = "Swap partition size too small"
+            self.full_name_mismatch = "The full name contains invalid characters or exceeds 32 characters.\nAccepted characters: Russian and Latin letters, numbers, hyphens, underscores and spaces."
+            self.hostname_mismatch = "The host name contains invalid characters or exceeds 32 characters.\nAcceptable characters: Latin letters, numbers, hyphens, underscores."
+            self.username_mismatch = "The user name contains invalid characters or exceeds 32 characters.\nAcceptable characters: Latin letters, numbers, hyphens, underscores."
+            self.mismatch = "The input field contains invalid characters or exceeds the length"
+            self.debug_mode = "The program is running in debug mode. Installation has been interrupted.\nTo disable debug mode, set the flag DEBUG=False"
+            self.debug_title = "Debug mode is enabled"
+
         elif language == "ru":
             self.test = "ТЕСТ | Русский"
             self.select_time_zone = "Выберите часовой пояс"
@@ -113,3 +121,11 @@ class Locale:
             self.not_setup_mode = "Не включен Setup Mode в Secure Boot"
             self.not_setup_mode_title = "Система не в Setup Mode"
             self.installing = "Система устанавливается. Пока можете откинуться на спинку стула.\nТехническая информация о процессе установки:"
+            self.swap_part_too_small = "Слишком маленький размер раздела подкачки"
+            self.full_name_mismatch = "Полное имя содержит недопустимые символы или превышает длину в 32 символа.\nДопустимые символы: русские и латинские буквы, цифры, дефисы, подчеркивания и пробелы."
+            self.hostname_mismatch = "Имя устройства содержит недопустимые символы или превышает длину в 32 символа.\nДопустимые символы: латинские буквы, цифры, дефисы, подчеркивания."
+            self.username_mismatch = "Имя пользователя содержит недопустимые символы или превышает длину в 32 символа.\nДопустимые символы: латинские буквы, цифры, дефисы, подчеркивания."
+            self.mismatch = "Поле ввода содержит недопустимые символы или превышает длину"
+            self.debug_mode = "Программа работает в режиме отладки. Установка прервана.\nДля отключения режима отладки установите флаг DEBUG=False"
+            self.debug_title = "Включен режим отладки"
+            

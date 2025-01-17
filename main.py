@@ -8,11 +8,14 @@ from requests import get
 from requests.exceptions import ConnectionError
 import os
 import threading
+import re
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis'], 'UTC': None}
 
 VERSION = "0.1"
 DEBUG = True
+
+MIN_PASSWORD_LENGTH = 8
 
 DISTRO_NAME="SECUX"
 
@@ -41,15 +44,14 @@ class App(CTk):
 
         # Available languages: ["ru", "en"]
         self.language = "ru"
-        
         self.setup_information = {}
+
         welcome_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), dark_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), size=(80,80))
         welcome_image_label = CTkLabel(self, text="", image=welcome_image)
-        welcome_entry_label = CTkLabel(self, text=f"Добро пожаловать в установщик дистрибутива {DISTRO_NAME}\nWelcome to {DISTRO_NAME} distribution installer")
-        
+        welcome_entry_label = CTkLabel(self, text=f"Добро пожаловать в установщик дистрибутива {DISTRO_NAME}\nWelcome to {DISTRO_NAME} distribution installer")        
         select_language_label = CTkLabel(self, text="Выберите язык | Select language")
-        languages_optionmenu = CTkOptionMenu(self, values=["Русский", "English"], command=self.language_callback)
-        next_button = CTkButton(self, text="Далее | Next", command=self.timezone_stage)
+        languages_optionmenu = CTkOptionMenu(self, values=["Русский", "English"], command=self.__language_callback)
+        next_button = CTkButton(self, text="Далее | Next", command=self.first_stage_timezone)
         info = CTkLabel(self, text=f"Версия | Version : {VERSION}", font=(None, 8))
 
         welcome_image_label.pack(padx=15, pady=15)
@@ -60,36 +62,41 @@ class App(CTk):
         info.pack(padx=15, pady=(5, 0))
         if DEBUG: CTkLabel(self, text="WARNING: DEBUG MODE", font=(None, 8)).pack(padx=15, pady=(5,0))
 
-    def language_callback(self, choice):
+    def __language_callback(self, choice):
         match choice:
             case "English":
                 self.language = "en"
             case "Русский":
                 self.language = "ru"
     
+    def __delete_widgets(self):
+        for widget in self.winfo_children():
+            if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
+                widget.destroy()
+
     # 15%
-    def timezone_stage(self):
+    def first_stage_timezone(self):
         self.lang = Locale(language=self.language)
-        if DEBUG: print(self.lang.test)
 
         for widget in self.winfo_children():
             widget.destroy()
-        self.progressbar = CTkProgressBar(self, orientation='horizontal', width=500)
         
+        self.progressbar = CTkProgressBar(self, orientation='horizontal', width=500)
         self.progressbar.set(0.15)
-        title1 = CTkLabel(self, text=self.lang.select_time_zone, font=(None, 16, 'bold'))
 
+        Notification(title="None", icon="warning.png", message=self.lang.full_name_mismatch, message_bold=False, exit_btn_msg=self.lang.exit)
+        
+        title1 = CTkLabel(self, text=self.lang.select_time_zone, font=(None, 16, 'bold'))
         region_label = CTkLabel(self, text=self.lang.region)
         zone_label = CTkLabel(self, text=self.lang.timezone)
-        
-        self.region_box = CTkOptionMenu(self, values=list(timezones.keys()), command=self.timezone_handler)
+        self.region_box = CTkOptionMenu(self, values=list(timezones.keys()), command=self.__timezone_handler)
         self.zone_box = CTkOptionMenu(self)
-        
-        self.timezone_handler("Europe")
+        next_btn = CTkButton(self, text=self.lang.next, command=self.second_stage_installation_type)
+
+        self.__timezone_handler("Europe")
         self.region_box.set("Europe")
         self.zone_box.set("Minsk")
-
-        next_btn = CTkButton(self, text=self.lang.next, command=self.installation_type_stage)
+        
         self.progressbar.grid(row=0, column=0, padx=15, pady=(5,15), sticky="news", columnspan=2)
         title1.grid(row=1, column=0, padx=15, pady=5, sticky="news", columnspan=2)
         region_label.grid(row=2, column=0, padx=15, pady=(5, 0), sticky="nsew")
@@ -98,12 +105,13 @@ class App(CTk):
         self.zone_box.grid(row=3, column=1, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=4, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
     
-    def timezone_handler(self, choice):
+    def __timezone_handler(self, choice):
         self.zone_box.configure(values=timezones[choice])
     
     # 26%
-    def installation_type_stage(self):
+    def second_stage_installation_type(self):
         self.progressbar.set(0.26)
+
         region = self.region_box.get()
         zone = self.zone_box.get()
         if zone:
@@ -112,19 +120,14 @@ class App(CTk):
             timezone = f"{region}"
         self.setup_information["Timezone"] = timezone
 
-        if DEBUG: print(self.setup_information)
-
-        for widget in self.winfo_children():
-            if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
-                widget.destroy()
+        self.__delete_widgets()
         
         label = CTkLabel(self, text=self.lang.select_install_option, font=(None, 16, "bold"))
         self.installation_type_variable = IntVar(value=0)
         self.secure_type = CTkRadioButton(self, value=0, variable=self.installation_type_variable, text=self.lang.securetype)
         self.less_secure_type = CTkRadioButton(self, value=1, variable=self.installation_type_variable, text=self.lang.lessecuretype)
         self.insecure_type = CTkRadioButton(self, value=2, variable=self.installation_type_variable, text=self.lang.insecuretype)
-        
-        next_btn = CTkButton(self, text=self.lang.next, command=self.desktop_environment_stage)
+        next_btn = CTkButton(self, text=self.lang.next, command=self.third_stage_desktop_environment)
 
         label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         self.secure_type.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
@@ -133,11 +136,10 @@ class App(CTk):
         next_btn.grid(row=5, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
 
     # 42%
-    def desktop_environment_stage(self):
+    def third_stage_desktop_environment(self):
         self.progressbar.set(0.42)
-        for widget in self.winfo_children():
-            if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
-                widget.destroy()
+
+        self.__delete_widgets()
         
         key = self.installation_type_variable.get()
         match key:
@@ -147,17 +149,14 @@ class App(CTk):
                 self.setup_information["InstallationType"] = "LessSecure"
             case 2:
                 self.setup_information["InstallationType"] = "InSecure"
-        if DEBUG: print(self.setup_information)
         
-        label = CTkLabel(self, text=self.lang.choose_de, font=(None, 16, "bold"))
-        
-
         self.de_variable = IntVar(value=0)
+        label = CTkLabel(self, text=self.lang.choose_de, font=(None, 16, "bold"))
         self.gnome_button = CTkRadioButton(self, value=0, variable=self.de_variable, text="GNOME")
         self.kde_button = CTkRadioButton(self, value=1, variable=self.de_variable, text="KDE")
         self.console_button = CTkRadioButton(self, value=2, variable=self.de_variable, text=self.lang.console)
+        next_btn = CTkButton(self, text=self.lang.next, command=self.fourth_stage_partitioning)
 
-        next_btn = CTkButton(self, text=self.lang.next, command=self.partitioning_stage)
         label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         self.gnome_button.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         self.kde_button.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
@@ -165,11 +164,11 @@ class App(CTk):
         next_btn.grid(row=5, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
 
     # 57%
-    def partitioning_stage(self):
+    def fourth_stage_partitioning(self):
         self.progressbar.set(0.57)
-        for widget in self.winfo_children():
-            if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
-                widget.destroy()
+
+        self.__delete_widgets()
+
         key = self.de_variable.get()
         match key:
             case 0:
@@ -178,7 +177,6 @@ class App(CTk):
                 self.setup_information["DE"] = "KDE"
             case 2:
                 self.setup_information["DE"] = "Console"
-        if DEBUG: print(self.setup_information)
         
         label = CTkLabel(self, text=self.lang.diskpart, font=(None, 16, "bold"))
         
@@ -191,7 +189,7 @@ class App(CTk):
         erase_all_partitioning = CTkRadioButton(self, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
         self.erase_all_disk = CTkOptionMenu(self, values=erase_all_disks)
         manual_partitioning = CTkRadioButton(self, text=self.lang.manual, variable=self.partitioning_type, value=1)
-        next_btn = CTkButton(self, text=self.lang.next, command=self.partitioning_next_button_handler)
+        next_btn = CTkButton(self, text=self.lang.next, command=self.__partitioning_next_button_handler)
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         erase_all_partitioning.grid(row=2, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
@@ -199,7 +197,7 @@ class App(CTk):
         manual_partitioning.grid(row=4, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=5, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
 
-    def partitioning_next_button_handler(self):
+    def __partitioning_next_button_handler(self):
         key = self.partitioning_type.get()
         match key:
             case 0:
@@ -214,9 +212,7 @@ class App(CTk):
                 self.manual_partitioning()
 
     def manual_partitioning(self):
-        for widget in self.winfo_children():
-            if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
-                widget.destroy()
+        self.__delete_widgets()
         
         self.partitions = []
         disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,FSTYPE,MOUNTPOINT,TYPE', '--json'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
@@ -226,30 +222,20 @@ class App(CTk):
                     self.partitions.append(f"{partition['name']} | {partition['size']} | {partition.get('fstype', 'N/A')}")
 
         label = CTkLabel(self, text=self.lang.selfpart, font=(None, 16, "bold"))
-        
-
         run_gparted_btn = CTkButton(self, text=self.lang.rungparted, command=lambda: os.system("/usr/bin/sudo /usr/bin/gparted"))
-        
-
-        update_disks = CTkButton(self, text=self.lang.refreshparts, command=self._update_partitions)
-        
-
+        update_disks = CTkButton(self, text=self.lang.refreshparts, command=self.__update_partitions)
         efi_partition_label = CTkLabel(self, text=self.lang.efipart)
         self.efi_partition_optionmenu = CTkOptionMenu(self, values=self.partitions)
-
         root_partition_label = CTkLabel(self, text=self.lang.rootfs)
-        self.root_partition_optionmenu = CTkOptionMenu(self, values=self.partitions, command=self.change_max_swapfile)
+        self.root_partition_optionmenu = CTkOptionMenu(self, values=self.partitions, command=self.__change_max_swapfile)
         self.use_swap = StringVar(value="on")
-        self.swap_checkbox = CTkCheckBox(self, text=self.lang.useswap, variable=self.use_swap, onvalue="on", offvalue="off", command=self.swapfile_handler)
-        
-
+        self.swap_checkbox = CTkCheckBox(self, text=self.lang.useswap, variable=self.use_swap, onvalue="on", offvalue="off", command=self.__swapfile_handler)
         swap_label = CTkLabel(self, text=self.lang.swapsize)
         self.swap_entry = CTkEntry(self)
         self.swap_entry.insert(0, "1")
-        self.swap_scrollbar = CTkSlider(self, command=self.scroll_handler, to=16)
-        
-
+        self.swap_scrollbar = CTkSlider(self, command=self.__scroll_handler, to=16)
         next_btn = CTkButton(self, text=self.lang.next, command=lambda: self.encryption_key_stage(manual=True))
+
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         run_gparted_btn.grid(row=2, column=0, padx=15, pady=5, sticky="nsew")
         update_disks.grid(row=2, column=1, padx=15, pady=5, sticky="nsew")
@@ -263,21 +249,21 @@ class App(CTk):
         self.swap_scrollbar.grid(row=7, column=1, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=8, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
 
-    def scroll_handler(self, newvalue):
+    def __scroll_handler(self, newvalue):
         newvalue = round(newvalue, 1)
         self.swap_entry.delete(0, 'end')
         self.swap_entry.insert(0, str(newvalue))
     
-    def swapfile_handler(self):
+    def __swapfile_handler(self):
         if self.swap_checkbox.get() == "off":
             self.swap_entry.configure(state="disabled")
             self.swap_scrollbar.configure(state="disabled")
         else:
             self.swap_entry.configure(state="normal")
             self.swap_scrollbar.configure(state="normal")
-            self.change_max_swapfile(None)
+            self.__change_max_swapfile(None)
 
-    def _update_partitions(self):
+    def __update_partitions(self):
         self.partitions.clear()
         disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,FSTYPE,MOUNTPOINT,TYPE', '--json'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
         for disk in disks:
@@ -287,20 +273,19 @@ class App(CTk):
         self.efi_partition_optionmenu.configure(values=self.partitions)
         self.root_partition_optionmenu.configure(values=self.partitions)
 
-    def change_max_swapfile(self, newvalue):
+    def __change_max_swapfile(self, newvalue):
         if self.swap_checkbox.get() == "off":
             return
-        half_of_max_space = int(self._get_max_swap_size() / (2**30))//2
+        half_of_max_space = int(self.__get_max_swap_size() / (2**30))//2
         if half_of_max_space == 0:
-            print("Max swap space can't be zero!")
+            Notification(title=self.lang.swap_part_too_small, icon="warning.png", message=self.lang.swap_part_too_small, message_bold=False, exit_btn_msg=self.lang.exit)
             self.swap_scrollbar.configure(state="disabled")
             return 
         else:
             self.swap_scrollbar.configure(state="normal")
         self.swap_scrollbar.configure(to=half_of_max_space)
-        # self.swap_scrollbar.set(0)
 
-    def _get_max_swap_size(self):
+    def __get_max_swap_size(self):
         """by default returns 16 GiB in bytes"""
         current_partition = self.root_partition_optionmenu.get().split(" | ")[0]
         disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
@@ -313,6 +298,7 @@ class App(CTk):
                         break
         return current_partition_size
 
+    # 71%
     def encryption_key_stage(self, manual):
         if manual:
             efi_partition = "/dev/" + self.efi_partition_optionmenu.get().split(" | ")[0]
@@ -335,11 +321,8 @@ class App(CTk):
             if use_swapfile:
                 swapsize = self.swap_entry.get()
                 self.setup_information["SwapSize"] = swapsize
-        if DEBUG: print(self.setup_information)
 
-        for widget in self.winfo_children():
-            if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
-                widget.destroy()
+        self.__delete_widgets()
         self.progressbar.set(0.71)
 
         label = CTkLabel(self, text=self.lang.os_encryption, font=(None, 16, "bold"))
@@ -356,11 +339,26 @@ class App(CTk):
         self.system_partition_encryption_key_entry2.grid(row=5, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=6, column=0, padx=15, pady=5, sticky="nsew", columnspan=2)
     
+    def __validate_input(self, input: str, russian=False, spaces=False):
+        if russian and spaces:
+            pattern = "^[a-zA-Zа-яА-ЯёЁ0-9 _-]{0,32}$"
+        elif russian == False and spaces:
+            pattern = "^[a-zA-Z0-9 _-]{0,32}$"
+        elif russian:
+            pattern = "^[a-zA-Zа-яА-ЯёЁ0-9_-]{0,32}$"
+        else:
+            pattern = "^[a-zA-Z0-9_-]{0,32}$"
+        if re.match(pattern, input):
+            return True
+        else:
+            return False
+
+    # 86%
     def admin_creation_stage(self):
         if self.system_partition_encryption_key_entry.get() != self.system_partition_encryption_key_entry2.get():
             Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
             return
-        if len(self.system_partition_encryption_key_entry.get()) < 8:
+        if len(self.system_partition_encryption_key_entry.get()) < MIN_PASSWORD_LENGTH:
             Notification(title=self.lang.pwd_length_title, icon="warning.png", message=self.lang.pwd_length, message_bold=True, exit_btn_msg=self.lang.exit)
             return
         self.setup_information["EncryptionKey"] = self.system_partition_encryption_key_entry.get()
@@ -369,9 +367,7 @@ class App(CTk):
         self.system_partition_encryption_key_entry2.delete(0, 'end')
         gc_collect()
 
-        for widget in self.winfo_children():
-            if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
-                widget.destroy()
+        self.__delete_widgets()
         self.progressbar.set(0.86)
 
         label = CTkLabel(self, text=self.lang.admin_creation, font=(None, 16, "bold"))
@@ -400,21 +396,30 @@ class App(CTk):
         self.password_entry2.grid(row=6, column=1, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=7, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
     
+    # 100%
     def final_stage(self):
         if self.password_entry.get() != self.password_entry2.get():
             Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
             return
-        if len(self.password_entry.get()) < 8:
+        if len(self.password_entry.get()) < MIN_PASSWORD_LENGTH:
             Notification(title=self.lang.pwd_length_title, icon="warning.png", message=self.lang.pwd_length, message_bold=True, exit_btn_msg=self.lang.exit)
             return
+        if not self.__validate_input(input=self.your_name_entry.get(), russian=True, spaces=True):
+            Notification(title=self.lang.mismatch, icon="warning.png", message=self.lang.full_name_mismatch, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
+        if not self.__validate_input(input=self.hostname_entry.get(), russian=False, spaces=False):
+            Notification(title=self.lang.mismatch, icon="warning.png", message=self.lang.hostname_mismatch, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
+        if not self.__validate_input(input=self.username_entry.get(), russian=False, spaces=False):
+            Notification(title=self.lang.mismatch, icon="warning.png", message=self.lang.username_mismatch, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
+        
         self.setup_information["FullName"] = self.your_name_entry.get()
         self.setup_information["Hostname"] = self.hostname_entry.get()
         self.setup_information["Username"] = self.username_entry.get()
         self.setup_information["Password"] = self.password_entry.get()
-        if DEBUG: print(self.setup_information)
-        for widget in self.winfo_children():
-            if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
-                widget.destroy()
+
+        self.__delete_widgets()
         self.progressbar.set(1)
 
         label = CTkLabel(self, text=self.lang.final, font=(None, 16, "bold"))
@@ -432,7 +437,6 @@ class App(CTk):
                 installation_type_entry.insert(0, self.lang.insecuretype)
             case "LessSecure":
                 installation_type_entry.insert(0, self.lang.lessecuretype)
-        
         installation_type_entry.configure(state="disabled")
 
         de_label = CTkLabel(self, text=self.lang.de)
@@ -544,7 +548,7 @@ class App(CTk):
         i += 1
         begin_installation_button.grid(row=i, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
     
-    def _list_partitions(self, drive):
+    def __list_partitions(self, drive):
         result = subprocess.run(['lsblk', '-ln', '-o', 'NAME,TYPE'], stdout=subprocess.PIPE, text=True)
         partitions = []
         for line in result.stdout.splitlines():
@@ -553,121 +557,121 @@ class App(CTk):
                 partitions.append(f"/dev/{name}")
         return partitions
 
-    def __execute_commands_sequentially(self, commands):
-        def run_next_command(index):
-            if index >= len(commands):
-                return  # Exit when all commands are executed
+    # def __execute_commands_sequentially(self, commands):
+    #     def run_next_command(index):
+    #         if index >= len(commands):
+    #             return  # Exit when all commands are executed
 
-            # Get the current command and its optional input
-            command_data = commands[index]
-            command = command_data["command"]
-            command_input = command_data.get("input", None)
+    #         # Get the current command and its optional input
+    #         command_data = commands[index]
+    #         command = command_data["command"]
+    #         command_input = command_data.get("input", None)
 
-            def run_command():
-                try:
-                    if command_input:
-                        # Commands requiring input
-                        result = subprocess.run(
-                            command,
-                            input=command_input,
-                            text=True,
-                            shell=True,
-                            check=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE
-                        )
-                        self.console_output.insert("end", result.stdout)
-                    else:
-                        # Commands without input
-                        process = subprocess.Popen(
-                            command,
-                            shell=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            text=True
-                        )
-                        for line in iter(process.stdout.readline, ''):
-                            self.console_output.insert("end", line)
-                            self.console_output.see("end")
-                        for line in iter(process.stderr.readline, ''):
-                            self.console_output.insert("end", line, "error")
-                            self.console_output.see("end")
-                        process.stdout.close()
-                        process.stderr.close()
-                        process.wait()
+    #         def run_command():
+    #             try:
+    #                 if command_input:
+    #                     # Commands requiring input
+    #                     result = subprocess.run(
+    #                         command,
+    #                         input=command_input,
+    #                         text=True,
+    #                         shell=True,
+    #                         check=True,
+    #                         stdout=subprocess.PIPE,
+    #                         stderr=subprocess.PIPE
+    #                     )
+    #                     self.console_output.insert("end", result.stdout)
+    #                 else:
+    #                     # Commands without input
+    #                     process = subprocess.Popen(
+    #                         command,
+    #                         shell=True,
+    #                         stdout=subprocess.PIPE,
+    #                         stderr=subprocess.PIPE,
+    #                         text=True
+    #                     )
+    #                     for line in iter(process.stdout.readline, ''):
+    #                         self.console_output.insert("end", line)
+    #                         self.console_output.see("end")
+    #                     for line in iter(process.stderr.readline, ''):
+    #                         self.console_output.insert("end", line, "error")
+    #                         self.console_output.see("end")
+    #                     process.stdout.close()
+    #                     process.stderr.close()
+    #                     process.wait()
 
-                    # Indicate the command completed
-                    self.console_output.insert("end", f"\nCommand finished: {command}\n", "info")
-                    self.console_output.see("end")
-                except subprocess.CalledProcessError as e:
-                    self.console_output.insert("end", f"\nError: {e.stderr}\n", "error")
-                    self.console_output.see("end")
+    #                 # Indicate the command completed
+    #                 self.console_output.insert("end", f"\nCommand finished: {command}\n", "info")
+    #                 self.console_output.see("end")
+    #             except subprocess.CalledProcessError as e:
+    #                 self.console_output.insert("end", f"\nError: {e.stderr}\n", "error")
+    #                 self.console_output.see("end")
 
-                # Schedule the next command
-                self.after(10, lambda: run_next_command(index + 1))
+    #             # Schedule the next command
+    #             self.after(10, lambda: run_next_command(index + 1))
 
-            # Run the current command in a separate thread
-            threading.Thread(target=run_command, daemon=True).start()
+    #         # Run the current command in a separate thread
+    #         threading.Thread(target=run_command, daemon=True).start()
 
-        # Start with the first command
-        run_next_command(0)
+    #     # Start with the first command
+    #     run_next_command(0)
 
-        def run_next_command(index):
-            # If there are no more commands, exit the sequence
-            if index >= len(commands):
-                return
+    #     def run_next_command(index):
+    #         # If there are no more commands, exit the sequence
+    #         if index >= len(commands):
+    #             return
 
-            # Get the current command
-            command = commands[index]
+    #         # Get the current command
+    #         command = commands[index]
 
-            def run_command():
-                process = subprocess.Popen(
-                    command,
-                    shell=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    bufsize=1
-                )
+    #         def run_command():
+    #             process = subprocess.Popen(
+    #                 command,
+    #                 shell=True,
+    #                 stdout=subprocess.PIPE,
+    #                 stderr=subprocess.PIPE,
+    #                 text=True,
+    #                 bufsize=1
+    #             )
 
-                # Process stdout
-                for line in iter(process.stdout.readline, ''):
-                    if line:
-                        self.console_output.insert("end", line)
-                        self.console_output.see("end")  # Auto-scroll to the bottom
+    #             # Process stdout
+    #             for line in iter(process.stdout.readline, ''):
+    #                 if line:
+    #                     self.console_output.insert("end", line)
+    #                     self.console_output.see("end")  # Auto-scroll to the bottom
 
-                # Process stderr
-                for line in iter(process.stderr.readline, ''):
-                    if line:
-                        self.console_output.insert("end", line, "error")
-                        self.console_output.see("end")  # Auto-scroll to the bottom
+    #             # Process stderr
+    #             for line in iter(process.stderr.readline, ''):
+    #                 if line:
+    #                     self.console_output.insert("end", line, "error")
+    #                     self.console_output.see("end")  # Auto-scroll to the bottom
 
-                # Wait for the process to complete
-                process.stdout.close()
-                process.stderr.close()
-                process.wait()
+    #             # Wait for the process to complete
+    #             process.stdout.close()
+    #             process.stderr.close()
+    #             process.wait()
 
-                # Start the next command after this one completes
-                self.console_output.insert("end", f"\nCommand finished: {command}\n", "info")
-                self.console_output.see("end")
-                self.console_output.update()  # Ensure the UI updates
+    #             # Start the next command after this one completes
+    #             self.console_output.insert("end", f"\nCommand finished: {command}\n", "info")
+    #             self.console_output.see("end")
+    #             self.console_output.update()  # Ensure the UI updates
 
-                # Run the next command in sequence
-                self.after(10, lambda: run_next_command(index + 1))
+    #             # Run the next command in sequence
+    #             self.after(10, lambda: run_next_command(index + 1))
 
-            # Run the current command in a separate thread
-            threading.Thread(target=run_command, daemon=True).start()
+    #         # Run the current command in a separate thread
+    #         threading.Thread(target=run_command, daemon=True).start()
 
-        # Start with the first command
-        run_next_command(0)
+    #     # Start with the first command
+    #     run_next_command(0)
 
-    def _execute(self, command, input = None):
-        if not input:
-            self.commands_to_execute.append({"command": command})
-        else:
-            self.commands_to_execute.append({"command": command, "input": input})
+    # def _execute(self, command, input = None):
+    #     if not input:
+    #         self.commands_to_execute.append({"command": command})
+    #     else:
+    #         self.commands_to_execute.append({"command": command, "input": input})
 
-    def get_crypto_luks_uuid(self):
+    def __get_crypto_luks_uuid(self):
         try:
             # Run blkid command and capture output
             result = subprocess.run(["blkid"], capture_output=True, text=True, check=True)
@@ -686,7 +690,7 @@ class App(CTk):
 
         return None
 
-    def check_secure_boot_and_setup_mode(self):
+    def __check_secure_boot_and_setup_mode(self):
         secure_boot_path = "/sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c"
         setup_mode_path = "/sys/firmware/efi/efivars/SetupMode-8be4df61-93ca-11d2-aa0d-00e098032b8c"
 
@@ -706,6 +710,7 @@ class App(CTk):
             return (False, 0, 0)
 
         return (True, secure_boot, setup_mode)
+    
     def begin_installation_ui(self):
         try:
             answ = get("http://gstatic.com/generate_204", timeout=5)
@@ -716,18 +721,23 @@ class App(CTk):
             Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
             return
         
-        uefi_info = self.check_secure_boot_and_setup_mode()
+        uefi_info = self.__check_secure_boot_and_setup_mode()
         if not uefi_info[0]:
             Notification(title=self.lang.not_uefi_title, icon="warning.png", message=self.lang.not_uefi, message_bold=True, exit_btn_msg=self.lang.exit)
             return 
         if uefi_info[1] != 0 and uefi_info[2] != 1:
             Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
             return
+        
         if DEBUG:
-            print("DEBUG MODE. EXITING...")
-            exit(1)
+            Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        
         for widget in self.winfo_children():
             widget.destroy()
+        
+        self.geometry("600x400")
+
         calm_emoji = CTkImage(light_image=Image.open(f"{WORKDIR}/images/calm.png"), dark_image=Image.open(f"{WORKDIR}/images/calm.png"), size=(80, 80))
         calm_emoji_label = CTkLabel(self, text="", image=calm_emoji)
         calm_emoji_label.pack(padx=10, pady=10)
@@ -739,11 +749,10 @@ class App(CTk):
 
     def begin_installation(self):
         self.commands_to_execute = []
-        # return
         if self.setup_information["Partitioning"] == "Automatic":
             self._execute(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
             self._execute(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
-            partitions = self._list_partitions(self.setup_information["DriveToFormat"])
+            partitions = self.__list_partitions(self.setup_information["DriveToFormat"])
             efi_partition = partitions[0]
             rootfs_partition = partitions[1]
         else:
@@ -771,8 +780,7 @@ class App(CTk):
 
         self._execute(f"mount /dev/volumegroup/root /mnt")
         if self.setup_information["UseSwap"]:
-
-                self._execute("swapon /dev/volumegroup/swap")
+            self._execute("swapon /dev/volumegroup/swap")
         self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
         self._execute("pacstrap -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl")
@@ -789,7 +797,7 @@ class App(CTk):
         self._execute("echo \"BINARIES=()\" >> /mnt/etc/mkinitcpio.conf")
         self._execute("echo \"FILES=()\" >> /mnt/etc/mkinitcpio.conf")
         self._execute("echo \"HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt lvm2 filesystems fsck)\" >> /mnt/etc/mkinitcpio.conf")
-        uuid = self.get_crypto_luks_uuid()
+        uuid = self.__get_crypto_luks_uuid()
         self._execute("mkdir /mnt/etc/cmdline.d")
         self._execute(f"echo \"rd.luks.name={uuid}=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet\" > /mnt/etc/cmdline.d/root.conf")
 
