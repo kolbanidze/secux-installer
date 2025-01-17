@@ -56,6 +56,7 @@ class Locale:
             self.not_uefi_title = "No UEFI support"
             self.not_setup_mode = "Setup Mode is not enabled in Secure Boot"
             self.not_setup_mode_title = "The system is not in Setup Mode"
+            self.installing = "The system is being installed. For now, you can sit back in your chair.\nTechnical information about the installation process:"
         elif language == "ru":
             self.test = "ТЕСТ | Русский"
             self.select_time_zone = "Выберите часовой пояс"
@@ -111,3 +112,4 @@ class Locale:
             self.not_uefi_title = "Отсутствие поддержки UEFI"
             self.not_setup_mode = "Не включен Setup Mode в Secure Boot"
             self.not_setup_mode_title = "Система не в Setup Mode"
+            self.installing = "Система устанавливается. Пока можете откинуться на спинку стула.\nТехническая информация о процессе установки:"
