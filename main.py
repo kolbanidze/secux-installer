@@ -714,7 +714,7 @@ class App(CTk):
         self.begin_installation()
 
     def begin_installation(self):
-        self.commands_to_execute = []
+        self.commands = []
         
         # Prepare partitions
         if self.setup_information["Partitioning"] == "Automatic":
@@ -861,7 +861,7 @@ class App(CTk):
         self._execute("echo [Теперь вы можете закрыть это окно и перезагрузиться в систему.]")
 
         # Execute commands
-        self._execute_commands(self.commands_to_execute)
+        self._execute_commands(self.commands)
         print("[DELETE ME] Интересно, отобразится ли это сообщение до завершения выполнения установки?")
 if __name__ == "__main__":
     App().mainloop()
