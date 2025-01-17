@@ -555,6 +555,64 @@ class App(CTk):
 
     def __execute_commands_sequentially(self, commands):
         def run_next_command(index):
+            if index >= len(commands):
+                return  # Exit when all commands are executed
+
+            # Get the current command and its optional input
+            command_data = commands[index]
+            command = command_data["command"]
+            command_input = command_data.get("input", None)
+
+            def run_command():
+                try:
+                    if command_input:
+                        # Commands requiring input
+                        result = subprocess.run(
+                            command,
+                            input=command_input,
+                            text=True,
+                            shell=True,
+                            check=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE
+                        )
+                        self.console_output.insert("end", result.stdout)
+                    else:
+                        # Commands without input
+                        process = subprocess.Popen(
+                            command,
+                            shell=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True
+                        )
+                        for line in iter(process.stdout.readline, ''):
+                            self.console_output.insert("end", line)
+                            self.console_output.see("end")
+                        for line in iter(process.stderr.readline, ''):
+                            self.console_output.insert("end", line, "error")
+                            self.console_output.see("end")
+                        process.stdout.close()
+                        process.stderr.close()
+                        process.wait()
+
+                    # Indicate the command completed
+                    self.console_output.insert("end", f"\nCommand finished: {command}\n", "info")
+                    self.console_output.see("end")
+                except subprocess.CalledProcessError as e:
+                    self.console_output.insert("end", f"\nError: {e.stderr}\n", "error")
+                    self.console_output.see("end")
+
+                # Schedule the next command
+                self.after(10, lambda: run_next_command(index + 1))
+
+            # Run the current command in a separate thread
+            threading.Thread(target=run_command, daemon=True).start()
+
+        # Start with the first command
+        run_next_command(0)
+
+        def run_next_command(index):
             # If there are no more commands, exit the sequence
             if index >= len(commands):
                 return
@@ -603,8 +661,11 @@ class App(CTk):
         # Start with the first command
         run_next_command(0)
 
-    def _execute(self, command):
-        self.commands_to_execute.append(command)
+    def _execute(self, command, input = None):
+        if not input:
+            self.commands_to_execute.append({"command": command})
+        else:
+            self.commands_to_execute.append({"command": command, "input": input})
 
     def get_crypto_luks_uuid(self):
         try:
@@ -690,8 +751,8 @@ class App(CTk):
             rootfs_partition = self.setup_information["SystemPartition"]
         
         print(efi_partition, rootfs_partition)
-        self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksFormat {rootfs_partition}")
-        self._execute(f"echo -n {self.setup_information["EncryptionKey"]} | cryptsetup luksOpen {rootfs_partition} cryptlvm")
+        self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=f"YES\n{self.setup_information["EncryptionKey"]}\n{self.setup_information["EncryptionKey"]}\n")
+        self._execute(f"cryptsetup luksOpen {rootfs_partition} cryptlvm", input=f"{self.setup_information["EncryptionKey"]}\n")
         
         self._execute("pvcreate /dev/mapper/cryptlvm")
         self._execute("vgcreate volumegroup /dev/mapper/cryptlvm")
@@ -719,12 +780,8 @@ class App(CTk):
 
         self._execute(f"arch-chroot /mnt useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
         
-        subprocess.run(
-                ['arch-chroot', '/mnt', 'passwd', self.setup_information["Username"]],
-                input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n",  # Pass the password twice for confirmation
-                text=True,  # Enables passing string as input
-                check=True  # Raises an exception if the command fails
-            )
+        self._execute(f"arch-chroot /mnt passwd {self.setup_information["Username"]}", input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n")
+
         self._execute("echo \"%wheel ALL=(ALL:ALL) ALL\" >> /mnt/etc/sudoers ")
         self._execute(f"arch-chroot /mnt usermod -aG wheel {self.setup_information["Username"]}")
         self._execute(f"arch-chroot /mnt ln -sf /usr/share/zoneinfo/{self.setup_information['Timezone']} /etc/localtime")
