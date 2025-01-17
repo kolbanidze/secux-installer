@@ -83,8 +83,6 @@ class App(CTk):
         
         self.progressbar = CTkProgressBar(self, orientation='horizontal', width=500)
         self.progressbar.set(0.15)
-
-        Notification(title="None", icon="warning.png", message=self.lang.full_name_mismatch, message_bold=False, exit_btn_msg=self.lang.exit)
         
         title1 = CTkLabel(self, text=self.lang.select_time_zone, font=(None, 16, 'bold'))
         region_label = CTkLabel(self, text=self.lang.region)
@@ -557,119 +555,54 @@ class App(CTk):
                 partitions.append(f"/dev/{name}")
         return partitions
 
-    # def __execute_commands_sequentially(self, commands):
-    #     def run_next_command(index):
-    #         if index >= len(commands):
-    #             return  # Exit when all commands are executed
+    def _execute(self, command: str, input: str = None):
+        if input:
+            self.commands.append({"command": command, "input": input})
+        else:
+            self.commands.append({"command": command})
 
-    #         # Get the current command and its optional input
-    #         command_data = commands[index]
-    #         command = command_data["command"]
-    #         command_input = command_data.get("input", None)
+    def _execute_commands(self, commands: list):
+        def run_commands():
+            for cmd in commands:
+                try:
+                    # Run the command
+                    if "input" in cmd:
+                        process = subprocess.Popen(
+                            cmd["command"],
+                            stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            shell=True,
+                            text=True
+                        )
+                        stdout, stderr = process.communicate(input=cmd["input"])
+                    else:
+                        process = subprocess.Popen(
+                            cmd["command"],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            shell=True,
+                            text=True
+                        )
+                        stdout, stderr = process.communicate()
 
-    #         def run_command():
-    #             try:
-    #                 if command_input:
-    #                     # Commands requiring input
-    #                     result = subprocess.run(
-    #                         command,
-    #                         input=command_input,
-    #                         text=True,
-    #                         shell=True,
-    #                         check=True,
-    #                         stdout=subprocess.PIPE,
-    #                         stderr=subprocess.PIPE
-    #                     )
-    #                     self.console_output.insert("end", result.stdout)
-    #                 else:
-    #                     # Commands without input
-    #                     process = subprocess.Popen(
-    #                         command,
-    #                         shell=True,
-    #                         stdout=subprocess.PIPE,
-    #                         stderr=subprocess.PIPE,
-    #                         text=True
-    #                     )
-    #                     for line in iter(process.stdout.readline, ''):
-    #                         self.console_output.insert("end", line)
-    #                         self.console_output.see("end")
-    #                     for line in iter(process.stderr.readline, ''):
-    #                         self.console_output.insert("end", line, "error")
-    #                         self.console_output.see("end")
-    #                     process.stdout.close()
-    #                     process.stderr.close()
-    #                     process.wait()
+                    # Update the console with the output
+                    self.console.configure(state="normal")
+                    if stdout:
+                        self.console.insert(END, stdout + "\n")
+                    if stderr:
+                        self.console.insert(END, stderr + "\n")
+                    self.console.configure(state="disabled")
 
-    #                 # Indicate the command completed
-    #                 self.console_output.insert("end", f"\nCommand finished: {command}\n", "info")
-    #                 self.console_output.see("end")
-    #             except subprocess.CalledProcessError as e:
-    #                 self.console_output.insert("end", f"\nError: {e.stderr}\n", "error")
-    #                 self.console_output.see("end")
+                    self.console.see(END)  # Scroll to the end of the console
+                except Exception as e:
+                    self.console.configure(state="normal")
+                    self.console.insert(END, f"Error: {str(e)}\n")
+                    self.console.configure(state="disabled")
+                    self.console.see(END)
 
-    #             # Schedule the next command
-    #             self.after(10, lambda: run_next_command(index + 1))
-
-    #         # Run the current command in a separate thread
-    #         threading.Thread(target=run_command, daemon=True).start()
-
-    #     # Start with the first command
-    #     run_next_command(0)
-
-    #     def run_next_command(index):
-    #         # If there are no more commands, exit the sequence
-    #         if index >= len(commands):
-    #             return
-
-    #         # Get the current command
-    #         command = commands[index]
-
-    #         def run_command():
-    #             process = subprocess.Popen(
-    #                 command,
-    #                 shell=True,
-    #                 stdout=subprocess.PIPE,
-    #                 stderr=subprocess.PIPE,
-    #                 text=True,
-    #                 bufsize=1
-    #             )
-
-    #             # Process stdout
-    #             for line in iter(process.stdout.readline, ''):
-    #                 if line:
-    #                     self.console_output.insert("end", line)
-    #                     self.console_output.see("end")  # Auto-scroll to the bottom
-
-    #             # Process stderr
-    #             for line in iter(process.stderr.readline, ''):
-    #                 if line:
-    #                     self.console_output.insert("end", line, "error")
-    #                     self.console_output.see("end")  # Auto-scroll to the bottom
-
-    #             # Wait for the process to complete
-    #             process.stdout.close()
-    #             process.stderr.close()
-    #             process.wait()
-
-    #             # Start the next command after this one completes
-    #             self.console_output.insert("end", f"\nCommand finished: {command}\n", "info")
-    #             self.console_output.see("end")
-    #             self.console_output.update()  # Ensure the UI updates
-
-    #             # Run the next command in sequence
-    #             self.after(10, lambda: run_next_command(index + 1))
-
-    #         # Run the current command in a separate thread
-    #         threading.Thread(target=run_command, daemon=True).start()
-
-    #     # Start with the first command
-    #     run_next_command(0)
-
-    # def _execute(self, command, input = None):
-    #     if not input:
-    #         self.commands_to_execute.append({"command": command})
-    #     else:
-    #         self.commands_to_execute.append({"command": command, "input": input})
+        # Run the commands in a separate thread to avoid blocking the UI
+        threading.Thread(target=run_commands, daemon=True).start()
 
     def __get_crypto_luks_uuid(self):
         try:
@@ -711,6 +644,19 @@ class App(CTk):
 
         return (True, secure_boot, setup_mode)
     
+    def __get_ucode_package(self):
+        try:
+            with open("/proc/cpuinfo", "r") as f:
+                for line in f:
+                    if "vendor_id" in line:
+                        if "GenuineIntel" in line:
+                            return "intel-ucode"
+                        elif "AuthenticAMD" in line:
+                            return "amd-ucode"
+            return "amd-ucode intel-ucode"
+        except FileNotFoundError:
+            return "amd-ucode intel-ucode"
+
     def begin_installation_ui(self):
         try:
             answ = get("http://gstatic.com/generate_204", timeout=5)
@@ -749,9 +695,11 @@ class App(CTk):
 
     def begin_installation(self):
         self.commands_to_execute = []
+        
+        # Prepare partitions
         if self.setup_information["Partitioning"] == "Automatic":
-            self._execute(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
-            self._execute(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
+            os.system(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
+            os.system(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
             partitions = self.__list_partitions(self.setup_information["DriveToFormat"])
             efi_partition = partitions[0]
             rootfs_partition = partitions[1]
@@ -759,58 +707,91 @@ class App(CTk):
             efi_partition = self.setup_information["EfiPartition"]
             rootfs_partition = self.setup_information["SystemPartition"]
         
-        print(efi_partition, rootfs_partition)
+        # Preparing commands for execution
+
+        # Creating LUKS partition
         self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=f"YES\n{self.setup_information["EncryptionKey"]}\n{self.setup_information["EncryptionKey"]}\n")
         self._execute(f"cryptsetup luksOpen {rootfs_partition} cryptlvm", input=f"{self.setup_information["EncryptionKey"]}\n")
         
+        # Creating LVM
         self._execute("pvcreate /dev/mapper/cryptlvm")
         self._execute("vgcreate volumegroup /dev/mapper/cryptlvm")
         
+        # Creating swap partition if needed
         if self.setup_information["UseSwap"] == False:
             self._execute("lvcreate -l 100%FREE volumegroup -n root")
         else:
             self._execute(f"lvcreate -L {self.setup_information["SwapSize"]}G volumegroup -n swap")
             self._execute("lvcreate -l 100%FREE volumegroup -n root")
         
+        # Formatting root partition
         self._execute("mkfs.ext4 /dev/volumegroup/root")
-        self._execute("mkswap /dev/volumegroup/swap")
         
+        # Formatting swap partition
+        if self.setup_information["UseSwap"]:
+            self._execute("mkswap /dev/volumegroup/swap")
+        
+        # Formatting EFI partition if needed
         if self.setup_information["Partitioning"] == "Automatic":
             self._execute(f"mkfs.fat -F32 {efi_partition}")
 
+        # Mounting root partition to /mnt and enabling swap if needed
         self._execute(f"mount /dev/volumegroup/root /mnt")
         if self.setup_information["UseSwap"]:
             self._execute("swapon /dev/volumegroup/swap")
+        
+        # Creating and mounting EFI partition
         self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
-        self._execute("pacstrap -K /mnt base linux linux-firmware linux-headers amd-ucode vim nano efibootmgr sudo lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl")
+        # Installing OS
+        pacstrap_command = f"pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package} vim nano efibootmgr sudo lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        if self.setup_information["DE"] == "GNOME":
+            pacstrap_command += "xorg gnome gnome-tweaks nautilus-sendto gnome-nettool gnome-usage adwaita-icon-theme xdg-user-dirs-gtk arc-gtk-theme gdm vlc firefox chromium"
+        elif self.setup_information["DE"] == "KDE":
+            pacstrap_command += "xorg plasma plasma-wayland-session kde-applications vlc firefox chromium"
+        self._execute(pacstrap_command)
+        
+        # Generating fstab
         self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
 
+        # Creating user
         self._execute(f"arch-chroot /mnt useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
         
+        # Setting password for user
         self._execute(f"arch-chroot /mnt passwd {self.setup_information["Username"]}", input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n")
 
+        # Making user admin
         self._execute("echo \"%wheel ALL=(ALL:ALL) ALL\" >> /mnt/etc/sudoers ")
         self._execute(f"arch-chroot /mnt usermod -aG wheel {self.setup_information["Username"]}")
+        
+        # Configuring timezone
         self._execute(f"arch-chroot /mnt ln -sf /usr/share/zoneinfo/{self.setup_information['Timezone']} /etc/localtime")
-        self._execute("echo \"MODULES=()\" > /mnt/etc/mkinitcpio.conf")
-        self._execute("echo \"BINARIES=()\" >> /mnt/etc/mkinitcpio.conf")
-        self._execute("echo \"FILES=()\" >> /mnt/etc/mkinitcpio.conf")
-        self._execute("echo \"HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt lvm2 filesystems fsck)\" >> /mnt/etc/mkinitcpio.conf")
+        
+        # Creating mkinitcpio.conf
+        mkinitcpio_contents = "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt lvm2 filesystems fsck)"
+        with open("/mnt/etc/mkinitcpio.conf", "w") as file:
+            file.write(mkinitcpio_contents)
+        
+        # Creating cmdline
         uuid = self.__get_crypto_luks_uuid()
         self._execute("mkdir /mnt/etc/cmdline.d")
         self._execute(f"echo \"rd.luks.name={uuid}=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet\" > /mnt/etc/cmdline.d/root.conf")
 
-        self._execute("echo \"[UKI]\" > /mnt/etc/kernel/uki.conf")
-        self._execute("echo \"OSRelease=@/etc/os-release\" >> /mnt/etc/kernel/uki.conf")
-        self._execute("echo \"PCRBanks=sha256\" >> /mnt/etc/kernel/uki.conf")
-        self._execute("echo \"[PCRSignature:initrd]\" >> /mnt/etc/kernel/uki.conf")
-        self._execute("echo \"Phases=enter-initrd\" >> /mnt/etc/kernel/uki.conf")
-        self._execute("echo \"PCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\" >> /mnt/etc/kernel/uki.conf")
-        self._execute("echo \"PCRPublicKey=/etc/kernel/pcr-initrd.pub.pem\" >> /mnt/etc/kernel/uki.conf")
+        # Creating UKI config
+        uki_contents = "[UKI]\n"+\
+        "OSRelease=@/etc/os-release\n"+\
+        "PCRBanks=sha256\n\n"+\
+        "[PCRSignature:initrd]\n"+\
+        "Phases=enter-initrd\n"+\
+        "PCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\n"+\
+        "PCRPublicKey=/etc/kernel/pcr-initrd.pub.pem"
+        with open("/mnt/etc/kernel/uki.conf", "w") as file:
+            file.write(uki_contents)
 
+        # Generate ukify keys
         self._execute("arch-chroot /mnt ukify genkey --config=/etc/kernel/uki.conf")
 
+        # Configure UKI generation
         self._execute("sed -i '/^default_config/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
         self._execute("sed -i '/^default_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
         self._execute("sed -i '/^#default_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
@@ -821,27 +802,47 @@ class App(CTk):
         self._execute("sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
         self._execute("sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
 
+        # Prepare EFI Partition
         self._execute("mkdir -p /mnt/efi/EFI/Linux")
+        
+        # Generate UKI
         self._execute("arch-chroot /mnt mkinitcpio -p linux")
+        
+        # Make NetworkManager run at boot
         self._execute("arch-chroot /mnt systemctl enable NetworkManager")
+
+        # Make GDM/SDDM run at boot
+        if self.setup_information["DE"] == "GNOME":
+            self._execute("arch-chroot /mnt systemctl enable gdm")
+        elif self.setup_information["DE"] == "KDE":
+            self._execute("arch-chroot /mnt systemctl enable sddm")
+
+        # Install bootloader
         self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
+        
+        # Generate sbctl keys
         self._execute("arch-chroot /mnt sbctl create-keys")
+        
         if self.setup_information["InstallationType"] == "LessSecure":
             self._execute("arch-chroot /mnt sbctl enroll-keys -m")
         elif self.setup_information["InstallationType"] == "Secure":
             self._execute("arch-chroot /mnt sbctl enroll-keys --yes-this-might-brick-my-machine")
         
+        # Signing EFI executables and storing them in the database for signing during updates
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux-fallback.efi")
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux.efi")
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
 
-        self._execute("echo [Installation finished]")
-        self._execute("echo [Installation finished]")
-        self._execute("echo [Installation finished]")
-        self._execute("echo [Installation finished]")
-        self._execute("echo [Installation finished]")
-        self.__execute_commands_sequentially(self.commands_to_execute)
+        # Final message in console
+        self._execute("echo [Installation finished!]")
+        self._execute("echo [Now you can close this window and reboot into the system.]")
+        self._execute("echo [Установка завершена!]")
+        self._execute("echo [Теперь вы можете закрыть это окно и перезагрузиться в систему.]")
+
+        # Execute commands
+        self._execute_commands(self.commands_to_execute)
+        print("[DELETE ME] Интересно, отобразится ли это сообщение до завершения выполнения установки?")
 if __name__ == "__main__":
     App().mainloop()
         
