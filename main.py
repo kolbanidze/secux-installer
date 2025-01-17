@@ -624,23 +624,26 @@ class App(CTk):
         # Run the commands in a separate thread to avoid blocking the UI
         threading.Thread(target=run_commands, daemon=True).start()
 
-    def __get_crypto_luks_uuid(self):
+    def __get_crypto_luks_uuid(self, partition):
         try:
-            # Run blkid command and capture output
-            result = subprocess.run(["blkid"], capture_output=True, text=True, check=True)
-            blkid_output = result.stdout
-
-            # Parse blkid output for crypto_LUKS devices
-            for line in blkid_output.splitlines():
-                if "TYPE=\"crypto_LUKS\"" in line:
-                    # Extract UUID
-                    for part in line.split():
-                        if part.startswith("UUID="):
-                            return part.split("=")[1].strip('"')  # Strip quotes around UUID
-
-        except subprocess.CalledProcessError as e:
-            print(f"Error running blkid: {e}")
-
+            # Run the blkid command for the specific partition
+            result = subprocess.run(
+                ["blkid", partition],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            if result.returncode != 0:
+                # Handle error (e.g., partition not found)
+                raise Exception(result.stderr.strip())
+            
+            # Parse the output to extract the UUID
+            output = result.stdout.strip()
+            for part in output.split():
+                if part.startswith("UUID="):
+                    return part.split("=")[1].strip('"')
+        except Exception as e:
+            print(f"Error: {e}")
         return None
 
     def __check_secure_boot_and_setup_mode(self):
@@ -791,7 +794,7 @@ class App(CTk):
         self._execute('echo -e "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt lvm2 filesystems fsck)" > /mnt/etc/mkinitcpio.conf')
         
         # Creating cmdline
-        uuid = self.__get_crypto_luks_uuid()
+        uuid = self.__get_crypto_luks_uuid(rootfs_partition)
         self._execute("mkdir /mnt/etc/cmdline.d")
         self._execute(f"echo \"rd.luks.name={uuid}=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet\" > /mnt/etc/cmdline.d/root.conf")
 
