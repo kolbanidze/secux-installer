@@ -709,8 +709,8 @@ class App(CTk):
         calm_emoji_label.pack(padx=10, pady=10)
         label = CTkLabel(self, text=self.lang.installing)
         label.pack(padx=10, pady=10)
-        self.console_output = CTkTextbox(self)
-        self.console_output.pack(padx=10, pady=10, expand=True, fill="both")
+        self.console = CTkTextbox(self)
+        self.console.pack(padx=10, pady=10, expand=True, fill="both")
         self.begin_installation()
 
     def begin_installation(self):
