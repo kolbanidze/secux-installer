@@ -766,7 +766,7 @@ class App(CTk):
         # Installing OS
         pacstrap_command = f"pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package()} vim nano efibootmgr sudo lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["DE"] == "GNOME":
-            pacstrap_command += "xorg gnome gnome-tweaks nautilus-sendto gnome-nettool gnome-usage adwaita-icon-theme xdg-user-dirs-gtk arc-gtk-theme gdm vlc firefox chromium"
+            pacstrap_command += "xorg gnome gnome-tweaks gdm vlc firefox chromium"
         elif self.setup_information["DE"] == "KDE":
             pacstrap_command += "xorg plasma plasma-wayland-session kde-applications vlc firefox chromium"
         self._execute(pacstrap_command)
