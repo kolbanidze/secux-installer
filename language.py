@@ -64,7 +64,12 @@ class Locale:
             self.mismatch = "The input field contains invalid characters or exceeds the length"
             self.debug_mode = "The program is running in debug mode. Installation has been interrupted.\nTo disable debug mode, set the flag DEBUG=False"
             self.debug_title = "Debug mode is enabled"
-
+            self.empty_entry = "Entry is empty"
+            self.full_name_empty = "Full name entry is empty"
+            self.hostname_empty = "Host name entry is empty"
+            self.username_empty = "Username is empty"
+            self.encryption_password_title = "Invalid characters"
+            self.encryption_password = "The disk encryption password you entered contains characters\nthat cannot be entered on the English keyboard layout.\nTo avoid problems unlocking the disk, use the English keyboard layout."
         elif language == "ru":
             self.test = "ТЕСТ | Русский"
             self.select_time_zone = "Выберите часовой пояс"
@@ -128,4 +133,9 @@ class Locale:
             self.mismatch = "Поле ввода содержит недопустимые символы или превышает длину"
             self.debug_mode = "Программа работает в режиме отладки. Установка прервана.\nДля отключения режима отладки установите флаг DEBUG=False"
             self.debug_title = "Включен режим отладки"
-            
+            self.empty_entry = "Поле ввода пусто"
+            self.full_name_empty = "Полное имя пустое"
+            self.hostname_empty = "Название устройства пустое"
+            self.username_empty = "Имя пользователя пустое"
+            self.encryption_password_title = "Недопустимые символы"
+            self.encryption_password = "Введённый вами пароль шифрования диска содержит символы,\n которые нельзя ввести на английской раскладке клавиатуры.\nВо избежание проблем с разблокировкой диска, используйте английскую раскладку."
