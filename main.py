@@ -82,11 +82,15 @@ class App(CTk):
         updater_welcome = CTkLabel(self, text=f"{DISTRO_NAME} installer updater | Обновления установщика {DISTRO_NAME}")
         run_update = CTkButton(self, text="Update | Обновить", command=self.__update_repo)
         self.updater_textbox = CTkTextbox(self, state="disabled")
+        after_update = CTkLabel(self, text="Для применения обновлений необходимо перезапустить программу.\nTo apply updates, you must restart the program.")
+        exit_button = CTkButton(self, text="Закрыть программу | Close the program", command=self.destroy)
 
         update_image_label.pack(padx=15, pady=15)
         updater_welcome.pack(padx=15, pady=15)
         run_update.pack(padx=15, pady=(0, 15))
         self.updater_textbox.pack(padx=15, pady=15, expand=True, fill="both")
+        after_update.pack(padx=15, pady=15)
+        exit_button.pack(padx=15, pady=(0, 15))
     
     def __update_repo(self):
         self.updater_textbox.configure(state="normal")
