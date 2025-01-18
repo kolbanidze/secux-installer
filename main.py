@@ -22,6 +22,9 @@ DISTRO_NAME="SECUX"
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
 
+if os.path.isfile(WORKDIR + "/production.conf"):
+    DEBUG = False
+
 class Notification(CTkToplevel):
     def __init__(self, title: str, icon: str, message: str, message_bold: bool, exit_btn_msg: str):
         super().__init__()
