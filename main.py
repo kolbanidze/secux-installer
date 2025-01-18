@@ -771,7 +771,7 @@ class App(CTk):
         if self.setup_information["DE"] == "GNOME":
             pacstrap_command += "xorg gnome gnome-tweaks gdm vlc firefox chromium"
         elif self.setup_information["DE"] == "KDE":
-            pacstrap_command += "xorg plasma plasma-wayland-session kde-applications vlc firefox chromium"
+            pacstrap_command += "xorg plasma kde-applications vlc firefox chromium"
         self._execute(pacstrap_command)
         
         # Generating fstab
