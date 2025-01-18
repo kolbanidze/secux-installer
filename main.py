@@ -743,10 +743,11 @@ class App(CTk):
         uefi_info = self.__check_secure_boot_and_setup_mode()
         if not uefi_info[0]:
             Notification(title=self.lang.not_uefi_title, icon="warning.png", message=self.lang.not_uefi, message_bold=True, exit_btn_msg=self.lang.exit)
-            return 
-        if uefi_info[1] != 0 and uefi_info[2] != 1:
-            Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
             return
+        if self.setup_information["InstallationType"] != "InSecure":
+            if uefi_info[1] != 0 and uefi_info[2] != 1:
+                Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
+                return
         
         if DEBUG:
             Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
