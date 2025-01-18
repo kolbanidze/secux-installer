@@ -50,8 +50,10 @@ class App(CTk):
         self.language = "ru"
         self.setup_information = {}
 
+        self.clicks = 0
         welcome_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), dark_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), size=(80,80))
         welcome_image_label = CTkLabel(self, text="", image=welcome_image)
+        welcome_image_label.bind("<Button-1>", self.__clicks_handler)
         welcome_entry_label = CTkLabel(self, text=f"Добро пожаловать в установщик дистрибутива {DISTRO_NAME}\nWelcome to {DISTRO_NAME} distribution installer")        
         select_language_label = CTkLabel(self, text="Выберите язык | Select language")
         languages_optionmenu = CTkOptionMenu(self, values=["Русский", "English"], command=self.__language_callback)
@@ -65,6 +67,47 @@ class App(CTk):
         next_button.pack(padx=15, pady=15)
         info.pack(padx=15, pady=(5, 0))
         if DEBUG: CTkLabel(self, text="WARNING: DEBUG MODE", font=(None, 10), text_color=("red")).pack(padx=15, pady=(5,0))
+
+    def __clicks_handler(self, event):
+        self.clicks += 1
+        if self.clicks == 3:
+            self.clicks = 0
+            self._updater()
+    
+    def _updater(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+        update_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/update.png'), dark_image=Image.open(f'{WORKDIR}/images/update.png'), size=(80, 80))
+        update_image_label = CTkLabel(self, text="", image=update_image)
+        updater_welcome = CTkLabel(self, text=f"{DISTRO_NAME} installer updater | Обновления установщика {DISTRO_NAME}")
+        run_update = CTkButton(self, text="Update | Обновить", command=self.__update_repo)
+        self.updater_textbox = CTkTextbox(self, state="disabled")
+
+        update_image_label.pack(padx=15, pady=15)
+        updater_welcome.pack(padx=15, pady=15)
+        run_update.pack(padx=15, pady=(0, 15))
+        self.updater_textbox.pack(padx=15, pady=15, expand=True, fill="both")
+    
+    def __update_repo(self):
+        self.updater_textbox.configure(state="normal")
+        try:
+            # Ensure the script is running from a Git repository
+            repo_path = os.path.dirname(os.path.abspath(__file__))
+            os.chdir(repo_path)
+            
+            process = subprocess.Popen(
+                ["git", "pull", "origin", "main"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True)
+            stdout, stderr = process.communicate()
+            if stdout:
+                self.updater_textbox.insert("end", stdout)
+            if stderr:
+                self.updater_textbox.insert("end", stderr)
+        except Exception as e:
+            self.updater_textbox.insert("end", f"ERROR: {e}\n")
+        self.updater_textbox.configure(state="disabled")
 
     def __language_callback(self, choice):
         match choice:
