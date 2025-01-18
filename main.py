@@ -61,7 +61,7 @@ class App(CTk):
         languages_optionmenu.pack(padx=15, pady=15)
         next_button.pack(padx=15, pady=15)
         info.pack(padx=15, pady=(5, 0))
-        if DEBUG: CTkLabel(self, text="WARNING: DEBUG MODE", font=(None, 8)).pack(padx=15, pady=(5,0))
+        if DEBUG: CTkLabel(self, text="WARNING: DEBUG MODE", font=(None, 10), text_color=("red")).pack(padx=15, pady=(5,0))
 
     def __language_callback(self, choice):
         match choice:
