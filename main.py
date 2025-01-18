@@ -857,6 +857,8 @@ class App(CTk):
 
         # Execute commands
         self._execute_commands(self.commands)
+
+
 if __name__ == "__main__":
     App().mainloop()
         
