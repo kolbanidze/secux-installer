@@ -874,6 +874,16 @@ class App(CTk):
         # Make NetworkManager run at boot
         self._execute("arch-chroot /mnt systemctl enable NetworkManager")
 
+        # Add languages support
+        if self.language == 'ru':
+            self._execute('arch-chroot /mnt echo "ru_RU.UTF-8 UTF-8" >> /etc/locale.gen')
+        else:
+            self._execute('arch-chroot /mnt echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen')
+        self._execute("arch-chroot /mnt locale-gen")
+
+        # Hostname
+        self._execute(f'echo "{self.setup_information["Hostname"]}" > /mnt/etc/hostname')
+
         # Make GDM/SDDM run at boot
         if self.setup_information["DE"] == "GNOME":
             self._execute("arch-chroot /mnt systemctl enable gdm")
