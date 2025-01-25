@@ -846,7 +846,7 @@ class App(CTk):
         
         # Creating cmdline
         self._execute("mkdir /mnt/etc/cmdline.d")
-        self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet lockdown=true splash\" > /mnt/etc/cmdline.d/root.conf")
+        self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet lockdown=confidentiality splash\" > /mnt/etc/cmdline.d/root.conf")
 
         # Creating UKI config
         self._execute('echo -e "[UKI]\nOSRelease=@/etc/os-release\nPCRBanks=sha256\n\n[PCRSignature:initrd]\nPhases=enter-initrd\nPCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\nPCRPublicKey=/etc/kernel/pcr-initrd.pub.pem" > /mnt/etc/kernel/uki.conf')
@@ -864,6 +864,9 @@ class App(CTk):
         self._execute("sed -i '/^fallback_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
         self._execute("sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
         self._execute("sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
+
+        # Set default plymouth theme
+        self._execute("arch-chroot /mnt plymouth-set-default-theme")
 
         # Prepare EFI Partition
         self._execute("mkdir -p /mnt/efi/EFI/Linux")
@@ -899,7 +902,6 @@ class App(CTk):
         self._execute("cp /usr/local/share/secux-installer/images/bootlogo.bmp /mnt/usr/share/icons")
         self._execute("cp /usr/local/share/secux-installer/images/secux.svg /mnt/usr/share/icons")
         self._execute("sed -i 's|/usr/share/systemd/bootctl/splash-arch.bmp|/usr/share/icons/bootlogo.bmp|' /mnt/etc/mkinitcpio.d/linux.preset")
-        self._execute("arch-chroot /mnt plymouth-set-default-theme")
 
         # Install bootloader
         self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
