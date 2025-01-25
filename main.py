@@ -644,28 +644,35 @@ class App(CTk):
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             shell=True,
-                            text=True
+                            text=True,
+                            bufsize=1  # Line-buffered output
                         )
-                        stdout, stderr = process.communicate(input=cmd["input"])
+                        process.stdin.write(cmd["input"])
+                        process.stdin.close()
                     else:
                         process = subprocess.Popen(
                             cmd["command"],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             shell=True,
-                            text=True
+                            text=True,
+                            bufsize=1  # Line-buffered output
                         )
-                        stdout, stderr = process.communicate()
 
-                    # Update the console with the output
+                    # Update the console in real-time
                     self.console.configure(state="normal")
-                    if stdout:
-                        self.console.insert(END, stdout + "\n")
-                    if stderr:
-                        self.console.insert(END, stderr + "\n")
-                    self.console.configure(state="disabled")
+                    for line in process.stdout:
+                        self.console.insert(END, line)
+                        self.console.see(END)
+                    for line in process.stderr:
+                        self.console.insert(END, line)
+                        self.console.see(END)
 
-                    self.console.see(END)  # Scroll to the end of the console
+                    process.stdout.close()
+                    process.stderr.close()
+                    process.wait()  # Ensure the process finishes
+
+                    self.console.configure(state="disabled")
                 except Exception as e:
                     self.console.configure(state="normal")
                     self.console.insert(END, f"Error: {str(e)}\n")
@@ -674,28 +681,6 @@ class App(CTk):
 
         # Run the commands in a separate thread to avoid blocking the UI
         threading.Thread(target=run_commands, daemon=True).start()
-
-    def __get_crypto_luks_uuid(self, partition):
-        try:
-            # Run the blkid command for the specific partition
-            result = subprocess.run(
-                ["blkid", partition],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            if result.returncode != 0:
-                # Handle error (e.g., partition not found)
-                raise Exception(result.stderr.strip())
-            
-            # Parse the output to extract the UUID
-            output = result.stdout.strip()
-            for part in output.split():
-                if part.startswith("UUID="):
-                    return part.split("=")[1].strip('"')
-        except Exception as e:
-            print(f"Error: {e}")
-        return None
 
     def __check_secure_boot_and_setup_mode(self):
         secure_boot_path = "/sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c"
