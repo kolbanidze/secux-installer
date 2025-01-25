@@ -818,7 +818,7 @@ class App(CTk):
         self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
         # Installing OS
-        pacstrap_command = f"pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package()} vim nano efibootmgr sudo lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        pacstrap_command = f"pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["DE"] == "GNOME":
             pacstrap_command += "xorg gnome gnome-tweaks gdm vlc firefox chromium"
         elif self.setup_information["DE"] == "KDE":
@@ -842,11 +842,11 @@ class App(CTk):
         self._execute(f"arch-chroot /mnt ln -sf /usr/share/zoneinfo/{self.setup_information['Timezone']} /etc/localtime")
         
         # Creating mkinitcpio.conf
-        self._execute('echo -e "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt lvm2 filesystems fsck)" > /mnt/etc/mkinitcpio.conf')
+        self._execute('echo -e "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt lvm2 filesystems fsck)" > /mnt/etc/mkinitcpio.conf')
         
         # Creating cmdline
         self._execute("mkdir /mnt/etc/cmdline.d")
-        self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet\" > /mnt/etc/cmdline.d/root.conf")
+        self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet lockdown=true splash\" > /mnt/etc/cmdline.d/root.conf")
 
         # Creating UKI config
         self._execute('echo -e "[UKI]\nOSRelease=@/etc/os-release\nPCRBanks=sha256\n\n[PCRSignature:initrd]\nPhases=enter-initrd\nPCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\nPCRPublicKey=/etc/kernel/pcr-initrd.pub.pem" > /mnt/etc/kernel/uki.conf')
@@ -889,6 +889,17 @@ class App(CTk):
             self._execute("arch-chroot /mnt systemctl enable gdm")
         elif self.setup_information["DE"] == "KDE":
             self._execute("arch-chroot /mnt systemctl enable sddm")
+        
+        # SDDM Theme
+        if self.setup_information["DE"] == "KDE":
+            self._execute("sed -i '/^\[Theme\]/{n;s/^Current=.*/Current=breeze/}' /mnt/usr/lib/sddm/sddm.conf.d/default.conf")
+        
+        # Change distro info and logo
+        self._execute("cp /etc/os-release /mnt/etc/os-release")
+        self._execute("cp /usr/local/share/secux-installer/images/bootlogo.bmp /mnt/usr/share/icons")
+        self._execute("cp /usr/local/share/secux-installer/images/secux.svg /mnt/usr/share/icons")
+        self._execute("sed -i 's|/usr/share/systemd/bootctl/splash-arch.bmp|/usr/share/icons/bootlogo.bmp|' /mnt/etc/mkinitcpio.d/linux.preset")
+        self._execute("arch-chroot /mnt plymouth-set-default-theme")
 
         # Install bootloader
         self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
