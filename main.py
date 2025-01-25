@@ -13,7 +13,7 @@ import string
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis'], 'UTC': None}
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 DEBUG = True
 
 MIN_PASSWORD_LENGTH = 8
@@ -818,11 +818,11 @@ class App(CTk):
         self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
         # Installing OS
-        pacstrap_command = f"pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        pacstrap_command = f"pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["DE"] == "GNOME":
-            pacstrap_command += "xorg gnome gnome-tweaks gdm vlc firefox chromium"
+            pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm vlc firefox chromium"
         elif self.setup_information["DE"] == "KDE":
-            pacstrap_command += "xorg plasma kde-applications vlc firefox chromium"
+            pacstrap_command += "xorg plasma networkmanager-openvpn kde-applications vlc firefox chromium"
         self._execute(pacstrap_command)
         
         # Generating fstab
@@ -871,6 +871,18 @@ class App(CTk):
         # Prepare EFI Partition
         self._execute("mkdir -p /mnt/efi/EFI/Linux")
         
+        # Change distro info and logo
+        self._execute("cp /etc/os-release /mnt/etc/os-release")
+        self._execute("cp /usr/local/share/secux-installer/images/bootlogo.bmp /mnt/usr/share/icons")
+        self._execute("cp /usr/local/share/secux-installer/images/secux.svg /mnt/usr/share/icons")
+        self._execute("sed -i 's|/usr/share/systemd/bootctl/splash-arch.bmp|/usr/share/icons/bootlogo.bmp|' /mnt/etc/mkinitcpio.d/linux.preset")
+        self._execute("rm /mnt/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf")
+        self._execute("rm /mnt/etc/debuginfod/archlinux.urls")
+        self._execute("rm /etc/ssh/sshd_config.d/99-archlinux.conf")
+        self._execute("rm /mnt/etc/arch-release")
+        self._execute("rm /mnt/usr/share/factory/etc/arch-release")
+        self._execute("rm /mnt/usr/share/plymouth/themes/spinner/watermark.png")
+
         # Generate UKI
         self._execute("arch-chroot /mnt mkinitcpio -p linux")
         
@@ -879,9 +891,9 @@ class App(CTk):
 
         # Add languages support
         if self.language == 'ru':
-            self._execute('arch-chroot /mnt echo "ru_RU.UTF-8 UTF-8" >> /etc/locale.gen')
+            self._execute('echo "ru_RU.UTF-8 UTF-8" >> /mnt/etc/locale.gen')
         else:
-            self._execute('arch-chroot /mnt echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen')
+            self._execute('echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen')
         self._execute("arch-chroot /mnt locale-gen")
 
         # Hostname
@@ -897,17 +909,9 @@ class App(CTk):
         if self.setup_information["DE"] == "KDE":
             self._execute("sed -i '/^\# Current theme name/{n;s/^Current=.*/Current=breeze/}' /mnt/usr/lib/sddm/sddm.conf.d/default.conf")
         
-        # Change distro info and logo
-        self._execute("cp /etc/os-release /mnt/etc/os-release")
-        self._execute("cp /usr/local/share/secux-installer/images/bootlogo.bmp /mnt/usr/share/icons")
-        self._execute("cp /usr/local/share/secux-installer/images/secux.svg /mnt/usr/share/icons")
-        self._execute("sed -i 's|/usr/share/systemd/bootctl/splash-arch.bmp|/usr/share/icons/bootlogo.bmp|' /mnt/etc/mkinitcpio.d/linux.preset")
-        self._execute("rm /mnt/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf")
-        self._execute("rm /mnt/etc/debuginfod/archlinux.urls")
-        self._execute("rm /etc/ssh/sshd_config.d/99-archlinux.conf")
-        self._execute("rm /mnt/etc/arch-release")
-        self._execute("rm /mnt/usr/share/factory/etc/arch-release")
-        self._execute("rm /mnt/usr/share/plymouth/themes/spinner/watermark.png")
+        # GDM remove arch logo
+        if self.setup_information["DE"] == "GNOME":
+            self._execute("arch-chroot /mnt sudo -u gdm dbus-launch gsettings set org.gnome.login-screen logo ''")
 
         # Install bootloader
         self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
