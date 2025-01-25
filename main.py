@@ -895,7 +895,7 @@ class App(CTk):
         
         # SDDM Theme
         if self.setup_information["DE"] == "KDE":
-            self._execute("sed -i '/^\[Theme\]/{n;s/^Current=.*/Current=breeze/}' /mnt/usr/lib/sddm/sddm.conf.d/default.conf")
+            self._execute("sed -i '/^\# Current theme name/{n;s/^Current=.*/Current=breeze/}' /mnt/usr/lib/sddm/sddm.conf.d/default.conf")
         
         # Change distro info and logo
         self._execute("cp /etc/os-release /mnt/etc/os-release")
@@ -907,6 +907,7 @@ class App(CTk):
         self._execute("rm /etc/ssh/sshd_config.d/99-archlinux.conf")
         self._execute("rm /mnt/etc/arch-release")
         self._execute("rm /mnt/usr/share/factory/etc/arch-release")
+        self._execute("rm /mnt/usr/share/plymouth/themes/spinner/watermark.png")
 
         # Install bootloader
         self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
