@@ -902,6 +902,11 @@ class App(CTk):
         self._execute("cp /usr/local/share/secux-installer/images/bootlogo.bmp /mnt/usr/share/icons")
         self._execute("cp /usr/local/share/secux-installer/images/secux.svg /mnt/usr/share/icons")
         self._execute("sed -i 's|/usr/share/systemd/bootctl/splash-arch.bmp|/usr/share/icons/bootlogo.bmp|' /mnt/etc/mkinitcpio.d/linux.preset")
+        self._execute("rm /mnt/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf")
+        self._execute("rm /mnt/etc/debuginfod/archlinux.urls")
+        self._execute("rm /etc/ssh/sshd_config.d/99-archlinux.conf")
+        self._execute("rm /mnt/etc/arch-release")
+        self._execute("rm /mnt/usr/share/factory/etc/arch-release")
 
         # Install bootloader
         self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
