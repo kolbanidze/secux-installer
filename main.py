@@ -895,7 +895,7 @@ class App(CTk):
         
         # SDDM Theme
         if self.setup_information["DE"] == "KDE":
-            self._execute("sed -i '/^\# Current theme name/{n;s/^Current=.*/Current=breeze/}' /mnt/usr/lib/sddm/sddm.conf.d/default.conf")
+            self._execute("sed -i '/^\\# Current theme name/{n;s/^Current=.*/Current=breeze/}' /mnt/usr/lib/sddm/sddm.conf.d/default.conf")
         
         # GDM remove arch logo
         if self.setup_information["DE"] == "GNOME":
