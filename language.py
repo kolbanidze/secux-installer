@@ -70,6 +70,7 @@ class Locale:
             self.username_empty = "Username is empty"
             self.encryption_password_title = "Invalid characters"
             self.encryption_password = "The disk encryption password you entered contains characters\nthat cannot be entered on the English keyboard layout.\nTo avoid problems unlocking the disk, use the English keyboard layout."
+            self.back = "Back"
         elif language == "ru":
             self.test = "ТЕСТ | Русский"
             self.select_time_zone = "Выберите часовой пояс"
@@ -139,3 +140,4 @@ class Locale:
             self.username_empty = "Имя пользователя пустое"
             self.encryption_password_title = "Недопустимые символы"
             self.encryption_password = "Введённый вами пароль шифрования диска содержит символы,\n которые нельзя ввести на английской раскладке клавиатуры.\nВо избежание проблем с разблокировкой диска, используйте английскую раскладку."
+            self.back = "Назад"

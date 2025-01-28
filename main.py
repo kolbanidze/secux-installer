@@ -43,13 +43,24 @@ class Notification(CTkToplevel):
 
 
 class App(CTk):
-    def __init__(self):
-        super().__init__()
-        self.title(DISTRO_NAME)
-
+    def __init__(self, first_execution = True):
         # Available languages: ["ru", "en"]
-        self.language = "ru"
-        self.setup_information = {}
+        if first_execution:
+            super().__init__()
+            self.title(DISTRO_NAME)
+            self.language = "ru"
+            self.setup_information = {}
+            self.timezone_executed = False
+            self.installation_type_executed = False
+            self.DE_executed = False
+            self.kernel_executed = False
+            self.partitioning_executed = False
+            self.encryption_executed = False
+            self.admin_creation_executed = False
+        else:
+            self.timezone_executed = True
+            self.__delete_widgets()
+            self.progressbar.destroy()
 
         self.clicks = 0
         welcome_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), dark_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), size=(80,80))
@@ -127,13 +138,16 @@ class App(CTk):
                 widget.destroy()
 
     # 15%
-    def first_stage_timezone(self):
-        self.lang = Locale(language=self.language)
-
-        for widget in self.winfo_children():
-            widget.destroy()
+    def first_stage_timezone(self, first_execution = True):
+        if first_execution:
+            self.lang = Locale(language=self.language)
         
-        self.progressbar = CTkProgressBar(self, orientation='horizontal', width=500)
+        if first_execution:
+            for widget in self.winfo_children():
+                widget.destroy()
+            self.progressbar = CTkProgressBar(self, orientation='horizontal', width=500)
+        else:
+            self.__delete_widgets()
         self.progressbar.set(0.15)
         
         title1 = CTkLabel(self, text=self.lang.select_time_zone, font=(None, 16, 'bold'))
@@ -141,11 +155,19 @@ class App(CTk):
         zone_label = CTkLabel(self, text=self.lang.timezone)
         self.region_box = CTkOptionMenu(self, values=list(timezones.keys()), command=self.__timezone_handler)
         self.zone_box = CTkOptionMenu(self)
+        back_btn = CTkButton(self, text=self.lang.back, command=lambda: self.__init__(first_execution=False))
         next_btn = CTkButton(self, text=self.lang.next, command=self.second_stage_installation_type)
 
-        self.__timezone_handler("Europe")
-        self.region_box.set("Europe")
-        self.zone_box.set("Minsk")
+        if first_execution:
+            self.__timezone_handler("Europe")
+            self.region_box.set("Europe")
+            self.zone_box.set("Minsk")
+        if not first_execution or self.timezone_executed:
+            self.__timezone_handler(self.region_box.get())
+            self.region_box.set(self.setup_information["Timezone"].split('/')[0])
+            self.zone_box.set(self.setup_information["Timezone"].split("/")[1])
+            self.installation_type_executed = True
+            
         
         self.progressbar.grid(row=0, column=0, padx=15, pady=(5,15), sticky="news", columnspan=2)
         title1.grid(row=1, column=0, padx=15, pady=5, sticky="news", columnspan=2)
@@ -153,22 +175,19 @@ class App(CTk):
         zone_label.grid(row=2, column=1, padx=15, pady=(5, 0), sticky="nsew")
         self.region_box.grid(row=3, column=0, padx=15, pady=5, sticky="nsew")
         self.zone_box.grid(row=3, column=1, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=4, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        back_btn.grid(row=4, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=4, column=1, padx=15, pady=5, sticky="nsew")
     
     def __timezone_handler(self, choice):
         self.zone_box.configure(values=timezones[choice])
+        self.zone_box.set(timezones[choice][0])
     
-    # 26%
-    def second_stage_installation_type(self):
-        self.progressbar.set(0.26)
+    def __back_handler(self, previous_stage_function):
+        previous_stage_function(first_execution = False)
 
-        region = self.region_box.get()
-        zone = self.zone_box.get()
-        if zone:
-            timezone = f"{region}/{zone}"
-        else:
-            timezone = f"{region}"
-        self.setup_information["Timezone"] = timezone
+    # 26%
+    def second_stage_installation_type(self, first_execution = True):
+        self.progressbar.set(0.26)
 
         self.__delete_widgets()
         
@@ -177,13 +196,32 @@ class App(CTk):
         self.secure_type = CTkRadioButton(self, value=0, variable=self.installation_type_variable, text=self.lang.securetype)
         self.less_secure_type = CTkRadioButton(self, value=1, variable=self.installation_type_variable, text=self.lang.lessecuretype)
         self.insecure_type = CTkRadioButton(self, value=2, variable=self.installation_type_variable, text=self.lang.insecuretype)
+        back_btn = CTkButton(self, text=self.lang.back, command=lambda: self.first_stage_timezone(first_execution=False))
         next_btn = CTkButton(self, text=self.lang.next, command=self.third_stage_desktop_environment)
+
+        if first_execution:
+            region = self.region_box.get()
+            zone = self.zone_box.get()
+            if zone:
+                timezone = f"{region}/{zone}"
+            else:
+                timezone = f"{region}"
+            self.setup_information["Timezone"] = timezone
+        if not first_execution or self.installation_type_executed:
+            match self.setup_information["InstallationType"]:
+                case "Secure":
+                    self.installation_type_variable.set(value=0)
+                case "LessSecure":
+                    self.installation_type_variable.set(value=1)
+                case "InSecure":
+                    self.installation_type_variable.set(value=2)
 
         label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         self.secure_type.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         self.less_secure_type.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         self.insecure_type.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        next_btn.grid(row=5, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
 
     # 42%
     def third_stage_desktop_environment(self):
@@ -205,13 +243,15 @@ class App(CTk):
         self.gnome_button = CTkRadioButton(self, value=0, variable=self.de_variable, text="GNOME")
         self.kde_button = CTkRadioButton(self, value=1, variable=self.de_variable, text="KDE")
         self.console_button = CTkRadioButton(self, value=2, variable=self.de_variable, text=self.lang.console)
+        back_btn = CTkButton(self, text=self.lang.back, command=lambda: self.second_stage_installation_type(first_execution=False))
         next_btn = CTkButton(self, text=self.lang.next, command=self.fourth_stage_partitioning)
 
         label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         self.gnome_button.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         self.kde_button.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         self.console_button.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        next_btn.grid(row=5, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=5, column=1, sticky="nsew", padx=15, pady=5)
 
     # 57%
     def fourth_stage_partitioning(self):
@@ -735,9 +775,9 @@ class App(CTk):
         #         Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
         #         return
         
-        if DEBUG:
-            Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
-            return
+        # if DEBUG:
+        #     Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
+        #     return
         
         for widget in self.winfo_children():
             widget.destroy()
@@ -757,17 +797,19 @@ class App(CTk):
         self.commands = []
         
         # Prepare partitions
-        if self.setup_information["Partitioning"] == "Automatic":
-            os.system(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
-            os.system(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
-            partitions = self.__list_partitions(self.setup_information["DriveToFormat"])
-            efi_partition = partitions[0]
-            rootfs_partition = partitions[1]
-        else:
-            efi_partition = self.setup_information["EfiPartition"]
-            rootfs_partition = self.setup_information["SystemPartition"]
+        # if self.setup_information["Partitioning"] == "Automatic":
+        #     os.system(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
+        #     os.system(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
+        #     partitions = self.__list_partitions(self.setup_information["DriveToFormat"])
+        #     efi_partition = partitions[0]
+        #     rootfs_partition = partitions[1]
+        # else:
+        #     efi_partition = self.setup_information["EfiPartition"]
+        #     rootfs_partition = self.setup_information["SystemPartition"]
         
         # Preparing commands for execution
+        efi_partition = "/dev/sda1"
+        rootfs_partition = "/dev/sda2"
 
         # Creating LUKS partition
         self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=f"{self.setup_information["EncryptionKey"]}")
@@ -924,8 +966,15 @@ class App(CTk):
         self._execute("echo [Установка завершена!]")
         self._execute("echo [Теперь вы можете закрыть это окно и перезагрузиться в систему.]")
 
+        print(f"sgdisk -Z /dev/sda")
+        print()
+        print(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 /dev/sda")
+        print()
         # Execute commands
-        self._execute_commands(self.commands)
+        for i in self.commands:
+            print(i['command'])
+            print()
+        # self._execute_commands(self.commands)
 
 
 if __name__ == "__main__":
