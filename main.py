@@ -909,7 +909,7 @@ class App(CTk):
                 return
         
         # DELETE ME
-        if DEBUG: print(self.setup_information)
+        print(self.setup_information)
         
         if DEBUG:
             Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
