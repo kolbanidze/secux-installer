@@ -1,28 +1,40 @@
-import customtkinter
+import customtkinter as ct
 
 
-class App(customtkinter.CTk):
+class App(ct.CTk):
     def __init__(self):
         super().__init__()
+        self.title("Test")
+        self.geometry("640x480")
 
-        self.geometry("500x300")
-        self.title("small example app")
-        self.minsize(300, 200)
+        self.end_button = ct.CTkButton(self, text="DESTROY")
+        self.end_button.pack(padx=10, pady=30)
 
-        # create 2x2 grid system
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure((0, 1), weight=1)
+        self.page1_frame = ct.CTkFrame(self)
+        self.page1_button = ct.CTkButton(self.page1_frame, text="Page 1", command=self.show_page2)
+        self.page1_button.pack()
+        self.page1_menu = ct.CTkOptionMenu(self.page1_frame)
+        self.page1_menu.pack()
 
-        self.textbox = customtkinter.CTkTextbox(master=self)
-        self.textbox.grid(row=0, column=0, columnspan=2, padx=20, pady=(20, 0), sticky="nsew")
+        self.page2_frame = ct.CTkFrame(self)
+        self.page2_button = ct.CTkButton(self.page2_frame, text="Page 1", command=self.show_page1)
+        self.page2_button.pack()
+        self.page2_menu = ct.CTkOptionMenu(self.page2_frame)
+        self.page2_menu.pack()
 
-        self.combobox = customtkinter.CTkComboBox(master=self, values=["Sample text 1", "Text 2"])
-        self.combobox.grid(row=1, column=0, padx=20, pady=20, sticky="ew")
-        self.button = customtkinter.CTkButton(master=self, command=self.button_callback, text="Insert Text")
-        self.button.grid(row=1, column=1, padx=20, pady=20, sticky="ew")
+        self.page1_frame.pack()
 
-    def button_callback(self):
-        self.textbox.insert("insert", self.combobox.get() + "\n")
+        self.end_button.configure(command=lambda: (self.page1_frame.destroy(), self.page2_frame.destroy()))
+
+    def show_page2(self):
+        ct.set_widget_scaling(0.5)
+        self.page1_frame.pack_forget()
+        self.page2_frame.pack()
+
+    def show_page1(self):
+        ct.set_widget_scaling(2)
+        self.page2_frame.pack_forget()
+        self.page1_frame.pack()
 
 
 if __name__ == "__main__":
