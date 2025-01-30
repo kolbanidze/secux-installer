@@ -983,7 +983,7 @@ class App(CTk):
 
         # Installing OS
         # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
-        kernels = " ".join(self.setup_information["Kernels"]) + " ".join([i+'-headers' for i in self.setup_information["Kernels"]])
+        kernels = " ".join(self.setup_information["Kernel"]) + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
         pacstrap_command = f"pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["DE"] == "GNOME":
             pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm vlc firefox chromium"
