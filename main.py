@@ -386,7 +386,7 @@ class App(CTk):
             if disk['type'] == 'disk':
                 raw_disks.append({disk['name']: disk['size']})
         sorted_raw_disks = sorted([(list(d.keys())[0], list(d.values())[0]) for d in raw_disks], key=lambda x: x[1], reverse=True)
-        erase_all_disks = [f"{drive} | {self.__convert_bytes_to_human_readable(size)}" for drive, size in sorted_raw_disks]
+        erase_all_disks = [f"/dev/{drive} | {self.__convert_bytes_to_human_readable(size)}" for drive, size in sorted_raw_disks]
 
         self.partitioning_type = IntVar(value=0)
         erase_all_partitioning = CTkRadioButton(self, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
