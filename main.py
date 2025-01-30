@@ -16,6 +16,7 @@ timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 VERSION = "0.1.8"
 DEBUG = True
+DEBUG_SHOW_COMMANDS = False
 
 MIN_PASSWORD_LENGTH = 8
 
@@ -908,9 +909,6 @@ class App(CTk):
                 Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
                 return
         
-        # DELETE ME
-        print(self.setup_information)
-        
         if DEBUG:
             Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
             return
@@ -979,7 +977,8 @@ class App(CTk):
 
         # Installing OS
         # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
-        pacstrap_command = f"pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        kernels = [] + " ".join([i for i in self.setup_information["Kernels"]]) + " ".join([i+'-headers' for i in self.setup_information["Kernels"]])
+        pacstrap_command = f"pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["DE"] == "GNOME":
             pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm vlc firefox chromium"
         elif self.setup_information["DE"] == "KDE":
@@ -1016,15 +1015,16 @@ class App(CTk):
         self._execute("arch-chroot /mnt ukify genkey --config=/etc/kernel/uki.conf")
 
         # Configure UKI generation
-        self._execute("sed -i '/^default_config/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
-        self._execute("sed -i '/^default_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
-        self._execute("sed -i '/^#default_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
-        self._execute("sed -i '/^#default_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
-        
-        self._execute("sed -i '/^fallback_config/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
-        self._execute("sed -i '/^fallback_image/s/^/#/' /mnt/etc/mkinitcpio.d/linux.preset")
-        self._execute("sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
-        self._execute("sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/linux.preset")
+        for kernel in self.setup_information["Kernel"]:
+            self._execute(f"sed -i '/^default_config/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+            self._execute(f"sed -i '/^default_image/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+            self._execute(f"sed -i '/^#default_uki/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+            self._execute(f"sed -i '/^#default_options/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+            
+            self._execute(f"sed -i '/^fallback_config/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+            self._execute(f"sed -i '/^fallback_image/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+            self._execute(f"sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+            self._execute(f"sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
 
         # Set default plymouth theme
         self._execute("arch-chroot /mnt plymouth-set-default-theme")
@@ -1100,7 +1100,12 @@ class App(CTk):
         self._execute("echo [Теперь вы можете закрыть это окно и перезагрузиться в систему.]")
 
         # Execute commands
-        self._execute_commands(self.commands)
+        if not DEBUG_SHOW_COMMANDS:
+            self._execute_commands(self.commands)
+        else:
+            for i in self.commands:
+                print(i)
+                print()
 
 
 if __name__ == "__main__":
