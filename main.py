@@ -339,9 +339,10 @@ class App(CTk):
         
         disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,FSTYPE,MOUNTPOINT,TYPE', '--json'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
         erase_all_disks = []
-        print(disks)
+
         for disk in disks:
-            erase_all_disks.append(f"/dev/{disk['name']} | {disk['size']}")
+            if disk['type'] == 'disk':
+                erase_all_disks.append(f"/dev/{disk['name']} | {disk['size']}")
         
         self.partitioning_type = IntVar(value=0)
         erase_all_partitioning = CTkRadioButton(self, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
