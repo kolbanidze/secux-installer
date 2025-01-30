@@ -14,7 +14,7 @@ from hmac import compare_digest
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
-VERSION = "0.1.6"
+VERSION = "0.1.7"
 DEBUG = True
 
 MIN_PASSWORD_LENGTH = 8
@@ -50,13 +50,6 @@ class App(CTk):
             self.title(DISTRO_NAME)
             self.language = "ru"
             self.setup_information = {}
-            # self.timezone_executed = False
-            # self.installation_type_executed = False
-            # self.DE_executed = False
-            # self.kernel_executed = False
-            # self.partitioning_executed = False
-            # self.encryption_executed = False
-            # self.admin_creation_executed = False
         else:
             self.timezone_executed = True
             self.__delete_widgets()
@@ -160,7 +153,7 @@ class App(CTk):
         for widget in self.winfo_children():
             widget.destroy()
         self.progressbar = CTkProgressBar(self, orientation='horizontal', width=500)
-        self.progressbar.set(0.15)
+        self.progressbar.set(0.125)
         
         title1 = CTkLabel(self, text=self.lang.select_time_zone, font=(None, 16, 'bold'))
         region_label = CTkLabel(self, text=self.lang.region)
@@ -168,7 +161,7 @@ class App(CTk):
         self.region_box = CTkOptionMenu(self, values=list(timezones.keys()), command=self.__timezone_handler)
         self.zone_box = CTkOptionMenu(self, command=self.__time_zone_write_to_setup_info)
         back_btn = CTkButton(self, text=self.lang.back, command=lambda: self.__init__(first_execution=False))
-        next_btn = CTkButton(self, text=self.lang.next, command=self.second_stage_installation_type)
+        next_btn = CTkButton(self, text=self.lang.next, command=self.installation_type_stage)
 
         if "Timezone" not in self.setup_information:
             self.__timezone_handler("Europe")
@@ -194,44 +187,8 @@ class App(CTk):
     
     ##### END TIME ZONE #####
 
-    # 26%
-    def second_stage_installation_type(self, first_execution = True):
-        self.progressbar.set(0.26)
-
-        self.__delete_widgets()
-        
-        label = CTkLabel(self, text=self.lang.select_install_option, font=(None, 16, "bold"))
-        self.installation_type_variable = IntVar(value=0)
-        self.secure_type = CTkRadioButton(self, value=0, variable=self.installation_type_variable, text=self.lang.securetype)
-        self.less_secure_type = CTkRadioButton(self, value=1, variable=self.installation_type_variable, text=self.lang.lessecuretype)
-        self.insecure_type = CTkRadioButton(self, value=2, variable=self.installation_type_variable, text=self.lang.insecuretype)
-        back_btn = CTkButton(self, text=self.lang.back, command=lambda: self.timezone_stage(first_execution=False))
-        next_btn = CTkButton(self, text=self.lang.next, command=self.third_stage_desktop_environment)
-
-        if first_execution:
-            pass
-        if not first_execution or self.installation_type_executed:
-            match self.setup_information["InstallationType"]:
-                case "Secure":
-                    self.installation_type_variable.set(value=0)
-                case "LessSecure":
-                    self.installation_type_variable.set(value=1)
-                case "InSecure":
-                    self.installation_type_variable.set(value=2)
-
-        label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        self.secure_type.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        self.less_secure_type.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        self.insecure_type.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
-
-    # 42%
-    def third_stage_desktop_environment(self):
-        self.progressbar.set(0.42)
-
-        self.__delete_widgets()
-        
+    ##### BEGIN INSTALLATION TYPE #####
+    def __installation_type_radio_button_handler(self):
         key = self.installation_type_variable.get()
         match key:
             case 0:
@@ -240,28 +197,42 @@ class App(CTk):
                 self.setup_information["InstallationType"] = "LessSecure"
             case 2:
                 self.setup_information["InstallationType"] = "InSecure"
-        
-        self.de_variable = IntVar(value=0)
-        label = CTkLabel(self, text=self.lang.choose_de, font=(None, 16, "bold"))
-        self.gnome_button = CTkRadioButton(self, value=0, variable=self.de_variable, text="GNOME")
-        self.kde_button = CTkRadioButton(self, value=1, variable=self.de_variable, text="KDE")
-        self.console_button = CTkRadioButton(self, value=2, variable=self.de_variable, text=self.lang.console)
-        back_btn = CTkButton(self, text=self.lang.back, command=lambda: self.second_stage_installation_type(first_execution=False))
-        next_btn = CTkButton(self, text=self.lang.next, command=self.fourth_stage_partitioning)
 
-        label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        self.gnome_button.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        self.kde_button.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        self.console_button.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=5, column=1, sticky="nsew", padx=15, pady=5)
-
-    # 57%
-    def fourth_stage_partitioning(self):
-        self.progressbar.set(0.57)
+    def installation_type_stage(self):
+        self.progressbar.set(0.25)
 
         self.__delete_widgets()
+        
+        label = CTkLabel(self, text=self.lang.select_install_option, font=(None, 16, "bold"))
+        self.installation_type_variable = IntVar(value=0)
+        self.secure_type = CTkRadioButton(self, value=0, variable=self.installation_type_variable, text=self.lang.securetype, command=self.__installation_type_radio_button_handler)
+        self.less_secure_type = CTkRadioButton(self, value=1, variable=self.installation_type_variable, text=self.lang.lessecuretype, command=self.__installation_type_radio_button_handler)
+        self.insecure_type = CTkRadioButton(self, value=2, variable=self.installation_type_variable, text=self.lang.insecuretype, command=self.__installation_type_radio_button_handler)
+        back_btn = CTkButton(self, text=self.lang.back, command=self.timezone_stage)
+        next_btn = CTkButton(self, text=self.lang.next, command=self.desktop_environment_stage)
 
+        if "InstallationType" in self.setup_information:
+            match self.setup_information["InstallationType"]:
+                case "Secure":
+                    self.installation_type_variable.set(value=0)
+                case "LessSecure":
+                    self.installation_type_variable.set(value=1)
+                case "InSecure":
+                    self.installation_type_variable.set(value=2)
+        else:
+            self.__installation_type_radio_button_handler()
+
+        label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        self.secure_type.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        self.less_secure_type.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        self.insecure_type.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
+    
+    ##### END INSTALLATION TYPE #####
+
+    ##### BEGIN DE #####
+    def __de_handler(self):
         key = self.de_variable.get()
         match key:
             case 0:
@@ -270,6 +241,99 @@ class App(CTk):
                 self.setup_information["DE"] = "KDE"
             case 2:
                 self.setup_information["DE"] = "Console"
+        
+    def desktop_environment_stage(self):
+        self.progressbar.set(0.375)
+
+        self.__delete_widgets()
+        
+        self.de_variable = IntVar(value=0)
+        label = CTkLabel(self, text=self.lang.choose_de, font=(None, 16, "bold"))
+        self.gnome_button = CTkRadioButton(self, value=0, variable=self.de_variable, text="GNOME", command=self.__de_handler)
+        self.kde_button = CTkRadioButton(self, value=1, variable=self.de_variable, text="KDE", command=self.__de_handler)
+        self.console_button = CTkRadioButton(self, value=2, variable=self.de_variable, text=self.lang.console, command=self.__de_handler)
+        back_btn = CTkButton(self, text=self.lang.back, command=self.installation_type_stage)
+        next_btn = CTkButton(self, text=self.lang.next, command=self.kernel_select_stage)
+
+        if "DE" in self.setup_information:
+            match self.setup_information["DE"]:
+                case "GNOME":
+                    self.de_variable.set(0)
+                case "KDE":
+                    self.de_variable.set(1)
+                case "Console":
+                    self.de_variable.set(2)
+        else:
+            self.__de_handler()
+
+        label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        self.gnome_button.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        self.kde_button.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        self.console_button.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=5, column=1, sticky="nsew", padx=15, pady=5)
+    
+    ##### END DE #####
+
+    ##### BEGIN KERNEL SELECT #####
+    def __kernel_select_handler(self):
+        if "Kernel" not in self.setup_information:
+            self.setup_information["Kernel"] = []
+        
+        self.setup_information["Kernel"].clear()
+        
+        if self.linux_hardened.get():
+            self.setup_information["Kernel"].append('linux-hardened')
+        if self.linux_lts.get():
+            self.setup_information["Kernel"].append('linux-lts')
+        if self.linux.get():
+            self.setup_information["Kernel"].append("linux")
+
+    def __move_to_partitioning_stage(self):
+        if len(self.setup_information["Kernel"]) == 0:
+            Notification(title=self.lang.atleast_one_kernel, icon='warning.png', message=self.lang.pls_select_kernel, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
+        self.partitioning_stage()
+
+    def kernel_select_stage(self):
+        self.progressbar.set(0.5)
+
+        self.__delete_widgets()
+
+        label = CTkLabel(self, text=self.lang.kernel_label, font=(None, 16, "bold"))
+        
+        self.linux_hardened = CTkCheckBox(self, text="Linux hardened", command=self.__kernel_select_handler)
+        self.linux_lts = CTkCheckBox(self, text="Linux LTS", command=self.__kernel_select_handler)
+        self.linux = CTkCheckBox(self, text="Linux", command=self.__kernel_select_handler)
+        back_btn = CTkButton(self, text=self.lang.back, command=self.desktop_environment_stage)
+        next_btn = CTkButton(self, text=self.lang.next, command=self.__move_to_partitioning_stage)
+
+        if "Kernel" not in self.setup_information:
+            self.linux_hardened.select()
+            self.__kernel_select_handler()
+        else:
+            if 'linux-hardened' in self.setup_information["Kernel"]:
+                self.linux_hardened.select()
+            if 'linux-lts' in self.setup_information["Kernel"]:
+                self.linux_lts.select()
+            if 'linux' in self.setup_information["Kernel"]:
+                self.linux.select()
+            
+
+        label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        self.linux_hardened.grid(row=2, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        self.linux_lts.grid(row=3, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        self.linux.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
+        back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
+
+    ##### END KERNEL SELECT #####
+
+    ##### BEGIN PARTITIONING #####
+    def partitioning_stage(self):
+        self.progressbar.set(0.625)
+
+        self.__delete_widgets()
         
         label = CTkLabel(self, text=self.lang.diskpart, font=(None, 16, "bold"))
         
@@ -849,6 +913,7 @@ class App(CTk):
         self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
         # Installing OS
+        # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
         pacstrap_command = f"pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["DE"] == "GNOME":
             pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm vlc firefox chromium"

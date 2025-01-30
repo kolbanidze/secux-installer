@@ -71,6 +71,9 @@ class Locale:
             self.encryption_password_title = "Invalid characters"
             self.encryption_password = "The disk encryption password you entered contains characters\nthat cannot be entered on the English keyboard layout.\nTo avoid problems unlocking the disk, use the English keyboard layout."
             self.back = "Back"
+            self.kernel_label = "Select the Linux kernel types to be installed"
+            self.atleast_one_kernel = "You must select at least one kernel"
+            self.pls_select_kernel = "Error. Please select at least one kernel."
         elif language == "ru":
             self.test = "ТЕСТ | Русский"
             self.select_time_zone = "Выберите часовой пояс"
@@ -141,3 +144,6 @@ class Locale:
             self.encryption_password_title = "Недопустимые символы"
             self.encryption_password = "Введённый вами пароль шифрования диска содержит символы,\n которые нельзя ввести на английской раскладке клавиатуры.\nВо избежание проблем с разблокировкой диска, используйте английскую раскладку."
             self.back = "Назад"
+            self.kernel_label = "Выберите виды ядра Linux, которые будет установлены"
+            self.atleast_one_kernel = "Необходимо выбрать хотя бы одно ядро"
+            self.pls_select_kernel = "Ошибка. Пожалуйста, выберите хотя бы одно ядро."
