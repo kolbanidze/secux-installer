@@ -812,7 +812,7 @@ class App(CTk):
                     # Run the command
                     if "input" in cmd:
                         process = subprocess.Popen(
-                            cmd["command"],
+                            f"stdbuf -oL {cmd["command"]}",
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
@@ -824,7 +824,7 @@ class App(CTk):
                         process.stdin.close()
                     else:
                         process = subprocess.Popen(
-                            cmd["command"],
+                            f"stdbuf -oL {cmd["command"]}",
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             shell=True,
@@ -979,7 +979,7 @@ class App(CTk):
 
         # Installing OS
         # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
-        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        pacstrap_command = f"pacstrap -K /mnt base linux linux-firmware linux-headers {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["DE"] == "GNOME":
             pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm vlc firefox chromium"
         elif self.setup_information["DE"] == "KDE":
