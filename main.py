@@ -330,6 +330,21 @@ class App(CTk):
     ##### END KERNEL SELECT #####
 
     ##### BEGIN PARTITIONING #####
+    def __convert_bytes_to_human_readable(self, size_in_bytes):
+        # Define the size units
+        units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
+        
+        # Initialize the unit index
+        unit_index = 0
+        
+        # Convert bytes to the appropriate unit
+        while size_in_bytes >= 1024 and unit_index < len(units) - 1:
+            size_in_bytes /= 1024
+            unit_index += 1
+        
+        # Return the formatted string with 2 decimal places
+        return f"{size_in_bytes:.2f} {units[unit_index]}"
+    
     def partitioning_stage(self):
         self.progressbar.set(0.625)
 
@@ -337,12 +352,13 @@ class App(CTk):
         
         label = CTkLabel(self, text=self.lang.diskpart, font=(None, 16, "bold"))
         
-        disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,FSTYPE,MOUNTPOINT,TYPE', '--json'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
-        erase_all_disks = []
-
+        disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,TYPE', '--json', '-b'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
+        raw_disks = []
         for disk in disks:
             if disk['type'] == 'disk':
-                erase_all_disks.append(f"/dev/{disk['name']} | {disk['size']}")
+                raw_disks.append({disk['name']: disk['size']})
+        sorted_raw_disks = sorted([(list(d.keys())[0], list(d.values())[0]) for d in raw_disks], key=lambda x: x[1], reverse=True)
+        erase_all_disks = [f"{drive} | {self.__convert_bytes_to_human_readable(size)}" for drive, size in sorted_raw_disks]
         
         self.partitioning_type = IntVar(value=0)
         erase_all_partitioning = CTkRadioButton(self, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
