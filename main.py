@@ -1052,7 +1052,8 @@ class App(CTk):
         self._execute("rm /mnt/usr/share/plymouth/themes/spinner/watermark.png")
 
         # Generate UKI
-        self._execute(f"arch-chroot /mnt mkinitcpio -p {' '.join(self.setup_information['Kernel'])}")
+        for kernel in self.setup_information["Kernel"]:
+            self._execute(f"arch-chroot /mnt mkinitcpio -p {kernel}")
         
         # Make NetworkManager run at boot
         self._execute("arch-chroot /mnt systemctl enable NetworkManager")
@@ -1096,9 +1097,11 @@ class App(CTk):
         
         # Signing EFI executables and storing them in the database for signing during updates
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
-        self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux-fallback.efi")
-        self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-linux.efi")
         self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
+        for kernel in self.setup_information["Kernel"]:
+            self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}-fallback.efi")
+            self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}.efi")
+        
 
         # Final message in console
         self._execute("echo [Installation finished!]")
