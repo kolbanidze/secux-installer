@@ -942,10 +942,6 @@ class App(CTk):
         else:
             efi_partition = self.setup_information["EfiPartition"]
             rootfs_partition = self.setup_information["SystemPartition"]
-        
-        # Preparing commands for execution
-        efi_partition = "/dev/sda1"
-        rootfs_partition = "/dev/sda2"
 
         # Creating LUKS partition
         self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=f"{self.setup_information["EncryptionKey"]}")
