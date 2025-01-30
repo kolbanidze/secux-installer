@@ -55,6 +55,8 @@ class App(CTk):
             self.__delete_widgets()
             self.progressbar.destroy()
 
+        set_appearance_mode("dark")
+
         self.clicks = 0
         welcome_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), dark_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), size=(80,80))
         welcome_image_label = CTkLabel(self, text="", image=welcome_image)
@@ -62,16 +64,36 @@ class App(CTk):
         welcome_entry_label = CTkLabel(self, text=f"Добро пожаловать в установщик дистрибутива {DISTRO_NAME}\nWelcome to {DISTRO_NAME} distribution installer")        
         select_language_label = CTkLabel(self, text="Выберите язык | Select language")
         languages_optionmenu = CTkOptionMenu(self, values=["Русский", "English"], command=self.__language_callback)
-        next_button = CTkButton(self, text="Далее | Next", command=self.timezone_stage)
+        next_button = CTkButton(self, text="Далее | Next", command=self.timezone_stage, fg_color="green")
+        ui_scaling_label = CTkLabel(self, text="Масштабирование | UI Scaling")
+        ui_scaling = CTkOptionMenu(self, values=["80%", "100%", "125%", "150%", "200%"], command=self.__ui_scaling_handler)
+        ui_scaling.set("100%")
+        self.white_mode = CTkSwitch(self, text="Светлая тема | White theme", command=self.__theme_handler)
         info = CTkLabel(self, text=f"Версия | Version : {VERSION}", font=(None, 8))
 
-        welcome_image_label.pack(padx=15, pady=15)
-        welcome_entry_label.pack(padx=15, pady=15)
-        select_language_label.pack(padx=15, pady=15)
-        languages_optionmenu.pack(padx=15, pady=15)
-        next_button.pack(padx=15, pady=15)
-        info.pack(padx=15, pady=(5, 0))
-        if DEBUG: CTkLabel(self, text="WARNING: DEBUG MODE", font=(None, 10), text_color=("red")).pack(padx=15, pady=(5,0))
+        self.grid_columnconfigure((0, 1), weight=1)
+
+        welcome_image_label.grid(row=0, padx=15, pady=5)
+        welcome_entry_label.grid(row=1, padx=15, pady=5)
+        select_language_label.grid(row=2, padx=15, pady=(15, 5))
+        languages_optionmenu.grid(row=3, padx=15, pady=5)
+        ui_scaling_label.grid(row=4, padx=15, pady=5)
+        ui_scaling.grid(row=5, padx=15, pady=5)
+        self.white_mode.grid(row=6, padx=15, pady=5)
+        next_button.grid(row=7, padx=15, pady=(15, 5))
+        info.grid(row=8, padx=15, pady=(5, 0))
+        if DEBUG: CTkLabel(self, text="WARNING: DEBUG MODE", font=(None, 10), text_color=("red")).grid(row=9, padx=15, pady=(5,0))
+
+    def __ui_scaling_handler(self, new_scaling: str):
+        new_scaling_float = int(new_scaling.replace("%", "")) / 100
+        set_widget_scaling(new_scaling_float)
+        set_window_scaling(new_scaling_float)
+    
+    def __theme_handler(self):
+        if self.white_mode.get():
+            set_appearance_mode("light")
+        else:
+            set_appearance_mode("dark")
 
     def __clicks_handler(self, event):
         self.clicks += 1
@@ -176,14 +198,14 @@ class App(CTk):
             self.zone_box.configure(values=timezones[region])
             
             
-        self.progressbar.grid(row=0, column=0, padx=15, pady=(5,15), sticky="news", columnspan=2)
-        title1.grid(row=1, column=0, padx=15, pady=5, sticky="news", columnspan=2)
-        region_label.grid(row=2, column=0, padx=15, pady=(5, 0), sticky="nsew")
-        zone_label.grid(row=2, column=1, padx=15, pady=(5, 0), sticky="nsew")
-        self.region_box.grid(row=3, column=0, padx=15, pady=5, sticky="nsew")
-        self.zone_box.grid(row=3, column=1, padx=15, pady=5, sticky="nsew")
-        back_btn.grid(row=4, column=0, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=4, column=1, padx=15, pady=5, sticky="nsew")
+        self.progressbar.grid(row=0, column=0, padx=15, pady=(5,15), sticky="nsew", columnspan=2)
+        title1.grid(row=1, column=0, padx=15, pady=5, sticky="ew", columnspan=2)
+        region_label.grid(row=2, column=0, padx=15, pady=(5, 0), sticky="ew")
+        zone_label.grid(row=2, column=1, padx=15, pady=(5, 0), sticky="ew")
+        self.region_box.grid(row=3, column=0, padx=15, pady=5, sticky="ew")
+        self.zone_box.grid(row=3, column=1, padx=15, pady=5, sticky="ew")
+        back_btn.grid(row=4, column=0, padx=15, pady=5, sticky="ew")
+        next_btn.grid(row=4, column=1, padx=15, pady=5, sticky="ew")
     
     ##### END TIME ZONE #####
 
@@ -359,7 +381,7 @@ class App(CTk):
                 raw_disks.append({disk['name']: disk['size']})
         sorted_raw_disks = sorted([(list(d.keys())[0], list(d.values())[0]) for d in raw_disks], key=lambda x: x[1], reverse=True)
         erase_all_disks = [f"{drive} | {self.__convert_bytes_to_human_readable(size)}" for drive, size in sorted_raw_disks]
-        
+
         self.partitioning_type = IntVar(value=0)
         erase_all_partitioning = CTkRadioButton(self, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
         self.erase_all_disk = CTkOptionMenu(self, values=erase_all_disks)
@@ -479,43 +501,45 @@ class App(CTk):
 
     ##### END PARTITIONING #####
 
+    ##### BEGIN ENCRYPTION KEY #####
     def __validate_english_keymap(self, password) -> bool:
         """True -> can be written with english keymap. False -> can't be written with english keymap"""
         valid_characters = string.ascii_letters + string.digits + string.punctuation + " "
         return all(char in valid_characters for char in password)
 
-    # 71%
-    def encryption_key_stage(self, manual):
-        if manual:
-            efi_partition = self.efi_partition_optionmenu.get().split(" | ")[0]
-            disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
-            for disk in disks:
-                if 'children' in disk:
-                    for partition in disk['children']:
-                        if partition['name'] == efi_partition:
-                            efi_partition_size = partition['size']
-                            break
-            if efi_partition_size < 209715200:
-                Notification(title=self.lang.efi_small_title, icon="warning.png", message=self.lang.efi_small, message_bold=True, exit_btn_msg=self.lang.exit)
-                return
-            system_partition = "/dev/" + self.root_partition_optionmenu.get().split(" | ")[0]
-            use_swapfile = ("on" == self.swap_checkbox.get())
-            self.setup_information["Partitioning"] = "Manual"
-            self.setup_information["EfiPartition"] = "/dev/" + efi_partition
-            self.setup_information["SystemPartition"] = system_partition
-            self.setup_information["UseSwap"] = use_swapfile
-            if use_swapfile:
-                swapsize = self.swap_entry.get()
-                self.setup_information["SwapSize"] = swapsize
+    def encryption_key_stage(self, manual, first_execution = True):
+        if first_execution:
+            if manual:
+                efi_partition = self.efi_partition_optionmenu.get().split(" | ")[0]
+                disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
+                for disk in disks:
+                    if 'children' in disk:
+                        for partition in disk['children']:
+                            if partition['name'] == efi_partition:
+                                efi_partition_size = partition['size']
+                                break
+                if efi_partition_size < 209715200:
+                    Notification(title=self.lang.efi_small_title, icon="warning.png", message=self.lang.efi_small, message_bold=True, exit_btn_msg=self.lang.exit)
+                    return
+                system_partition = "/dev/" + self.root_partition_optionmenu.get().split(" | ")[0]
+                use_swapfile = ("on" == self.swap_checkbox.get())
+                self.setup_information["Partitioning"] = "Manual"
+                self.setup_information["EfiPartition"] = "/dev/" + efi_partition
+                self.setup_information["SystemPartition"] = system_partition
+                self.setup_information["UseSwap"] = use_swapfile
+                if use_swapfile:
+                    swapsize = self.swap_entry.get()
+                    self.setup_information["SwapSize"] = swapsize
 
         self.__delete_widgets()
-        self.progressbar.set(0.71)
+        self.progressbar.set(0.75)
 
         label = CTkLabel(self, text=self.lang.os_encryption, font=(None, 16, "bold"))
         label1 = CTkLabel(self, text=self.lang.enckey)
         self.system_partition_encryption_key_entry = CTkEntry(self, show='*')
         label2 = CTkLabel(self, text=self.lang.enckey2)
         self.system_partition_encryption_key_entry2 = CTkEntry(self, show='*')
+        back_btn = CTkButton(self, text=self.lang.back, command=self.partitioning_stage)
         next_btn = CTkButton(self, text=self.lang.next, command=self.admin_creation_stage)
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
@@ -523,8 +547,12 @@ class App(CTk):
         self.system_partition_encryption_key_entry.grid(row=3, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         label2.grid(row=4, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         self.system_partition_encryption_key_entry2.grid(row=5, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=6, column=0, padx=15, pady=5, sticky="nsew", columnspan=2)
-    
+        back_btn.grid(row=6, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=6, column=1, padx=15, pady=5, sticky="nsew")
+
+    ##### END ENCRYPTION KEY #####
+
+    ##### BEGIN ADMIN CREATION #####
     def __validate_input(self, input: str, russian=False, spaces=False):
         if russian and spaces:
             pattern = "^[a-zA-Zа-яА-ЯёЁ0-9 _-]{0,32}$"
@@ -539,25 +567,25 @@ class App(CTk):
         else:
             return False
 
-    # 86%
-    def admin_creation_stage(self):
-        if not compare_digest(self.system_partition_encryption_key_entry.get(), self.system_partition_encryption_key_entry2.get()):
-            Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
-            return
-        if len(self.system_partition_encryption_key_entry.get()) < MIN_PASSWORD_LENGTH:
-            Notification(title=self.lang.pwd_length_title, icon="warning.png", message=self.lang.pwd_length, message_bold=True, exit_btn_msg=self.lang.exit)
-            return
-        if not self.__validate_english_keymap(self.system_partition_encryption_key_entry.get()):
-            Notification(title=self.lang.encryption_password_title, icon="warning.png", message=self.lang.encryption_password, message_bold=False, exit_btn_msg=self.lang.exit)
-            return
-        self.setup_information["EncryptionKey"] = self.system_partition_encryption_key_entry.get()
+    def admin_creation_stage(self, first_execution = True):
+        if first_execution:
+            if not compare_digest(self.system_partition_encryption_key_entry.get(), self.system_partition_encryption_key_entry2.get()):
+                Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
+                return
+            if len(self.system_partition_encryption_key_entry.get()) < MIN_PASSWORD_LENGTH:
+                Notification(title=self.lang.pwd_length_title, icon="warning.png", message=self.lang.pwd_length, message_bold=True, exit_btn_msg=self.lang.exit)
+                return
+            if not self.__validate_english_keymap(self.system_partition_encryption_key_entry.get()):
+                Notification(title=self.lang.encryption_password_title, icon="warning.png", message=self.lang.encryption_password, message_bold=False, exit_btn_msg=self.lang.exit)
+                return
+            self.setup_information["EncryptionKey"] = self.system_partition_encryption_key_entry.get()
         
-        self.system_partition_encryption_key_entry.delete(0, 'end')
-        self.system_partition_encryption_key_entry2.delete(0, 'end')
-        gc_collect()
+            self.system_partition_encryption_key_entry.delete(0, 'end')
+            self.system_partition_encryption_key_entry2.delete(0, 'end')
+            gc_collect()
 
         self.__delete_widgets()
-        self.progressbar.set(0.86)
+        self.progressbar.set(0.875)
 
         label = CTkLabel(self, text=self.lang.admin_creation, font=(None, 16, "bold"))
         your_name_label = CTkLabel(self, text=self.lang.yourname)
@@ -570,6 +598,7 @@ class App(CTk):
         self.password_entry = CTkEntry(self, show='*')
         password_label2 = CTkLabel(self, text=self.lang.password2)
         self.password_entry2 = CTkEntry(self, show="*")
+        back_btn = CTkButton(self, text=self.lang.back, command=lambda: self.encryption_key_stage(manual=False, first_execution=False))
         next_btn = CTkButton(self, text=self.lang.next, command=self.final_stage)
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
@@ -583,9 +612,12 @@ class App(CTk):
         self.password_entry.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
         password_label2.grid(row=6, column=0, padx=15, pady=5, sticky="nsew")
         self.password_entry2.grid(row=6, column=1, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=7, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        back_btn.grid(row=7, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=7, column=1, padx=15, pady=5, sticky="nsew")
     
-    # 100%
+    ##### END ADMIN CREATION #####
+
+    ##### BEGIN FINAL STAGE #####
     def final_stage(self):
         if not compare_digest(self.password_entry.get(), self.password_entry2.get()):
             Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
@@ -692,6 +724,7 @@ class App(CTk):
         username_entry.insert(0, self.setup_information['Username'])
         username_entry.configure(state="disabled")
 
+        back_button = CTkButton(self, text=self.lang.back, command=lambda: self.admin_creation_stage(first_execution=False))
         begin_installation_button = CTkButton(self, text=self.lang.begin_install, command=self.begin_installation_ui)
 
         i = 1
@@ -748,6 +781,9 @@ class App(CTk):
         i += 1
         begin_installation_button.grid(row=i, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
     
+    ##### END FINAL STAGE #####
+
+    ##### BEGIN INSTALLTION #####
     def __list_partitions(self, drive):
         result = subprocess.run(['lsblk', '-ln', '-o', 'NAME,TYPE'], stdout=subprocess.PIPE, text=True)
         partitions = []
@@ -865,6 +901,8 @@ class App(CTk):
             if uefi_info[1] != 0 and uefi_info[2] != 1:
                 Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
                 return
+        
+        if DEBUG: print(self.setup_information)
         
         if DEBUG:
             Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
