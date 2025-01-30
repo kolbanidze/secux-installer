@@ -339,6 +339,7 @@ class App(CTk):
         
         disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,FSTYPE,MOUNTPOINT,TYPE', '--json'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
         erase_all_disks = []
+        print(disks)
         for disk in disks:
             erase_all_disks.append(f"/dev/{disk['name']} | {disk['size']}")
         
@@ -346,13 +347,15 @@ class App(CTk):
         erase_all_partitioning = CTkRadioButton(self, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
         self.erase_all_disk = CTkOptionMenu(self, values=erase_all_disks)
         manual_partitioning = CTkRadioButton(self, text=self.lang.manual, variable=self.partitioning_type, value=1)
+        back_btn = CTkButton(self, text=self.lang.back, command=self.kernel_select_stage)
         next_btn = CTkButton(self, text=self.lang.next, command=self.__partitioning_next_button_handler)
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         erase_all_partitioning.grid(row=2, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         self.erase_all_disk.grid(row=3, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         manual_partitioning.grid(row=4, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=5, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
 
     def __partitioning_next_button_handler(self):
         key = self.partitioning_type.get()
@@ -391,6 +394,7 @@ class App(CTk):
         self.swap_entry = CTkEntry(self)
         self.swap_entry.insert(0, "1")
         self.swap_scrollbar = CTkSlider(self, command=self.__scroll_handler, to=16)
+        back_btn = CTkButton(self, text=self.lang.back, command=self.partitioning_stage)
         next_btn = CTkButton(self, text=self.lang.next, command=lambda: self.encryption_key_stage(manual=True))
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
@@ -404,7 +408,8 @@ class App(CTk):
         swap_label.grid(row=6, column=0, padx=15, pady=5, sticky="nsew")
         self.swap_entry.grid(row=7, column=0, padx=15, pady=5, sticky="nsew")
         self.swap_scrollbar.grid(row=7, column=1, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=8, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        back_btn.grid(row=8, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=8, column=1, padx=15, pady=5, sticky="nsew")
 
     def __scroll_handler(self, newvalue):
         newvalue = round(newvalue, 1)
@@ -454,6 +459,8 @@ class App(CTk):
                         current_partition_size = partition['size']
                         break
         return current_partition_size
+
+    ##### END PARTITIONING #####
 
     def __validate_english_keymap(self, password) -> bool:
         """True -> can be written with english keymap. False -> can't be written with english keymap"""
