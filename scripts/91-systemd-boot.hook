@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Target = systemd-boot
+
+[Action]
+Description = Signing systemd-boot and copying to /efi/EFI/Linux as grubx64.efi
+When = PostTransaction
+Exec = /usr/share/systemd-boot-sign.sh

@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Target = shim-signed
+
+[Action]
+Description = Copying shimx64.efi and mmx64.efi to /efi/EFI/Linux
+When = PostTransaction
+Exec = /usr/share/shim-copy.sh
