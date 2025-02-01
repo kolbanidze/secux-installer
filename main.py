@@ -16,7 +16,7 @@ timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 VERSION = "0.1.10"
 DEBUG = True
-DEBUG_SHOW_COMMANDS = True # DEFAULT: False
+DEBUG_SHOW_COMMANDS = False
 DEBUG_SHOW_COMMANDS_EFI_PARTITION = "/dev/vda1"
 DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION = "/dev/vda2"
 
@@ -934,6 +934,15 @@ class App(CTk):
         self.console.pack(padx=10, pady=10, expand=True, fill="both")
         self.begin_installation()
 
+    def __split_device(self, device):
+        match = re.match(r"(.+?)(p?\d+)$", device)
+        if match:
+            base, num = match.groups()
+            if base.endswith("p"):  # Remove trailing 'p' for nvme devices
+                base = base[:-1]
+            return base, num.lstrip("p")  # Remove 'p' from number
+        return device, ""
+
     def begin_installation(self):
         self.commands = []
         
@@ -1002,8 +1011,9 @@ class App(CTk):
         self._execute(pacstrap_command)
         
         # Adding custom repo
-        self._execute('echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
+        self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
         self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
+        self._execute("arch-chroot /mnt pacman-key --recv CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
         self._execute("arch-chroot /mnt pacman-key --lsign-key CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
 
         # Generating fstab
@@ -1135,6 +1145,9 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/share/systemd-boot-sign.sh")
             self._execute("cp /usr/local/share/secux-installer/scripts/sign-uki.sh /mnt/usr/lib/initcpio/post")
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
+            self._execute("cp /efi/EFI/systemd/systemd-bootx64.efi /efi/EFI/Linux/grubx64.efi")
+            base, num = self.__split_device(rootfs_partition)
+            self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\EFI\Linux\shimx64.efi"')
 
         # Final message in console
         self._execute("echo [Installation finished!]")
