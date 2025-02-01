@@ -1013,7 +1013,7 @@ class App(CTk):
         self._execute("echo lolo1")
         # Adding custom repo
         self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
-        self._exceute("echo loo1")
+        self._execute("echo loo1")
         self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
         self._execute("echo laos934")
         self._execute("arch-chroot /mnt pacman-key --recv CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
