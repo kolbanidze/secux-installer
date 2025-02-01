@@ -1147,7 +1147,7 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
             self._execute("cp /efi/EFI/systemd/systemd-bootx64.efi /efi/EFI/Linux/grubx64.efi")
             base, num = self.__split_device(rootfs_partition)
-            self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\EFI\Linux\shimx64.efi"')
+            self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
 
         # Final message in console
         self._execute("echo [Installation finished!]")
