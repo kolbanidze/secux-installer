@@ -1128,15 +1128,23 @@ class App(CTk):
         # Creating trusted boot chain with microsoft keys
         if self.setup_information["InstallationType"] == "LessSecure":
             self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/Linux/shimx64.efi")
+            print("yo1")
             self._execute("cp /mnt/usr/share/shim-signed/mmx64.efi /mnt/efi/EFI/Linux/mmx64.efi")
+            print("yo2")
             self._execute("mkdir -p /mnt/etc/secureboot")
+            print("yo3")
             self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
+            print("yo4")
             self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
+            print('yo5')
             self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
+            print("yo6")
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}.efi /efi/EFI/Linux/arch-{kernel}.efi")
                 self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}-fallback.efi /efi/EFI/Linux/arch-{kernel}-fallback.efi")
-            # self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
+            print("yo7")
+            self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
+            print('yo8')
             self._execute("cp /usr/local/share/secux-installer/scripts/92-shim-signed.hook /mnt/usr/share/libalpm/hooks/")
             self._execute("cp /usr/local/share/secux-installer/scripts/shim-copy.sh /mnt/usr/share/")
             self._execute("chmod +x /mnt/usr/share")
@@ -1146,8 +1154,10 @@ class App(CTk):
             self._execute("cp /usr/local/share/secux-installer/scripts/sign-uki.sh /mnt/usr/lib/initcpio/post")
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
             self._execute("cp /efi/EFI/systemd/systemd-bootx64.efi /efi/EFI/Linux/grubx64.efi")
+            print('yo9')
             base, num = self.__split_device(rootfs_partition)
             self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
+        print('yo10')
 
         # Final message in console
         self._execute("echo [Installation finished!]")
