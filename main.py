@@ -16,7 +16,7 @@ timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 VERSION = "0.1.11"
 DEBUG = True
-DEBUG_SHOW_COMMANDS = True
+DEBUG_SHOW_COMMANDS = False
 DEBUG_SHOW_COMMANDS_EFI_PARTITION = "/dev/vda1"
 DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION = "/dev/vda2"
 
@@ -1150,7 +1150,7 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/share/systemd-boot-sign.sh")
             self._execute("cp /usr/local/share/secux-installer/scripts/sign-uki.sh /mnt/usr/lib/initcpio/post")
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
-            self._execute("cp /efi/EFI/systemd/systemd-bootx64.efi /efi/EFI/Linux/grubx64.efi")
+            self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/Linux/grubx64.efi")
             base, num = self.__split_device(rootfs_partition)
             self._execute(f'echo yo7; efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
 
