@@ -183,6 +183,7 @@ class App(CTk):
         
         for widget in self.winfo_children():
             widget.destroy()
+        self.geometry(f"{self.winfo_width()*2}x{self.winfo_height()*0.5}")
         self.progressbar = CTkProgressBar(self, orientation='horizontal', width=500)
         self.progressbar.set(0.125)
         
@@ -984,7 +985,12 @@ class App(CTk):
         # Installing OS
         # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
         kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
-        pacstrap_command = f"pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools sbctl less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        pacstrap_command = f"pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        if self.setup_information["InstallationType"] == "Secure":
+            pacstrap_command += "sbctl "
+        elif self.setup_information["InstallationType"] == "LessSecure":
+            pacstrap_command += "mokutil "
+        
         if self.setup_information["DE"] == "GNOME":
             pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm vlc firefox chromium"
         elif self.setup_information["DE"] == "KDE":
@@ -1088,20 +1094,20 @@ class App(CTk):
         self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
         
         # Generate sbctl keys
-        self._execute("arch-chroot /mnt sbctl create-keys")
-        
-        if self.setup_information["InstallationType"] == "LessSecure":
-            self._execute("arch-chroot /mnt sbctl enroll-keys -m")
-        elif self.setup_information["InstallationType"] == "Secure":
+        if self.setup_information["InstallationType"] == "Secure":
+            self._execute("arch-chroot /mnt sbctl create-keys")
             self._execute("arch-chroot /mnt sbctl enroll-keys --yes-this-might-brick-my-machine")
         
         # Signing EFI executables and storing them in the database for signing during updates
-        self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
-        self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
-        for kernel in self.setup_information["Kernel"]:
-            self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}-fallback.efi")
-            self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}.efi")
-        
+        if self.setup_information["InstallationType"] == "Secure":
+            self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
+            self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
+            for kernel in self.setup_information["Kernel"]:
+                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}-fallback.efi")
+                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}.efi")
+
+        # Creating trusted boot chain with microsoft keys
+
 
         # Final message in console
         self._execute("echo [Installation finished!]")
