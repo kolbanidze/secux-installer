@@ -1010,11 +1010,16 @@ class App(CTk):
             pacstrap_command += "xorg plasma networkmanager-openvpn kde-applications vlc firefox chromium"
         self._execute(pacstrap_command)
         
+        self._execute("echo lolo1")
         # Adding custom repo
         self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
+        self._exceute("echo loo1")
         self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
+        self._execute("echo laos934")
         self._execute("arch-chroot /mnt pacman-key --recv CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
+        self._execute("echo dfs342")
         self._execute("arch-chroot /mnt pacman-key --lsign-key CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
+        self._execute("echo 34853u")
 
         # Generating fstab
         self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
@@ -1124,11 +1129,11 @@ class App(CTk):
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}-fallback.efi")
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}.efi")
-
         # Creating trusted boot chain with microsoft keys
         if self.setup_information["InstallationType"] == "LessSecure":
             self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/Linux/shimx64.efi")
             self._execute("cp /mnt/usr/share/shim-signed/mmx64.efi /mnt/efi/EFI/Linux/mmx64.efi")
+            self._execute("echo 89435y34u5")
             self._execute("mkdir -p /mnt/etc/secureboot")
             self._execute('echo yo1; openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
             self._execute("echo yo2; openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
