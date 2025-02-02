@@ -820,7 +820,8 @@ class App(CTk):
                     # Run the command
                     if "input" in cmd:
                         process = subprocess.Popen(
-                            f"stdbuf -oL {cmd["command"]}",
+                            # f"stdbuf -oL {cmd["command"]}",
+                            cmd["command"],
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
@@ -832,7 +833,8 @@ class App(CTk):
                         process.stdin.close()
                     else:
                         process = subprocess.Popen(
-                            f"stdbuf -oL {cmd["command"]}",
+                            # f"stdbuf -oL {cmd["command"]}",
+                            cmd["command"],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             shell=True,
@@ -1164,9 +1166,9 @@ class App(CTk):
             self._execute("echo uiyg8394ruijtsgfd")
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/Linux/grubx64.efi")
             self._execute("echo dfguh384yrojd")
-            # base, num = self.__split_device(rootfs_partition)
-            # self._execute(f'echo yo7; efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
-
+            base, num = self.__split_device(rootfs_partition)
+            self._execute(f'echo yo7; efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
+        self._execute("sleep 5")
         # Final message in console
         self._execute("echo [Installation finished!]")
         self._execute("echo [Now you can close this window and reboot into the system.]")
