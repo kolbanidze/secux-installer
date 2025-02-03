@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=SecurityManager
+Comment=SECUX Linux securitymanager
+Icon=/usr/share/icons/secux.svg
+Exec=/usr/bin/python /usr/local/bin/secux-apps/manager.py
+Terminal=false
+Categories=Security;Manager;Secux;

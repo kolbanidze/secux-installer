@@ -1162,9 +1162,12 @@ class App(CTk):
             self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
 
         # Installing secux-apps
-        self._execute("mkdir -p /usr/local/bin/secux-apps")
-        self._execute("git clone https://github.com/kolbanidze/secux-apps /usr/local/bin/secux-apps --depth=1")
+        self._execute("mkdir -p /mnt/usr/local/bin/secux-apps")
+        self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
         self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /usr/share/polkit-1/actions/")
+        self._execute("touch /mnt/usr/local/bin/secux-apps/production.conf")
+        self._execute("cp /usr/local/share/secux-installer/scripts/securitymanager.desktop /mnt/usr/share/applications")
+        self._execute("chmod +x /mnt/usr/share/applications/securitymanager.desktop")
 
         # Final message in console
         self._execute("echo [Installation finished!]")
