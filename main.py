@@ -1161,6 +1161,11 @@ class App(CTk):
             base, num = self.__split_device(rootfs_partition)
             self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
 
+        # Installing secux-apps
+        self._execute("mkdir -p /usr/local/bin/secux-apps")
+        self._execute("git clone https://github.com/kolbanidze/secux-apps /usr/local/bin/secux-apps --depth=1")
+        self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /usr/share/polkit-1/actions/")
+
         # Final message in console
         self._execute("echo [Installation finished!]")
         self._execute("echo [Now you can close this window and reboot into the system.]")
