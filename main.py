@@ -1000,7 +1000,7 @@ class App(CTk):
         # Installing OS
         # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
         kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
-        pacstrap_command = f"pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["InstallationType"] == "Secure":
             pacstrap_command += "sbctl "
         elif self.setup_information["InstallationType"] == "LessSecure":
@@ -1015,13 +1015,9 @@ class App(CTk):
         self._execute("echo lolo1")
         # Adding custom repo
         self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
-        self._execute("echo loo1")
         self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
-        self._execute("echo laos934")
         self._execute("arch-chroot /mnt pacman-key --recv CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
-        self._execute("echo dfs342")
         self._execute("arch-chroot /mnt pacman-key --lsign-key CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
-        self._execute("echo 34853u")
 
         # Generating fstab
         self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
@@ -1131,44 +1127,31 @@ class App(CTk):
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}-fallback.efi")
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}.efi")
+        
         # Creating trusted boot chain with microsoft keys
         if self.setup_information["InstallationType"] == "LessSecure":
             self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/Linux/shimx64.efi")
             self._execute("cp /mnt/usr/share/shim-signed/mmx64.efi /mnt/efi/EFI/Linux/mmx64.efi")
-            self._execute("echo 89435y34u5")
             self._execute("mkdir -p /mnt/etc/secureboot")
-            self._execute('echo yo1; openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
-            self._execute("echo yo2; openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
-            self._execute("echo yo3; arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
-            self._execute("echo reuhgi348953u4r")
+            self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
+            self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
+            self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
             for kernel in self.setup_information["Kernel"]:
-                self._execute(f"echo asdkjhasdjkashd{kernel}")
-                self._execute(f"echo yo4; arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}.efi /efi/EFI/Linux/arch-{kernel}.efi")
-                self._execute(f"echo yo5; arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}-fallback.efi /efi/EFI/Linux/arch-{kernel}-fallback.efi")
-                self._execute(f"echo asikdjsaojdasd{kernel}")
-            self._execute("echo yo6; arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
-            self._execute("echo 34895y39485u34hi")
+                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}.efi /efi/EFI/Linux/arch-{kernel}.efi")
+                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}-fallback.efi /efi/EFI/Linux/arch-{kernel}-fallback.efi")
+            self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
             self._execute("cp /usr/local/share/secux-installer/scripts/92-shim-signed.hook /mnt/usr/share/libalpm/hooks/")
-            self._execute("echo 2384729834")
             self._execute("cp /usr/local/share/secux-installer/scripts/shim-copy.sh /mnt/usr/share/")
-            self._execute("echo sdjhfsfd")
             self._execute("chmod +x /mnt/usr/share/shim-copy.sh")
-            self._execute('echo 34895yuihojkf')
             self._execute("cp /usr/local/share/secux-installer/scripts/91-systemd-boot.hook /mnt/usr/share/libalpm/hooks/")
-            self._execute("echo 39548yuhjiorfd")
             self._execute("cp /usr/local/share/secux-installer/scripts/systemd-boot-sign.sh /mnt/usr/share")
-            self._execute("echo 32849uhrjsdfsdf")
             self._execute("chmod +x /mnt/usr/share/systemd-boot-sign.sh")
-            self._execute("echo 34895yrsdjkfdsf")
             self._execute("cp /usr/local/share/secux-installer/scripts/sign-uki.sh /mnt/usr/lib/initcpio/post")
-            self._execute("echo 34895ruhjidnfds")
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
-            self._execute("echo uiyg8394ruijtsgfd")
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/Linux/grubx64.efi")
-            self._execute("echo dfguh384yrojd")
             base, num = self.__split_device(rootfs_partition)
-            self._execute(f'echo yo7; efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
-        self._execute("sleep 5")
+            self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
+
         # Final message in console
         self._execute("echo [Installation finished!]")
         self._execute("echo [Now you can close this window and reboot into the system.]")
