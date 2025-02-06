@@ -60,16 +60,16 @@ class App(CTk):
             self.ui_scale = 1
             self.light_theme = False
             set_appearance_mode("dark")
-            self.timezone_geometry_resized = False
-            self.init_geometry_resized = False
+            # self.timezone_geometry_resized = False
+            # self.init_geometry_resized = False
         else:
             self.focus_set()
             for widget in self.winfo_children():
                 widget.destroy()
-        if self.init_geometry_resized:
-            self.geometry(f"{self.winfo_width()//2}x{self.winfo_height()*2}")
-            self.init_geometry_resized = False
-            self.timezone_geometry_resized = False
+        # if self.init_geometry_resized:
+        #     self.geometry(f"{self.winfo_width()//2}x{self.winfo_height()*2}")
+        #     self.init_geometry_resized = False
+        #     self.timezone_geometry_resized = False
 
         self.clicks = 0
         welcome_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), dark_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), size=(80,80))
@@ -193,10 +193,10 @@ class App(CTk):
         
         for widget in self.winfo_children():
             widget.destroy()
-        if not self.timezone_geometry_resized:
-            self.geometry(f"{self.winfo_width()*2}x{self.winfo_height()*0.5}")
-            self.timezone_geometry_resized = True
-            self.init_geometry_resized = True
+        # if not self.timezone_geometry_resized:
+        #     self.geometry(f"{self.winfo_width()*2}x{self.winfo_height()*0.5}")
+        #     self.timezone_geometry_resized = True
+        #     self.init_geometry_resized = True
         self.progressbar = CTkProgressBar(self, orientation='horizontal', width=500)
         self.progressbar.set(0.125)
         
@@ -1009,7 +1009,7 @@ class App(CTk):
         # Installing OS
         # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
         kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
-        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip python-dbus v4l-utils lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["InstallationType"] == "Secure":
             pacstrap_command += "sbctl "
         elif self.setup_information["InstallationType"] == "LessSecure":
