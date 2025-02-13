@@ -16,7 +16,7 @@ timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 VERSION = "0.1.12"
 DEBUG = True
-DEBUG_SHOW_COMMANDS = True
+DEBUG_SHOW_COMMANDS = False
 DEBUG_SHOW_COMMANDS_EFI_PARTITION = "/dev/vda1"
 DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION = "/dev/vda2"
 
@@ -32,6 +32,10 @@ WORKDIR = os.path.dirname(os.path.abspath(__file__))
 
 if os.path.isfile(WORKDIR + "/production.conf"):
     DEBUG = False
+
+OFFLINE_INSTALLATION = False
+if os.path.isfile(WORKDIR + "/offline_installation.conf"):
+    OFFLINE_INSTALLATION = True
 
 class Notification(CTkToplevel):
     def __init__(self, title: str, icon: str, message: str, message_bold: bool, exit_btn_msg: str):
@@ -90,6 +94,7 @@ class App(CTk):
         info = CTkLabel(self, text=f"Версия | Version : {VERSION}", font=(None, 8))
 
         self.grid_columnconfigure((0, 1), weight=1)
+        if OFFLINE_INSTALLATION: Notification("1", "warning.png", "1", True, "1")
 
         welcome_image_label.grid(row=0, columnspan=2, padx=15, pady=5)
         welcome_entry_label.grid(row=1, columnspan=2, padx=15, pady=5)
@@ -909,14 +914,14 @@ class App(CTk):
             return "amd-ucode intel-ucode"
 
     def begin_installation_ui(self):
-        try:
-            answ = get("http://gstatic.com/generate_204", timeout=5)
-        except ConnectionError:
-            Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
-            return
-        if answ.status_code != 204:
-            Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
-            return
+        # try:
+        #     answ = get("http://gstatic.com/generate_204", timeout=5)
+        # except ConnectionError:
+        #     Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+        #     return
+        # if answ.status_code != 204:
+        #     Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+        #     return
         
         uefi_info = self.__check_secure_boot_and_setup_mode()
         if not uefi_info[0]:
@@ -1021,11 +1026,11 @@ class App(CTk):
             pacstrap_command += "xorg plasma networkmanager-openvpn kde-applications vlc firefox chromium tk python-pexpect python-pillow"
         self._execute(pacstrap_command)
         
-        self._execute("echo lolo1")
         # Adding custom repo
         self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
         self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
-        self._execute("arch-chroot /mnt pacman-key --recv CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
+        # self._execute("arch-chroot /mnt pacman-key --recv CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
+        self._execute("arch-chroot /mnt pacman-key --add /usr/share/pacman/keyrings/kolbanidze.gpg")
         self._execute("arch-chroot /mnt pacman-key --lsign-key CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
 
         # Generating fstab
