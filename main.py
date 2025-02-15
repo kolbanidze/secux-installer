@@ -16,7 +16,7 @@ timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 VERSION = "0.1.12"
 DEBUG = True
-DEBUG_SHOW_COMMANDS = False
+DEBUG_SHOW_COMMANDS = True
 DEBUG_SHOW_COMMANDS_EFI_PARTITION = "/dev/vda1"
 DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION = "/dev/vda2"
 
