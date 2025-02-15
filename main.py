@@ -16,7 +16,7 @@ timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 VERSION = "0.1.12"
 DEBUG = True
-DEBUG_SHOW_COMMANDS = False
+DEBUG_SHOW_COMMANDS = True
 DEBUG_SHOW_COMMANDS_EFI_PARTITION = "/dev/vda1"
 DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION = "/dev/vda2"
 
@@ -1063,6 +1063,7 @@ class App(CTk):
             pacstrap_command += "xorg plasma networkmanager-openvpn kde-applications vlc firefox chromium tk python-pexpect python-pillow"
         self._execute(pacstrap_command)
         
+        self._execute("echo INSTALL SECUESESIJROIEjh")
         # Adding custom repo
         self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
         self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
