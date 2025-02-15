@@ -1180,7 +1180,7 @@ class App(CTk):
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}-fallback.efi")
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}.efi")
         
-        self._execute("yooo.")
+        self._execute("echo yooo.")
         # Creating trusted boot chain with microsoft keys
         if self.setup_information["InstallationType"] == "LessSecure":
             self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/Linux/shimx64.efi")
@@ -1212,7 +1212,7 @@ class App(CTk):
         if self.online_installation:
             self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
         else:
-            self._execute("cp /usr/local/share/secux-apps/* /mnt/usr/local/share/secux-apps/")
+            self._execute("cp /usr/local/share/secux-apps/* /mnt/usr/local/bin/secux-apps/ -r")
         self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /usr/share/polkit-1/actions/")
         self._execute("touch /mnt/usr/local/bin/secux-apps/production.conf")
         self._execute("cp /usr/local/share/secux-installer/scripts/securitymanager.desktop /mnt/usr/share/applications")
