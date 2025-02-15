@@ -925,7 +925,7 @@ class App(CTk):
         return True
 
     def __offline_or_online(self, online: bool):
-        self.offline_repo_exists_but_online_installation = online
+        self.online_installation = online
         self.__begin_installation_ui()
 
     def __begin_installation_ui(self):
@@ -981,7 +981,7 @@ class App(CTk):
                 offline_btn.grid(row=2, column=0, padx=10, pady=5, sticky="nsew")
                 online_btn.grid(row=2, column=1, padx=10, pady=5, sticky="nsew")
         else:
-            self.offline_repo_exists_but_online_installation = False
+            self.online_installation = False
             self.__begin_installation_ui()
         
 
@@ -1048,7 +1048,7 @@ class App(CTk):
 
         # Installing OS
         # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
-        if self.offline_repo_exists_but_online_installation:
+        if self.online_installation:
             self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
         kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
         pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip python-dbus v4l-utils lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
@@ -1179,6 +1179,7 @@ class App(CTk):
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}-fallback.efi")
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}.efi")
         
+        self._execute("yooo.")
         # Creating trusted boot chain with microsoft keys
         if self.setup_information["InstallationType"] == "LessSecure":
             self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/Linux/shimx64.efi")
@@ -1187,9 +1188,11 @@ class App(CTk):
             self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
             self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
             self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
+            self._execute("echo DEBUG thing.")
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}.efi /efi/EFI/Linux/arch-{kernel}.efi")
                 self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}-fallback.efi /efi/EFI/Linux/arch-{kernel}-fallback.efi")
+            self._execute('echo DEBUG1.')
             self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
             self._execute("cp /usr/local/share/secux-installer/scripts/92-shim-signed.hook /mnt/usr/share/libalpm/hooks/")
             self._execute("cp /usr/local/share/secux-installer/scripts/shim-copy.sh /mnt/usr/share/")
@@ -1205,7 +1208,10 @@ class App(CTk):
 
         # Installing secux-apps
         self._execute("mkdir -p /mnt/usr/local/bin/secux-apps")
-        self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
+        if self.online_installation:
+            self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
+        else:
+            self._execute("cp /usr/local/share/secux-apps/* /mnt/usr/local/share/secux-apps/")
         self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /usr/share/polkit-1/actions/")
         self._execute("touch /mnt/usr/local/bin/secux-apps/production.conf")
         self._execute("cp /usr/local/share/secux-installer/scripts/securitymanager.desktop /mnt/usr/share/applications")
