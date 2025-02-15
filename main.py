@@ -33,9 +33,9 @@ WORKDIR = os.path.dirname(os.path.abspath(__file__))
 if os.path.isfile(WORKDIR + "/production.conf"):
     DEBUG = False
 
-OFFLINE_INSTALLATION = False
+OFFLINE = False
 if os.path.isfile(WORKDIR + "/offline_installation.conf"):
-    OFFLINE_INSTALLATION = True
+    OFFLINE = True
 
 class Notification(CTkToplevel):
     def __init__(self, title: str, icon: str, message: str, message_bold: bool, exit_btn_msg: str):
@@ -94,7 +94,7 @@ class App(CTk):
         info = CTkLabel(self, text=f"Версия | Version : {VERSION}", font=(None, 8))
 
         self.grid_columnconfigure((0, 1), weight=1)
-        if OFFLINE_INSTALLATION: Notification("1", "warning.png", "1", True, "1")
+        if OFFLINE: Notification("1", "warning.png", "1", True, "1")
 
         welcome_image_label.grid(row=0, columnspan=2, padx=15, pady=5)
         welcome_entry_label.grid(row=1, columnspan=2, padx=15, pady=5)
@@ -913,29 +913,26 @@ class App(CTk):
         except FileNotFoundError:
             return "amd-ucode intel-ucode"
 
-    def begin_installation_ui(self):
-        # try:
-        #     answ = get("http://gstatic.com/generate_204", timeout=5)
-        # except ConnectionError:
-        #     Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
-        #     return
-        # if answ.status_code != 204:
-        #     Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
-        #     return
-        
-        uefi_info = self.__check_secure_boot_and_setup_mode()
-        if not uefi_info[0]:
-            Notification(title=self.lang.not_uefi_title, icon="warning.png", message=self.lang.not_uefi, message_bold=True, exit_btn_msg=self.lang.exit)
-            return
-        if self.setup_information["InstallationType"] != "InSecure":
-            if uefi_info[1] != 0 and uefi_info[2] != 1:
-                Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
-                return
-        
+    def __check_network_connection(self) -> bool:
+        try:
+            answ = get("http://gstatic.com/generate_204", timeout=5)
+        except ConnectionError:
+            Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+            return False
+        if answ.status_code != 204:
+            Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+            return False
+        return True
+
+    def __offline_or_online(self, online: bool):
+        self.offline_repo_exists_but_online_installation = online
+        self.__begin_installation_ui()
+
+    def __begin_installation_ui(self):
         if DEBUG:
             Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
             return
-        
+
         for widget in self.winfo_children():
             widget.destroy()
         
@@ -949,6 +946,44 @@ class App(CTk):
         self.console = CTkTextbox(self)
         self.console.pack(padx=10, pady=10, expand=True, fill="both")
         self.begin_installation()
+
+    def begin_installation_ui(self):
+        # try:
+        #     answ = get("http://gstatic.com/generate_204", timeout=5)
+        # except ConnectionError:
+        #     Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+        #     return
+        # if answ.status_code != 204:
+        #     Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+        #     return
+        
+        # uefi_info = self.__check_secure_boot_and_setup_mode()
+        # if not uefi_info[0]:
+        #     Notification(title=self.lang.not_uefi_title, icon="warning.png", message=self.lang.not_uefi, message_bold=True, exit_btn_msg=self.lang.exit)
+        #     return
+        # if self.setup_information["InstallationType"] != "InSecure":
+        #     if uefi_info[1] != 0 and uefi_info[2] != 1:
+        #         Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
+        #         return
+        
+        if OFFLINE:
+            if self.__check_network_connection():
+                self.__delete_widgets()
+                self.title(self.lang.online_or_offline_title)
+                image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/information.png'), dark_image=Image.open(f'{WORKDIR}/images/information.png'), size=(80, 80))
+                image_label = CTkLabel(self, text="", image=image)
+                label = CTkLabel(self, text=self.lang.online_or_offline_message)
+                offline_btn = CTkButton(self, text=self.lang.offline, command=lambda: self.__offline_or_online(False))
+                online_btn = CTkButton(self, text=self.lang.online, command=lambda: self.__offline_or_online(True))
+
+                image_label.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
+                label.grid(row=1, column=1, padx=10, pady=5, sticky="nsew")
+                offline_btn.grid(row=2, column=0, padx=10, pady=5, sticky="nsew")
+                online_btn.grid(row=2, column=1, padx=10, pady=5, sticky="nsew")
+        else:
+            self.offline_repo_exists_but_online_installation = False
+            self.__begin_installation_ui()
+        
 
     def __split_device(self, device):
         match = re.match(r"(.+?)(p?\d+)$", device)
@@ -1013,6 +1048,8 @@ class App(CTk):
 
         # Installing OS
         # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
+        if self.offline_repo_exists_but_online_installation:
+            self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
         kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
         pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip python-dbus v4l-utils lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["InstallationType"] == "Secure":

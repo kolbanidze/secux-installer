@@ -74,6 +74,10 @@ class Locale:
             self.kernel_label = "Select the Linux kernel types to be installed"
             self.atleast_one_kernel = "You must select at least one kernel"
             self.pls_select_kernel = "Error. Please select at least one kernel."
+            self.online_or_offline_message = "The installation image contains everything you need to install packages\nYou can download the latest version package from the network (online) or install pre-installed ones (offline)"
+            self.offline = "Offline"
+            self.online = "Online"
+            self.online_or_offline_title = "Packages source"
         elif language == "ru":
             self.test = "ТЕСТ | Русский"
             self.select_time_zone = "Выберите часовой пояс"
@@ -147,3 +151,7 @@ class Locale:
             self.kernel_label = "Выберите виды ядра Linux, которые будет установлены"
             self.atleast_one_kernel = "Необходимо выбрать хотя бы одно ядро"
             self.pls_select_kernel = "Ошибка. Пожалуйста, выберите хотя бы одно ядро."
+            self.online_or_offline_title = "Источник пакетов"
+            self.online_or_offline_message = "Образ установки содержит все\nнеобходимые для установки пакеты\nВы можете загрузить последние\nверсии пакетов из сети (онлайн) или\nустановить предустановленные (оффлайн)"
+            self.offline = "Оффлайн"
+            self.online = "Онлайн"
