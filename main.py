@@ -831,10 +831,7 @@ class App(CTk):
         def run_commands():
             for cmd in commands:
                 try:
-                    # Delete me
-                    print(f"Executing: {cmd['command']}...")
-                    self.console.configure(state="normal")
-                    self.console.insert(END, f"Executing: {cmd['command']}...")
+                    print(f"Executing>{cmd['command']}")
                     self.console.see(END)
                     # Run the command
                     if "input" in cmd:
@@ -1232,7 +1229,7 @@ class App(CTk):
             self._execute("arch-chroot /mnt pip install customtkinter setuptools screeninfo python-dotenv --break-system-packages")
         else:
             self._execute(f"cp {WORKDIR}/python_packages /mnt/tmp/python_packages -r")
-            self._execute(f"arch-chroot /mnt pip install --find-links /mnt/tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
+            self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
 
         # Installing Kirt App
         self._execute("mkdir -p /mnt/usr/local/bin/kirt-app")
