@@ -3,7 +3,7 @@
  "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
-    <action id="org.freedesktop.policykit.pkexec.securitymanager">
+    <action id="org.freedesktop.policykit.pkexec.kirt-app">
     <description>Run securitymanager program</description>
     <message>Authentication is required to run the kirt-app</message>
     <message xml:lang="ru">Для запуска kirt-app требуется аутентификация</message>
