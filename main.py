@@ -1229,6 +1229,16 @@ class App(CTk):
             self._execute(f"cp {WORKDIR}/python_packages /mnt/tmp/python_packages -r")
             self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
 
+        # Installing Kirt App
+        self._execute("mkdir -p /mnt/usr/local/bin/kirt-app")
+        if self.online_installation:
+            self._execute("git clone https://github.com/kirt-king/kirt-app /mnt/usr/local/bin/kirt-app --depth=1")
+        else:
+            self._execute("cp /usr/local/share/kirt-app/* /mnt/usr/local/bin/kirt-app/ -r")
+        self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.kirt-app.policy /mnt/usr/share/polkit-1/actions/")
+        self._execute("cp /usr/local/share/secux-installer/scripts/kirt-app.desktop /mnt/usr/share/applications")
+        self._execute("chmod +x /mnt/usr/share/applications/kirt-app.desktop")
+
         # Final message in console
         self._execute("echo [Installation finished!]")
         self._execute("echo [Now you can close this window and reboot into the system.]")

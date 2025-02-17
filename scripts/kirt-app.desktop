@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Kirt App
+Comment=Kirt app
+Icon=/usr/share/icons/secux.svg
+Exec=/usr/bin/python /usr/local/bin/kirt-app/app_scripts/app.py
+Terminal=false
+Categories=Kirt;Secux;Face;Recognition
