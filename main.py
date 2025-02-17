@@ -831,6 +831,10 @@ class App(CTk):
         def run_commands():
             for cmd in commands:
                 try:
+                    # Delete me
+                    self.console.configure(state="normal")
+                    self.console.insert(END, f"Executing: {cmd['command']}...")
+                    self.console.see(END)
                     # Run the command
                     if "input" in cmd:
                         process = subprocess.Popen(
