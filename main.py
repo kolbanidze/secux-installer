@@ -1051,7 +1051,7 @@ class App(CTk):
         if self.online_installation:
             self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
         kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
-        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip python-dbus v4l-utils lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base base-devel cmake {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip python-dbus v4l-utils lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
         if self.setup_information["InstallationType"] == "Secure":
             pacstrap_command += "sbctl "
         elif self.setup_information["InstallationType"] == "LessSecure":
@@ -1063,7 +1063,7 @@ class App(CTk):
             pacstrap_command += "xorg plasma networkmanager-openvpn kde-applications vlc firefox chromium tk python-pexpect python-pillow"
         self._execute(pacstrap_command)
         
-        self._execute("echo INSTALL SECUESESIJROIEjh")
+        self._execute("echo Packages were installed successfully.")
         # Adding custom repo
         self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
         self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
@@ -1191,11 +1191,11 @@ class App(CTk):
             self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
             self._execute("echo DEBUG thing.")
             for kernel in self.setup_information["Kernel"]:
-                self._execute(f"echo SIGNING {kernel}")
+                self._execute(f"echo Signing {kernel}")
                 self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}.efi /efi/EFI/Linux/arch-{kernel}.efi")
                 self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}-fallback.efi /efi/EFI/Linux/arch-{kernel}-fallback.efi")
-                self._execute(f"DONE SIGNING {kernel}")
-            self._execute('echo DEBUG1.')
+                self._execute(f"echo Successfully signed {kernel}")
+            self._execute('echo Importing MOK')
             self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
             self._execute("cp /usr/local/share/secux-installer/scripts/92-shim-signed.hook /mnt/usr/share/libalpm/hooks/")
             self._execute("cp /usr/local/share/secux-installer/scripts/shim-copy.sh /mnt/usr/share/")
@@ -1207,6 +1207,7 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/Linux/grubx64.efi")
             base, num = self.__split_device(rootfs_partition)
+            self._execute("Adding bootentry.")
             self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
 
         # Installing secux-apps
@@ -1215,10 +1216,18 @@ class App(CTk):
             self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
         else:
             self._execute("cp /usr/local/share/secux-apps/* /mnt/usr/local/bin/secux-apps/ -r")
-        self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /usr/share/polkit-1/actions/")
+        self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /mnt/usr/share/polkit-1/actions/")
         self._execute("touch /mnt/usr/local/bin/secux-apps/production.conf")
         self._execute("cp /usr/local/share/secux-installer/scripts/securitymanager.desktop /mnt/usr/share/applications")
         self._execute("chmod +x /mnt/usr/share/applications/securitymanager.desktop")
+
+        # Installing dependencies
+        if self.online_installation:
+            self._execute("arch-chroot /mnt pacman -S python-opencv")
+            self._execute("arch-chroot /mnt pip install customtkinter setuptools screeninfo python-dotenv --break-system-packages")
+        else:
+            self._execute(f"cp {WORKDIR}/python_packages /mnt/tmp/python_packages -r")
+            self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
 
         # Final message in console
         self._execute("echo [Installation finished!]")
@@ -1242,4 +1251,3 @@ class App(CTk):
 
 if __name__ == "__main__":
     App().mainloop()
-        
