@@ -832,6 +832,7 @@ class App(CTk):
             for cmd in commands:
                 try:
                     # Delete me
+                    print(f"Executing: {cmd['command']}...")
                     self.console.configure(state="normal")
                     self.console.insert(END, f"Executing: {cmd['command']}...")
                     self.console.see(END)
