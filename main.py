@@ -62,7 +62,7 @@ class App(CTk):
         self.ui_scale = 1
         self.light_theme = False
         self.current_stage = 0
-        self.total_amount_of_stages = 8
+        self.total_amount_of_stages = 10
         set_appearance_mode("dark")
         # self.minsize(350, 500)
 
@@ -78,8 +78,8 @@ class App(CTk):
         languages_optionmenu = CTkOptionMenu(self.welcome_menu, values=["Русский", "English"], command=self.__language_callback)
         next_button = CTkButton(self.welcome_menu, text="Далее | Next", command=self.__draw_timezone_stage, fg_color="green")
         ui_scaling_label = CTkLabel(self.welcome_menu, text="Масштабирование | UI Scaling")
-        ui_scaling = CTkOptionMenu(self.welcome_menu, values=["80%", "100%", "125%", "150%", "200%"], command=self.__ui_scaling_handler)
-        ui_scaling.set(str(int(self.ui_scale*100)) + "%")
+        self.ui_scaling = CTkOptionMenu(self.welcome_menu, values=["80%", "100%", "125%", "150%", "200%"], command=self.__ui_scaling_handler)
+        self.ui_scaling.set(str(int(self.ui_scale*100)) + "%")
         self.white_mode = CTkSwitch(self.welcome_menu, text="Светлая тема | White theme", command=self.__theme_handler)
         if self.light_theme:
             self.white_mode.select()
@@ -92,18 +92,16 @@ class App(CTk):
         select_language_label.grid(row=2, columnspan=2, padx=15, pady=(15, 5))
         languages_optionmenu.grid(row=3, columnspan=2, padx=15, pady=5)
         ui_scaling_label.grid(row=4, columnspan=2, padx=15, pady=5)
-        ui_scaling.grid(row=5, columnspan=2, padx=15, pady=5)
+        self.ui_scaling.grid(row=5, columnspan=2, padx=15, pady=5)
         self.white_mode.grid(row=6, columnspan=2, padx=15, pady=5)
         next_button.grid(row=7, columnspan=2, padx=15, pady=(15, 5))
         info.grid(row=8, padx=15, columnspan=2, pady=(5, 0))
         if DEBUG: CTkLabel(self.welcome_menu, text="WARNING: DEBUG MODE", font=(None, 10), text_color=("red")).grid(row=9, columnspan=2, padx=15, pady=(5,0))
         
-
     def __ui_scaling_handler(self, new_scaling: str):
         self.ui_scale = int(new_scaling.replace("%", "")) / 100
         set_widget_scaling(self.ui_scale)
         self.__resize()
-        # set_window_scaling(self.ui_scale)
     
     def __theme_handler(self):
         if self.white_mode.get():
@@ -116,7 +114,7 @@ class App(CTk):
     def __resize(self):
         self.update_idletasks()
         resolution = f"{self.winfo_reqwidth()}x{self.winfo_reqheight()}"
-        if DEBUG: print(resolution)
+        # if DEBUG: print(resolution)
         self.geometry(resolution)
 
     def __clicks_handler(self, event):
@@ -170,6 +168,28 @@ class App(CTk):
                 self.language = "en"
             case "Русский":
                 self.language = "ru"
+        if len(self.winfo_children()) > 1:
+            for widget in self.winfo_children():
+                if widget != self.welcome_menu:
+                    widget.destroy()
+            self.ui_scaling.configure(state='disabled')
+            if hasattr(self, "timezone_stage_frame"):
+                del self.timezone_stage_frame
+            if hasattr(self, 'installation_type_frame'):
+                del self.installation_type_frame
+            if hasattr(self, 'de_frame'):
+                del self.de_frame
+            if hasattr(self, 'kernel_frame'):
+                del self.kernel_frame
+            if hasattr(self, 'partitioning_frame'):
+                del self.partitioning_frame
+            if hasattr(self, 'encryption_frame'):
+                del self.encryption_frame
+            if hasattr(self, 'admin_frame'):
+                del self.admin_frame
+            if hasattr(self, 'network_frame'):
+                del self.network_frame
+            self.current_stage = 0
     
     # def __delete_widgets(self):
     #     for widget in self.winfo_children():
@@ -178,7 +198,9 @@ class App(CTk):
 
     def __draw_progress_bar(self, frame):
         progressbar = CTkProgressBar(frame, orientation='horizontal', width=500)
-        progressbar.set(self.current_stage / self.total_amount_of_stages)
+        value = self.current_stage / self.total_amount_of_stages
+        if DEBUG: print(value*100)
+        progressbar.set(value)
         progressbar.grid(row=0, column=0, padx=15, pady=(5,15), sticky="nsew", columnspan=2)
 
     ##### BEGIN TIME ZONE #####
@@ -199,19 +221,18 @@ class App(CTk):
     def __draw_timezone_stage(self):
         self.welcome_menu.pack_forget()
         self.current_stage += 1
-        self.timezone_stage()
-
+        self.lang = Locale(language=self.language)
+        if not hasattr(self, "timezone_stage_frame"):
+            self.timezone_stage()
+        self.__draw_stage(self.timezone_stage_frame)
+            
     def __return_to_welcome_menu(self):
-        self.current_stage -= 1
+        
         self.timezone_stage_frame.pack_forget()
-        self.welcome_menu.pack(fill='both', expand=True)
-        self.__resize()
+        self.__draw_stage(self.welcome_menu)
 
     def timezone_stage(self):
-        self.lang = Locale(language=self.language)
-        
         self.timezone_stage_frame = CTkFrame(self)
-        
         self.__draw_progress_bar(self.timezone_stage_frame)
         title1 = CTkLabel(self.timezone_stage_frame, text=self.lang.select_time_zone, font=(None, 16, 'bold'))
         region_label = CTkLabel(self.timezone_stage_frame, text=self.lang.region)
@@ -248,12 +269,18 @@ class App(CTk):
     def __draw_installation_type(self):
         self.timezone_stage_frame.pack_forget()
         self.current_stage += 1
-        self.installation_type_stage()
+        if not hasattr(self, "installation_type_frame"):
+            self.installation_type_stage()
+        self.__draw_stage(self.installation_type_frame)
 
     def __return_to_timezone(self):
         self.installation_type_frame.pack_forget()
-        self.current_stage -= 1
-        self.timezone_stage()
+        
+        self.__draw_stage(self.timezone_stage_frame)
+
+    def __draw_stage(self, frame):
+        frame.pack(fill='both', expand=True)
+        self.__resize()
 
     ##### BEGIN INSTALLATION TYPE #####
     def __installation_type_radio_button_handler(self):
@@ -268,7 +295,7 @@ class App(CTk):
 
     def installation_type_stage(self):
         self.installation_type_frame = CTkFrame(self)
-        self.installation_type_frame.pack(fill='both', expand=True)
+        # self.installation_type_frame.pack(fill='both', expand=True)
 
         self.__draw_progress_bar(self.installation_type_frame)
         label = CTkLabel(self.installation_type_frame, text=self.lang.select_install_option, font=(None, 16, "bold"))
@@ -314,16 +341,17 @@ class App(CTk):
     def __draw_de(self):
         self.installation_type_frame.pack_forget()
         self.current_stage += 1
-        self.desktop_environment_stage()
+        if not hasattr(self, "de_frame"):
+            self.desktop_environment_stage()
+        self.__draw_stage(self.de_frame)
     
     def __return_to_installation_type(self):
-        self.current_stage -= 1
+        
         self.de_frame.pack_forget()
-        self.installation_type_stage()
+        self.__draw_stage(self.installation_type_frame)
 
     def desktop_environment_stage(self):
         self.de_frame = CTkFrame(self)
-        self.de_frame.pack(fill='both', expand=True)
 
         self.__draw_progress_bar(self.de_frame)
         self.de_variable = IntVar(value=0)
@@ -372,16 +400,17 @@ class App(CTk):
     def __draw_kernel_stage(self):
         self.de_frame.pack_forget()
         self.current_stage += 1
-        self.kernel_select_stage()
+        if not hasattr(self, "kernel_frame"):
+            self.kernel_select_stage()
+        self.__draw_stage(self.kernel_frame)
     
     def __return_to_de(self):
         self.kernel_frame.pack_forget()
-        self.current_stage -= 1
-        self.desktop_environment_stage()
+        
+        self.__draw_stage(self.de_frame)
 
     def kernel_select_stage(self):
         self.kernel_frame = CTkFrame(self)
-        self.kernel_frame.pack(expand=True, fill='both')
 
         self.__draw_progress_bar(self.kernel_frame)
         label = CTkLabel(self.kernel_frame, text=self.lang.kernel_label, font=(None, 16, "bold"))
@@ -436,16 +465,18 @@ class App(CTk):
 
         self.current_stage += 1
         self.kernel_frame.pack_forget()
-        self.partitioning_stage()
+        if not hasattr(self, "partitioning_frame"):
+            self.partitioning_stage()
+        self.__draw_stage(self.partitioning_frame)
     
     def __return_to_kernel(self):
         self.partitioning_frame.pack_forget()
-        self.current_stage -= 1
-        self.kernel_select_stage()
+        
+        self.__draw_stage(self.kernel_frame)
 
     def partitioning_stage(self):
         self.partitioning_frame = CTkFrame(self)
-        self.partitioning_frame.pack(expand=True, fill='both')
+        # self.partitioning_frame.pack(expand=True, fill='both')
 
         self.__draw_progress_bar(self.partitioning_frame)
         label = CTkLabel(self.partitioning_frame, text=self.lang.diskpart, font=(None, 16, "bold"))
@@ -484,13 +515,19 @@ class App(CTk):
                 self.setup_information["SwapSize"] = "1"
                 self.partitioning_frame.pack_forget()
                 self.current_stage += 1
-                self.encryption_key_stage()
+                if not hasattr(self, "encryption_frame"):
+                    self.encryption_key_stage()
+                self.__draw_stage(self.encryption_frame)
             case 1:
                 self.setup_information["Partitioning"] = "Manual"
-                self.manual_partitioning()
+                self.partitioning_frame.pack_forget()
+                if not hasattr(self, "manual_partitioning_frame"):
+                    self.manual_partitioning()
+                self.__draw_stage(self.manual_partitioning_frame)
 
     def manual_partitioning(self):
-        self.__delete_widgets()
+        self.manual_partitioning_frame = CTkFrame(self)
+        # self.manual_partitioning_frame.pack(fill='both', expand=True)
         
         self.partitions = []
         disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,FSTYPE,MOUNTPOINT,TYPE', '--json'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
@@ -499,21 +536,22 @@ class App(CTk):
                 for partition in disk['children']:
                     self.partitions.append(f"{partition['name']} | {partition['size']} | {partition.get('fstype', 'N/A')}")
 
-        label = CTkLabel(self, text=self.lang.selfpart, font=(None, 16, "bold"))
-        run_gparted_btn = CTkButton(self, text=self.lang.rungparted, command=lambda: os.system("/usr/bin/sudo /usr/bin/gparted"))
-        update_disks = CTkButton(self, text=self.lang.refreshparts, command=self.__update_partitions)
-        efi_partition_label = CTkLabel(self, text=self.lang.efipart)
-        self.efi_partition_optionmenu = CTkOptionMenu(self, values=self.partitions)
-        root_partition_label = CTkLabel(self, text=self.lang.rootfs)
-        self.root_partition_optionmenu = CTkOptionMenu(self, values=self.partitions, command=self.__change_max_swapfile)
+        self.__draw_progress_bar(self.manual_partitioning_frame)
+        label = CTkLabel(self.manual_partitioning_frame, text=self.lang.selfpart, font=(None, 16, "bold"))
+        run_gparted_btn = CTkButton(self.manual_partitioning_frame, text=self.lang.rungparted, command=lambda: os.system("/usr/bin/sudo /usr/bin/gparted"))
+        update_disks = CTkButton(self.manual_partitioning_frame, text=self.lang.refreshparts, command=self.__update_partitions)
+        efi_partition_label = CTkLabel(self.manual_partitioning_frame, text=self.lang.efipart)
+        self.efi_partition_optionmenu = CTkOptionMenu(self.manual_partitioning_frame, values=self.partitions)
+        root_partition_label = CTkLabel(self.manual_partitioning_frame, text=self.lang.rootfs)
+        self.root_partition_optionmenu = CTkOptionMenu(self.manual_partitioning_frame, values=self.partitions, command=self.__change_max_swapfile)
         self.use_swap = StringVar(value="on")
-        self.swap_checkbox = CTkCheckBox(self, text=self.lang.useswap, variable=self.use_swap, onvalue="on", offvalue="off", command=self.__swapfile_handler)
-        swap_label = CTkLabel(self, text=self.lang.swapsize)
-        self.swap_entry = CTkEntry(self)
+        self.swap_checkbox = CTkCheckBox(self.manual_partitioning_frame, text=self.lang.useswap, variable=self.use_swap, onvalue="on", offvalue="off", command=self.__swapfile_handler)
+        swap_label = CTkLabel(self.manual_partitioning_frame, text=self.lang.swapsize)
+        self.swap_entry = CTkEntry(self.manual_partitioning_frame)
         self.swap_entry.insert(0, "1")
-        self.swap_scrollbar = CTkSlider(self, command=self.__scroll_handler, to=16)
-        back_btn = CTkButton(self, text=self.lang.back, command=self.partitioning_stage)
-        next_btn = CTkButton(self, text=self.lang.next, command=lambda: self.encryption_key_stage(manual=True))
+        self.swap_scrollbar = CTkSlider(self.manual_partitioning_frame, command=self.__scroll_handler, to=16)
+        back_btn = CTkButton(self.manual_partitioning_frame, text=self.lang.back, command=lambda: self.__return_to_partitioning(self.manual_partitioning_frame))
+        next_btn = CTkButton(self.manual_partitioning_frame, text=self.lang.next, command=self.__draw_encryption_stage_from_manual)
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         run_gparted_btn.grid(row=2, column=0, padx=15, pady=5, sticky="nsew")
@@ -528,6 +566,7 @@ class App(CTk):
         self.swap_scrollbar.grid(row=7, column=1, padx=15, pady=5, sticky="nsew")
         back_btn.grid(row=8, column=0, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=8, column=1, padx=15, pady=5, sticky="nsew")
+        # self.__resize()
 
     def __scroll_handler(self, newvalue):
         newvalue = round(newvalue, 1)
@@ -578,15 +617,7 @@ class App(CTk):
                         break
         return current_partition_size
 
-    ##### END PARTITIONING #####
-
-    ##### BEGIN ENCRYPTION KEY #####
-    def __validate_english_keymap(self, password) -> bool:
-        """True -> can be written with english keymap. False -> can't be written with english keymap"""
-        valid_characters = string.ascii_letters + string.digits + string.punctuation + " "
-        return all(char in valid_characters for char in password)
-
-    def encryption_key_stage(self):
+    def __draw_encryption_stage_from_manual(self):
         efi_partition = self.efi_partition_optionmenu.get().split(" | ")[0]
         disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
         for disk in disks:
@@ -607,17 +638,38 @@ class App(CTk):
         if use_swapfile:
             swapsize = self.swap_entry.get()
             self.setup_information["SwapSize"] = swapsize
+        
+        self.manual_partitioning_frame.grid_forget()
+        self.current_stage += 1
+        if not hasattr(self, "encryption_frame"):
+            self.encryption_key_stage()
+        self.__draw_stage(self.encryption_frame)
+    
+    def __return_to_partitioning(self, frame):
+        frame.pack_forget()
+        
+        if not hasattr(self, "partitioning_frame"):
+            self.partitioning_stage()
+        self.__draw_stage(self.partitioning_frame)
+    ##### END PARTITIONING #####
 
-        self.__delete_widgets()
-        self.progressbar.set(0.75)
+    ##### BEGIN ENCRYPTION KEY #####
+    def __validate_english_keymap(self, password) -> bool:
+        """True -> can be written with english keymap. False -> can't be written with english keymap"""
+        valid_characters = string.ascii_letters + string.digits + string.punctuation + " "
+        return all(char in valid_characters for char in password)
 
-        label = CTkLabel(self, text=self.lang.os_encryption, font=(None, 16, "bold"))
-        label1 = CTkLabel(self, text=self.lang.enckey)
-        self.system_partition_encryption_key_entry = CTkEntry(self, show='*')
-        label2 = CTkLabel(self, text=self.lang.enckey2)
-        self.system_partition_encryption_key_entry2 = CTkEntry(self, show='*')
-        back_btn = CTkButton(self, text=self.lang.back, command=self.partitioning_stage)
-        next_btn = CTkButton(self, text=self.lang.next, command=self.admin_creation_stage)
+    def encryption_key_stage(self):
+        self.encryption_frame = CTkFrame(self)
+
+        self.__draw_progress_bar(self.encryption_frame)
+        label = CTkLabel(self.encryption_frame, text=self.lang.os_encryption, font=(None, 16, "bold"))
+        label1 = CTkLabel(self.encryption_frame, text=self.lang.enckey)
+        self.system_partition_encryption_key_entry = CTkEntry(self.encryption_frame, show='*')
+        label2 = CTkLabel(self.encryption_frame, text=self.lang.enckey2)
+        self.system_partition_encryption_key_entry2 = CTkEntry(self.encryption_frame, show='*')
+        back_btn = CTkButton(self.encryption_frame, text=self.lang.back, command=lambda: self.__return_to_partitioning(self.encryption_frame))
+        next_btn = CTkButton(self.encryption_frame, text=self.lang.next, command=self.__draw_admin_creation)
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         label1.grid(row=2, column=0, padx=15, pady=5, sticky="nsew", columnspan=2)
@@ -626,6 +678,27 @@ class App(CTk):
         self.system_partition_encryption_key_entry2.grid(row=5, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         back_btn.grid(row=6, column=0, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=6, column=1, padx=15, pady=5, sticky="nsew")
+
+    def __draw_admin_creation(self):
+        if self.system_partition_encryption_key_entry.get() != self.system_partition_encryption_key_entry2.get():
+            Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        if len(self.system_partition_encryption_key_entry.get()) < MIN_PASSWORD_LENGTH:
+            Notification(title=self.lang.pwd_length_title, icon="warning.png", message=self.lang.pwd_length, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        if not self.__validate_english_keymap(self.system_partition_encryption_key_entry.get()):
+            Notification(title=self.lang.encryption_password_title, icon="warning.png", message=self.lang.encryption_password, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
+        self.setup_information["EncryptionKey"] = self.system_partition_encryption_key_entry.get()
+        self.current_stage += 1
+        if not hasattr(self, "admin_frame"):
+            self.admin_creation_stage()
+        self.encryption_frame.pack_forget()
+        self.__draw_stage(self.admin_frame)
+
+    def __return_to_encryption_key_stage(self):
+        self.admin_frame.pack_forget()
+        self.__draw_stage(self.encryption_frame)
 
     ##### END ENCRYPTION KEY #####
 
@@ -644,39 +717,23 @@ class App(CTk):
         else:
             return False
 
-    def admin_creation_stage(self, first_execution = True):
-        if first_execution:
-            if not compare_digest(self.system_partition_encryption_key_entry.get(), self.system_partition_encryption_key_entry2.get()):
-                Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
-                return
-            if len(self.system_partition_encryption_key_entry.get()) < MIN_PASSWORD_LENGTH:
-                Notification(title=self.lang.pwd_length_title, icon="warning.png", message=self.lang.pwd_length, message_bold=True, exit_btn_msg=self.lang.exit)
-                return
-            if not self.__validate_english_keymap(self.system_partition_encryption_key_entry.get()):
-                Notification(title=self.lang.encryption_password_title, icon="warning.png", message=self.lang.encryption_password, message_bold=False, exit_btn_msg=self.lang.exit)
-                return
-            self.setup_information["EncryptionKey"] = self.system_partition_encryption_key_entry.get()
-        
-            self.system_partition_encryption_key_entry.delete(0, 'end')
-            self.system_partition_encryption_key_entry2.delete(0, 'end')
-            gc_collect()
+    def admin_creation_stage(self):
+        self.admin_frame = CTkFrame(self)
 
-        self.__delete_widgets()
-        self.progressbar.set(0.875)
-
-        label = CTkLabel(self, text=self.lang.admin_creation, font=(None, 16, "bold"))
-        your_name_label = CTkLabel(self, text=self.lang.yourname)
-        self.your_name_entry = CTkEntry(self)
-        hostname_label = CTkLabel(self, text=self.lang.hostname)
-        self.hostname_entry = CTkEntry(self)
-        username_label = CTkLabel(self, text=self.lang.username)
-        self.username_entry = CTkEntry(self)
-        password_label = CTkLabel(self, text=self.lang.password1)
-        self.password_entry = CTkEntry(self, show='*')
-        password_label2 = CTkLabel(self, text=self.lang.password2)
-        self.password_entry2 = CTkEntry(self, show="*")
-        back_btn = CTkButton(self, text=self.lang.back, command=lambda: self.encryption_key_stage(manual=False, first_execution=False))
-        next_btn = CTkButton(self, text=self.lang.next, command=self.final_stage)
+        self.__draw_progress_bar(self.admin_frame)
+        label = CTkLabel(self.admin_frame, text=self.lang.admin_creation, font=(None, 16, "bold"))
+        your_name_label = CTkLabel(self.admin_frame, text=self.lang.yourname)
+        self.your_name_entry = CTkEntry(self.admin_frame)
+        hostname_label = CTkLabel(self.admin_frame, text=self.lang.hostname)
+        self.hostname_entry = CTkEntry(self.admin_frame)
+        username_label = CTkLabel(self.admin_frame, text=self.lang.username)
+        self.username_entry = CTkEntry(self.admin_frame)
+        password_label = CTkLabel(self.admin_frame, text=self.lang.password1)
+        self.password_entry = CTkEntry(self.admin_frame, show='*')
+        password_label2 = CTkLabel(self.admin_frame, text=self.lang.password2)
+        self.password_entry2 = CTkEntry(self.admin_frame, show="*")
+        back_btn = CTkButton(self.admin_frame, text=self.lang.back, command=self.__return_to_encryption_key_stage)
+        next_btn = CTkButton(self.admin_frame, text=self.lang.next, command=self.__draw_network_stage)
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         your_name_label.grid(row=2, column=0, padx=15, pady=5, sticky="nsew")
@@ -693,6 +750,66 @@ class App(CTk):
         next_btn.grid(row=7, column=1, padx=15, pady=5, sticky="nsew")
     
     ##### END ADMIN CREATION #####
+
+    #### NETWORK STAGE #####
+    def __draw_network_stage(self):
+        self.admin_frame.pack_forget()
+        self.current_stage += 1
+        if not hasattr(self, "network_frame"):
+            self.network_stage()
+        self.__draw_stage(self.network_frame)
+        self.__resize()
+    
+    def __return_to_admin(self):
+        self.network_frame.pack_forget()
+        self.current_stage -= 1
+        self.__draw_stage(self.admin_frame)
+
+    def network_stage(self):
+        self.network_frame = CTkFrame(self)
+
+        self.__draw_progress_bar(self.network_frame)
+        title = CTkLabel(self.network_frame, text=self.lang.online_or_offline_title, font=(None, 16, 'bold'))
+        image = CTkImage(light_image=Image.open(f"{WORKDIR}/images/wifi.png"), dark_image=Image.open(f"{WORKDIR}/images/wifi.png"), size=(80, 80))
+        image_label = CTkLabel(self.network_frame, text="", image=image)
+        label = CTkLabel(self.network_frame, text=self.lang.package_source)
+        current_image = CTkLabel(self.network_frame, text=f"{self.lang.package_source_status}: {self.lang.offline if OFFLINE else self.lang.online}", font=(None, 14, 'bold'))
+        back_button = CTkButton(self.network_frame, text=self.lang.back, command=self.__return_to_admin)
+        offline_button = CTkButton(self.network_frame, text=self.lang.offline, command=self.__offline_handler)
+        online_button = CTkButton(self.network_frame, text=self.lang.online, command=self.__online_handler)
+
+        title.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
+        image_label.grid(row=2, column=0, padx=10, pady=5, sticky="nsew")
+        label.grid(row=2, column=1, padx=10, pady=5, sticky="nsew")
+        back_button.grid(row=3, column=0, padx=10, pady=5, sticky="nsew")
+        current_image.grid(row=3, column=1, padx=10, pady=5, sticky="nsew")
+        offline_button.grid(row=4, column=0, padx=10, pady=5, sticky="nsew")
+        online_button.grid(row=4, column=1, padx=10, pady=5, sticky="nsew")
+
+    def __online_handler(self):
+        if not self.__check_network_connection:
+            Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        self.online_installation = True
+        self.__draw_apps_stage()
+    
+    def __offline_handler(self):
+        self.online_installation = False
+        self.__draw_apps_stage()
+
+    def __draw_apps_stage(self):
+        self.network_frame.pack_forget()
+
+    #### END NETWORK STAGE #####
+
+    #### BEGIN APPS STAGE ####
+    def apps_stage(self):
+        self.apps_frame = CTkFrame(self)
+
+        self.__draw_progress_bar(self.apps_frame)
+        label = CTkLabel(self, text=self.lang.apps_label, font=(None, 16, 'bold'))
+        
+    #### END APPS STAGE ####
 
     ##### BEGIN FINAL STAGE #####
     def final_stage(self):
