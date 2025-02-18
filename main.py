@@ -482,7 +482,9 @@ class App(CTk):
                 self.setup_information["DriveToFormat"] = disk
                 self.setup_information["UseSwap"] = True
                 self.setup_information["SwapSize"] = "1"
-                self.encryption_key_stage(manual=False)
+                self.partitioning_frame.pack_forget()
+                self.current_stage += 1
+                self.encryption_key_stage()
             case 1:
                 self.setup_information["Partitioning"] = "Manual"
                 self.manual_partitioning()
@@ -584,29 +586,27 @@ class App(CTk):
         valid_characters = string.ascii_letters + string.digits + string.punctuation + " "
         return all(char in valid_characters for char in password)
 
-    def encryption_key_stage(self, manual, first_execution = True):
-        if first_execution:
-            if manual:
-                efi_partition = self.efi_partition_optionmenu.get().split(" | ")[0]
-                disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
-                for disk in disks:
-                    if 'children' in disk:
-                        for partition in disk['children']:
-                            if partition['name'] == efi_partition:
-                                efi_partition_size = partition['size']
-                                break
-                if efi_partition_size < 209715200:
-                    Notification(title=self.lang.efi_small_title, icon="warning.png", message=self.lang.efi_small, message_bold=True, exit_btn_msg=self.lang.exit)
-                    return
-                system_partition = "/dev/" + self.root_partition_optionmenu.get().split(" | ")[0]
-                use_swapfile = ("on" == self.swap_checkbox.get())
-                self.setup_information["Partitioning"] = "Manual"
-                self.setup_information["EfiPartition"] = "/dev/" + efi_partition
-                self.setup_information["SystemPartition"] = system_partition
-                self.setup_information["UseSwap"] = use_swapfile
-                if use_swapfile:
-                    swapsize = self.swap_entry.get()
-                    self.setup_information["SwapSize"] = swapsize
+    def encryption_key_stage(self):
+        efi_partition = self.efi_partition_optionmenu.get().split(" | ")[0]
+        disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
+        for disk in disks:
+            if 'children' in disk:
+                for partition in disk['children']:
+                    if partition['name'] == efi_partition:
+                        efi_partition_size = partition['size']
+                        break
+        if efi_partition_size < 209715200:
+            Notification(title=self.lang.efi_small_title, icon="warning.png", message=self.lang.efi_small, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        system_partition = "/dev/" + self.root_partition_optionmenu.get().split(" | ")[0]
+        use_swapfile = ("on" == self.swap_checkbox.get())
+        self.setup_information["Partitioning"] = "Manual"
+        self.setup_information["EfiPartition"] = "/dev/" + efi_partition
+        self.setup_information["SystemPartition"] = system_partition
+        self.setup_information["UseSwap"] = use_swapfile
+        if use_swapfile:
+            swapsize = self.swap_entry.get()
+            self.setup_information["SwapSize"] = swapsize
 
         self.__delete_widgets()
         self.progressbar.set(0.75)
