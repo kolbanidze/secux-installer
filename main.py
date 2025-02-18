@@ -54,47 +54,38 @@ class Notification(CTkToplevel):
 
 
 class App(CTk):
-    def __init__(self, first_execution = True):
-        # Available languages: ["ru", "en"]
-        if first_execution:
-            super().__init__()
-            self.title(DISTRO_NAME)
-            self.language = "ru"
-            self.setup_information = {}
-            self.ui_scale = 1
-            self.light_theme = False
-            set_appearance_mode("dark")
-            # self.timezone_geometry_resized = False
-            # self.init_geometry_resized = False
-        else:
-            self.focus_set()
-            for widget in self.winfo_children():
-                widget.destroy()
-        # if self.init_geometry_resized:
-        #     self.geometry(f"{self.winfo_width()//2}x{self.winfo_height()*2}")
-        #     self.init_geometry_resized = False
-        #     self.timezone_geometry_resized = False
+    def __init__(self):
+        super().__init__()
+        self.title(DISTRO_NAME)
+        self.language = "ru"
+        self.setup_information = {}
+        self.ui_scale = 1
+        self.light_theme = False
+        self.current_stage = 0
+        self.total_amount_of_stages = 8
+        set_appearance_mode("dark")
+        # self.minsize(350, 500)
+
+        self.welcome_menu = CTkFrame(self)
+        self.welcome_menu.pack(fill='both', expand=True)
 
         self.clicks = 0
         welcome_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), dark_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), size=(80,80))
-        welcome_image_label = CTkLabel(self, text="", image=welcome_image)
+        welcome_image_label = CTkLabel(self.welcome_menu, text="", image=welcome_image)
         welcome_image_label.bind("<Button-1>", self.__clicks_handler)
-        welcome_entry_label = CTkLabel(self, text=f"Добро пожаловать в установщик дистрибутива {DISTRO_NAME}\nWelcome to {DISTRO_NAME} distribution installer")        
-        select_language_label = CTkLabel(self, text="Выберите язык | Select language")
-        languages_optionmenu = CTkOptionMenu(self, values=["Русский", "English"], command=self.__language_callback)
-        next_button = CTkButton(self, text="Далее | Next", command=self.timezone_stage, fg_color="green")
-        ui_scaling_label = CTkLabel(self, text="Масштабирование | UI Scaling")
-        ui_scaling = CTkOptionMenu(self, values=["80%", "100%", "125%", "150%", "200%"], command=self.__ui_scaling_handler)
+        welcome_entry_label = CTkLabel(self.welcome_menu, text=f"Добро пожаловать в установщик дистрибутива {DISTRO_NAME}\nWelcome to {DISTRO_NAME} distribution installer")        
+        select_language_label = CTkLabel(self.welcome_menu, text="Выберите язык | Select language")
+        languages_optionmenu = CTkOptionMenu(self.welcome_menu, values=["Русский", "English"], command=self.__language_callback)
+        next_button = CTkButton(self.welcome_menu, text="Далее | Next", command=self.__draw_timezone_stage, fg_color="green")
+        ui_scaling_label = CTkLabel(self.welcome_menu, text="Масштабирование | UI Scaling")
+        ui_scaling = CTkOptionMenu(self.welcome_menu, values=["80%", "100%", "125%", "150%", "200%"], command=self.__ui_scaling_handler)
         ui_scaling.set(str(int(self.ui_scale*100)) + "%")
-        if not first_execution:
-            ui_scaling.configure(state="disabled")
-        self.white_mode = CTkSwitch(self, text="Светлая тема | White theme", command=self.__theme_handler)
+        self.white_mode = CTkSwitch(self.welcome_menu, text="Светлая тема | White theme", command=self.__theme_handler)
         if self.light_theme:
             self.white_mode.select()
-        info = CTkLabel(self, text=f"Версия | Version : {VERSION}", font=(None, 8))
+        info = CTkLabel(self.welcome_menu, text=f"Версия | Version : {VERSION}", font=(None, 8))
 
-        self.grid_columnconfigure((0, 1), weight=1)
-        if OFFLINE: Notification("1", "warning.png", "1", True, "1")
+        self.welcome_menu.grid_columnconfigure((0, 1), weight=1)
 
         welcome_image_label.grid(row=0, columnspan=2, padx=15, pady=5)
         welcome_entry_label.grid(row=1, columnspan=2, padx=15, pady=5)
@@ -105,12 +96,14 @@ class App(CTk):
         self.white_mode.grid(row=6, columnspan=2, padx=15, pady=5)
         next_button.grid(row=7, columnspan=2, padx=15, pady=(15, 5))
         info.grid(row=8, padx=15, columnspan=2, pady=(5, 0))
-        if DEBUG: CTkLabel(self, text="WARNING: DEBUG MODE", font=(None, 10), text_color=("red")).grid(row=9, columnspan=2, padx=15, pady=(5,0))
+        if DEBUG: CTkLabel(self.welcome_menu, text="WARNING: DEBUG MODE", font=(None, 10), text_color=("red")).grid(row=9, columnspan=2, padx=15, pady=(5,0))
+        
 
     def __ui_scaling_handler(self, new_scaling: str):
         self.ui_scale = int(new_scaling.replace("%", "")) / 100
         set_widget_scaling(self.ui_scale)
-        set_window_scaling(self.ui_scale)
+        self.__resize()
+        # set_window_scaling(self.ui_scale)
     
     def __theme_handler(self):
         if self.white_mode.get():
@@ -119,6 +112,12 @@ class App(CTk):
         else:
             set_appearance_mode("dark")
             self.light_theme = False
+
+    def __resize(self):
+        self.update_idletasks()
+        resolution = f"{self.winfo_reqwidth()}x{self.winfo_reqheight()}"
+        if DEBUG: print(resolution)
+        self.geometry(resolution)
 
     def __clicks_handler(self, event):
         self.clicks += 1
@@ -172,11 +171,15 @@ class App(CTk):
             case "Русский":
                 self.language = "ru"
     
-    def __delete_widgets(self):
-        for widget in self.winfo_children():
-            if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
-                widget.destroy()
+    # def __delete_widgets(self):
+    #     for widget in self.winfo_children():
+    #         if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
+    #             widget.destroy()
 
+    def __draw_progress_bar(self, frame):
+        progressbar = CTkProgressBar(frame, orientation='horizontal', width=500)
+        progressbar.set(self.current_stage / self.total_amount_of_stages)
+        progressbar.grid(row=0, column=0, padx=15, pady=(5,15), sticky="nsew", columnspan=2)
 
     ##### BEGIN TIME ZONE #####
     def __timezone_handler(self, choice):
@@ -193,26 +196,31 @@ class App(CTk):
             timezone = f"{region}"
         self.setup_information["Timezone"] = timezone
 
+    def __draw_timezone_stage(self):
+        self.welcome_menu.pack_forget()
+        self.current_stage += 1
+        self.timezone_stage()
+
+    def __return_to_welcome_menu(self):
+        self.current_stage -= 1
+        self.timezone_stage_frame.pack_forget()
+        self.welcome_menu.pack(fill='both', expand=True)
+        self.__resize()
+
     def timezone_stage(self):
         self.lang = Locale(language=self.language)
         
-        for widget in self.winfo_children():
-            widget.destroy()
-        # if not self.timezone_geometry_resized:
-        #     self.geometry(f"{self.winfo_width()*2}x{self.winfo_height()*0.5}")
-        #     self.timezone_geometry_resized = True
-        #     self.init_geometry_resized = True
-        self.progressbar = CTkProgressBar(self, orientation='horizontal', width=500)
-        self.progressbar.set(0.125)
+        self.timezone_stage_frame = CTkFrame(self)
         
-        title1 = CTkLabel(self, text=self.lang.select_time_zone, font=(None, 16, 'bold'))
-        region_label = CTkLabel(self, text=self.lang.region)
-        zone_label = CTkLabel(self, text=self.lang.timezone)
-        self.region_box = CTkOptionMenu(self, values=list(timezones.keys()), command=self.__timezone_handler)
-        self.zone_box = CTkOptionMenu(self, command=self.__time_zone_write_to_setup_info)
-        back_btn = CTkButton(self, text=self.lang.back, command=lambda: self.__init__(first_execution=False))
-        next_btn = CTkButton(self, text=self.lang.next, command=self.installation_type_stage)
-
+        self.__draw_progress_bar(self.timezone_stage_frame)
+        title1 = CTkLabel(self.timezone_stage_frame, text=self.lang.select_time_zone, font=(None, 16, 'bold'))
+        region_label = CTkLabel(self.timezone_stage_frame, text=self.lang.region)
+        zone_label = CTkLabel(self.timezone_stage_frame, text=self.lang.timezone)
+        self.region_box = CTkOptionMenu(self.timezone_stage_frame, values=list(timezones.keys()), command=self.__timezone_handler)
+        self.zone_box = CTkOptionMenu(self.timezone_stage_frame, command=self.__time_zone_write_to_setup_info)
+        back_btn = CTkButton(self.timezone_stage_frame, text=self.lang.back, command=self.__return_to_welcome_menu)
+        next_btn = CTkButton(self.timezone_stage_frame, text=self.lang.next, command=self.__draw_installation_type)
+        
         if "Timezone" not in self.setup_information:
             self.__timezone_handler("Europe")
             self.region_box.set("Europe")
@@ -224,9 +232,7 @@ class App(CTk):
             self.region_box.set(region)
             self.zone_box.set(zone)
             self.zone_box.configure(values=timezones[region])
-            
-            
-        self.progressbar.grid(row=0, column=0, padx=15, pady=(5,15), sticky="nsew", columnspan=2)
+
         title1.grid(row=1, column=0, padx=15, pady=5, sticky="ew", columnspan=2)
         region_label.grid(row=2, column=0, padx=15, pady=(5, 0), sticky="ew")
         zone_label.grid(row=2, column=1, padx=15, pady=(5, 0), sticky="ew")
@@ -234,8 +240,20 @@ class App(CTk):
         self.zone_box.grid(row=3, column=1, padx=15, pady=5, sticky="ew")
         back_btn.grid(row=4, column=0, padx=15, pady=5, sticky="ew")
         next_btn.grid(row=4, column=1, padx=15, pady=5, sticky="ew")
-    
+        self.timezone_stage_frame.pack(expand=True, fill='both')
+        self.__resize()
+        
     ##### END TIME ZONE #####
+
+    def __draw_installation_type(self):
+        self.timezone_stage_frame.pack_forget()
+        self.current_stage += 1
+        self.installation_type_stage()
+
+    def __return_to_timezone(self):
+        self.installation_type_frame.pack_forget()
+        self.current_stage -= 1
+        self.timezone_stage()
 
     ##### BEGIN INSTALLATION TYPE #####
     def __installation_type_radio_button_handler(self):
@@ -249,17 +267,17 @@ class App(CTk):
                 self.setup_information["InstallationType"] = "InSecure"
 
     def installation_type_stage(self):
-        self.progressbar.set(0.25)
+        self.installation_type_frame = CTkFrame(self)
+        self.installation_type_frame.pack(fill='both', expand=True)
 
-        self.__delete_widgets()
-        
-        label = CTkLabel(self, text=self.lang.select_install_option, font=(None, 16, "bold"))
+        self.__draw_progress_bar(self.installation_type_frame)
+        label = CTkLabel(self.installation_type_frame, text=self.lang.select_install_option, font=(None, 16, "bold"))
         self.installation_type_variable = IntVar(value=0)
-        self.secure_type = CTkRadioButton(self, value=0, variable=self.installation_type_variable, text=self.lang.securetype, command=self.__installation_type_radio_button_handler)
-        self.less_secure_type = CTkRadioButton(self, value=1, variable=self.installation_type_variable, text=self.lang.lessecuretype, command=self.__installation_type_radio_button_handler)
-        self.insecure_type = CTkRadioButton(self, value=2, variable=self.installation_type_variable, text=self.lang.insecuretype, command=self.__installation_type_radio_button_handler)
-        back_btn = CTkButton(self, text=self.lang.back, command=self.timezone_stage)
-        next_btn = CTkButton(self, text=self.lang.next, command=self.desktop_environment_stage)
+        self.secure_type = CTkRadioButton(self.installation_type_frame, value=0, variable=self.installation_type_variable, text=self.lang.securetype, command=self.__installation_type_radio_button_handler)
+        self.less_secure_type = CTkRadioButton(self.installation_type_frame, value=1, variable=self.installation_type_variable, text=self.lang.lessecuretype, command=self.__installation_type_radio_button_handler)
+        self.insecure_type = CTkRadioButton(self.installation_type_frame, value=2, variable=self.installation_type_variable, text=self.lang.insecuretype, command=self.__installation_type_radio_button_handler)
+        back_btn = CTkButton(self.installation_type_frame, text=self.lang.back, command=self.__return_to_timezone)
+        next_btn = CTkButton(self.installation_type_frame, text=self.lang.next, command=self.__draw_de)
 
         if "InstallationType" in self.setup_information:
             match self.setup_information["InstallationType"]:
@@ -278,6 +296,7 @@ class App(CTk):
         self.insecure_type.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
+        self.__resize()
     
     ##### END INSTALLATION TYPE #####
 
@@ -291,19 +310,29 @@ class App(CTk):
                 self.setup_information["DE"] = "KDE"
             case 2:
                 self.setup_information["DE"] = "Console"
-        
-    def desktop_environment_stage(self):
-        self.progressbar.set(0.375)
+    
+    def __draw_de(self):
+        self.installation_type_frame.pack_forget()
+        self.current_stage += 1
+        self.desktop_environment_stage()
+    
+    def __return_to_installation_type(self):
+        self.current_stage -= 1
+        self.de_frame.pack_forget()
+        self.installation_type_stage()
 
-        self.__delete_widgets()
-        
+    def desktop_environment_stage(self):
+        self.de_frame = CTkFrame(self)
+        self.de_frame.pack(fill='both', expand=True)
+
+        self.__draw_progress_bar(self.de_frame)
         self.de_variable = IntVar(value=0)
-        label = CTkLabel(self, text=self.lang.choose_de, font=(None, 16, "bold"))
-        self.gnome_button = CTkRadioButton(self, value=0, variable=self.de_variable, text="GNOME", command=self.__de_handler)
-        self.kde_button = CTkRadioButton(self, value=1, variable=self.de_variable, text="KDE", command=self.__de_handler)
-        self.console_button = CTkRadioButton(self, value=2, variable=self.de_variable, text=self.lang.console, command=self.__de_handler)
-        back_btn = CTkButton(self, text=self.lang.back, command=self.installation_type_stage)
-        next_btn = CTkButton(self, text=self.lang.next, command=self.kernel_select_stage)
+        label = CTkLabel(self.de_frame, text=self.lang.choose_de, font=(None, 16, "bold"))
+        self.gnome_button = CTkRadioButton(self.de_frame, value=0, variable=self.de_variable, text="GNOME", command=self.__de_handler)
+        self.kde_button = CTkRadioButton(self.de_frame, value=1, variable=self.de_variable, text="KDE", command=self.__de_handler)
+        self.console_button = CTkRadioButton(self.de_frame, value=2, variable=self.de_variable, text=self.lang.console, command=self.__de_handler)
+        back_btn = CTkButton(self.de_frame, text=self.lang.back, command=self.__return_to_installation_type)
+        next_btn = CTkButton(self.de_frame, text=self.lang.next, command=self.__draw_kernel_stage)
 
         if "DE" in self.setup_information:
             match self.setup_information["DE"]:
@@ -322,6 +351,7 @@ class App(CTk):
         self.console_button.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=5, column=1, sticky="nsew", padx=15, pady=5)
+        self.__resize()
     
     ##### END DE #####
 
@@ -339,24 +369,27 @@ class App(CTk):
         if self.linux.get():
             self.setup_information["Kernel"].append("linux")
 
-    def __move_to_partitioning_stage(self):
-        if len(self.setup_information["Kernel"]) == 0:
-            Notification(title=self.lang.atleast_one_kernel, icon='warning.png', message=self.lang.pls_select_kernel, message_bold=False, exit_btn_msg=self.lang.exit)
-            return
-        self.partitioning_stage()
+    def __draw_kernel_stage(self):
+        self.de_frame.pack_forget()
+        self.current_stage += 1
+        self.kernel_select_stage()
+    
+    def __return_to_de(self):
+        self.kernel_frame.pack_forget()
+        self.current_stage -= 1
+        self.desktop_environment_stage()
 
     def kernel_select_stage(self):
-        self.progressbar.set(0.5)
+        self.kernel_frame = CTkFrame(self)
+        self.kernel_frame.pack(expand=True, fill='both')
 
-        self.__delete_widgets()
-
-        label = CTkLabel(self, text=self.lang.kernel_label, font=(None, 16, "bold"))
-        
-        self.linux_hardened = CTkCheckBox(self, text="Linux hardened", command=self.__kernel_select_handler)
-        self.linux_lts = CTkCheckBox(self, text="Linux LTS", command=self.__kernel_select_handler)
-        self.linux = CTkCheckBox(self, text="Linux", command=self.__kernel_select_handler)
-        back_btn = CTkButton(self, text=self.lang.back, command=self.desktop_environment_stage)
-        next_btn = CTkButton(self, text=self.lang.next, command=self.__move_to_partitioning_stage)
+        self.__draw_progress_bar(self.kernel_frame)
+        label = CTkLabel(self.kernel_frame, text=self.lang.kernel_label, font=(None, 16, "bold"))
+        self.linux_hardened = CTkCheckBox(self.kernel_frame, text="Linux hardened", command=self.__kernel_select_handler)
+        self.linux_lts = CTkCheckBox(self.kernel_frame, text="Linux LTS", command=self.__kernel_select_handler)
+        self.linux = CTkCheckBox(self.kernel_frame, text="Linux", command=self.__kernel_select_handler)
+        back_btn = CTkButton(self.kernel_frame, text=self.lang.back, command=self.__return_to_de)
+        next_btn = CTkButton(self.kernel_frame, text=self.lang.next, command=self.__draw_partitioning)
 
         if "Kernel" not in self.setup_information:
             self.linux_hardened.select()
@@ -376,6 +409,7 @@ class App(CTk):
         self.linux.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
+        self.__resize()
 
     ##### END KERNEL SELECT #####
 
@@ -395,12 +429,26 @@ class App(CTk):
         # Return the formatted string with 2 decimal places
         return f"{size_in_bytes:.2f} {units[unit_index]}"
     
-    def partitioning_stage(self):
-        self.progressbar.set(0.625)
+    def __draw_partitioning(self):
+        if len(self.setup_information["Kernel"]) == 0:
+            Notification(title=self.lang.atleast_one_kernel, icon='warning.png', message=self.lang.pls_select_kernel, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
 
-        self.__delete_widgets()
-        
-        label = CTkLabel(self, text=self.lang.diskpart, font=(None, 16, "bold"))
+        self.current_stage += 1
+        self.kernel_frame.pack_forget()
+        self.partitioning_stage()
+    
+    def __return_to_kernel(self):
+        self.partitioning_frame.pack_forget()
+        self.current_stage -= 1
+        self.kernel_select_stage()
+
+    def partitioning_stage(self):
+        self.partitioning_frame = CTkFrame(self)
+        self.partitioning_frame.pack(expand=True, fill='both')
+
+        self.__draw_progress_bar(self.partitioning_frame)
+        label = CTkLabel(self.partitioning_frame, text=self.lang.diskpart, font=(None, 16, "bold"))
         
         disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,TYPE', '--json', '-b'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
         raw_disks = []
@@ -411,11 +459,11 @@ class App(CTk):
         erase_all_disks = [f"/dev/{drive} | {self.__convert_bytes_to_human_readable(size)}" for drive, size in sorted_raw_disks]
 
         self.partitioning_type = IntVar(value=0)
-        erase_all_partitioning = CTkRadioButton(self, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
-        self.erase_all_disk = CTkOptionMenu(self, values=erase_all_disks)
-        manual_partitioning = CTkRadioButton(self, text=self.lang.manual, variable=self.partitioning_type, value=1)
-        back_btn = CTkButton(self, text=self.lang.back, command=self.kernel_select_stage)
-        next_btn = CTkButton(self, text=self.lang.next, command=self.__partitioning_next_button_handler)
+        erase_all_partitioning = CTkRadioButton(self.partitioning_frame, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
+        self.erase_all_disk = CTkOptionMenu(self.partitioning_frame, values=erase_all_disks)
+        manual_partitioning = CTkRadioButton(self.partitioning_frame, text=self.lang.manual, variable=self.partitioning_type, value=1)
+        back_btn = CTkButton(self.partitioning_frame, text=self.lang.back, command=self.__return_to_kernel)
+        next_btn = CTkButton(self.partitioning_frame, text=self.lang.next, command=self.__partitioning_next_button_handler)
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         erase_all_partitioning.grid(row=2, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
@@ -423,6 +471,7 @@ class App(CTk):
         manual_partitioning.grid(row=4, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
+        self.__resize()
 
     def __partitioning_next_button_handler(self):
         key = self.partitioning_type.get()
@@ -1228,8 +1277,10 @@ class App(CTk):
             self._execute("arch-chroot /mnt pacman -S python-opencv")
             self._execute("arch-chroot /mnt pip install customtkinter setuptools screeninfo python-dotenv --break-system-packages")
         else:
-            self._execute(f"cp {WORKDIR}/python_packages /mnt/tmp/python_packages -r")
-            self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
+            self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
+            # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
+            self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/setuptools*")
+            self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/*")
 
         # Installing Kirt App
         self._execute("mkdir -p /mnt/usr/local/bin/kirt-app")

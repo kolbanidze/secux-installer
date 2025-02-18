@@ -1,40 +1,38 @@
-from subprocess import run
+from customtkinter import *
 
-PACKAGES = "base linux linux-lts linux-hardened linux-headers linux-lts-headers linux-hardened-headers linux-firmware amd-ucode intel-ucode vim nano efibootmgr sudo plymouth python-pip python-dbus v4l-utils lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd sbctl shim-signed mokutil networkmanager-openvpn gnome-tweaks gdm vlc firefox chromium tk python-pexpect python-pillow"
+class App(CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("YO.")
+        self.main_frame = CTkScrollableFrame(self)
+        mainlabel = CTkLabel(self.main_frame, text="MAIN FRAME")
+        next_button = CTkButton(self.main_frame, text="NEXT", command=self._next_stage)
+        scaling = CTkOptionMenu(self.main_frame, values=["80%", "100%", "125%", "150%"], command=self._scaling_handler)
+        self.main_frame.pack(fill='both', expand=True)
+        mainlabel.pack(padx=10, pady=5)
+        next_button.pack(padx=10, pady=5)
+        scaling.pack(padx=10, pady=5)
+        # self.main_frame.pack_forget()
+        self.second_frame = CTkScrollableFrame(self)
+        return_button = CTkButton(self.second_frame, text="Return to main frame", command=self._return_to)
+        return_button.pack(padx=10, pady=5)
+    
+    def _scaling_handler(self, value):
+        value = int(value.replace("%", "")) / 100
+        set_widget_scaling(value)
+        # set_window_scaling(value)
+    
+    def _next_stage(self):
+        self.main_frame.pack_forget()
+        self.second_frame.pack(fill='both', expand=True)
+    
+    def _return_to(self):
+        self.second_frame.pack_forget()
+        self.main_frame.pack(fill='both', expand=True)
 
-PACKAGES += " baobab epiphany evince gdm gnome-backgrounds gnome-calculator gnome-calendar gnome-characters gnome-clocks gnome-color-manager gnome-connections gnome-console gnome-contacts gnome-control-center gnome-disk-utility gnome-font-viewer gnome-keyring gnome-logs gnome-maps gnome-menus gnome-music gnome-remote-desktop gnome-session gnome-settings-daemon gnome-shell gnome-shell-extensions gnome-software gnome-system-monitor gnome-text-editor gnome-tour gnome-user-docs gnome-user-share gnome-weather grilo-plugins gvfs gvfs-afc gvfs-dnssd gvfs-goa gvfs-google gvfs-gphoto2 gvfs-mtp gvfs-nfs gvfs-onedrive gvfs-smb gvfs-wsdd loupe malcontent nautilus orca rygel simple-scan snapshot sushi tecla totem xdg-desktop-portal-gnome xdg-user-dirs-gtk yelp bluedevil breeze breeze-gtk breeze-plymouth discover drkonqi flatpak-kcm kactivitymanagerd kde-cli-tools kde-gtk-config kdecoration kdeplasma-addons kgamma kglobalacceld kinfocenter kmenuedit kpipewire krdp kscreen kscreenlocker ksshaskpass ksystemstats kwallet-pam kwayland kwin kwrited layer-shell-qt libkscreen libksysguard libplasma milou ocean-sound-theme oxygen oxygen-sounds plasma-activities plasma-activities-stats plasma-browser-integration plasma-desktop plasma-disks plasma-firewall plasma-integration plasma-nm plasma-pa plasma-sdk plasma-systemmonitor plasma-thunderbolt plasma-vault plasma-welcome plasma-workspace plasma-workspace-wallpapers plasma5support plymouth-kcm polkit-kde-agent powerdevil print-manager qqc2-breeze-style sddm-kcm systemsettings wacomtablet xdg-desktop-portal-kde xf86-video-vesa xorg-bdftopcf xorg-docs xorg-font-util xorg-fonts-100dpi xorg-fonts-75dpi xorg-fonts-encodings xorg-iceauth xorg-mkfontscale xorg-server xorg-server-common xorg-server-devel xorg-server-xephyr xorg-server-xnest xorg-server-xvfb xorg-sessreg xorg-setxkbmap xorg-smproxy xorg-x11perf xorg-xauth xorg-xbacklight xorg-xcmsdb xorg-xcursorgen xorg-xdpyinfo xorg-xdriinfo xorg-xev xorg-xgamma xorg-xhost xorg-xinput xorg-xkbcomp xorg-xkbevd xorg-xkbutils xorg-xkill xorg-xlsatoms xorg-xlsclients xorg-xmodmap xorg-xpr xorg-xprop xorg-xrandr xorg-xrdb xorg-xrefresh xorg-xset xorg-xsetroot xorg-xvinfo xorg-xwayland xorg-xwd xorg-xwininfo xorg-xwud"
-
-PACKAGES += " vte4"
-
-deps = []
-
-for i in PACKAGES.split(" "):
-    process = run(f"pactree -u \"{i}\"", shell=True, capture_output=True)
-    a = process.stdout.decode().split("\n")
-    deps.append(a)
-    # for j in a:
-    #     if j not in deps:
-    #         deps.append(j)
-# deps.append("gnome")
-# deps.append("plasma")
-# deps.append("xorg")
-# print(" ".join(deps))
-deps2=[]
-for i in deps:
-    for j in i:
-        if len(j) != 0:
-            deps2.append(j)
-# print(len(deps2))
-deps2 = list(set(deps2))
-print(len(deps2))
-for i in range(len(deps2)):
-    if "<" in deps2[i]: 
-        deps2[i] = deps2[i].split("<")[0]
-        continue
-    if ">" in deps2[i]:
-        deps2[i] = deps2[i].split(">")[0]
-        continue
-    if "=" in deps2[i]:
-        deps2[i] = deps2[i].split("=")[0]
-        # or ">" in deps2[i] or "=" in deps2[i]:
-print(" ".join(deps2))
+if __name__ == "__main__":
+    App().mainloop()
+# I'll commit it for history.
+# That script has proven that flexible scalable widgets EXISTS in customtkinter :)
+# glhf 18.02.2025
+# thx ndtp for such opportunity
