@@ -1557,9 +1557,9 @@ class App(CTk):
             else:
                 self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
                 # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
-                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/darkdetect* --break-system-packages")
-                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/packaging* --break-system-packages")
-                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/customtkinter* --break-system-packages")
+                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/darkdetect* --break-system-packages\"")
+                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/packaging* --break-system-packages\"")
+                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/customtkinter* --break-system-packages\"")
                 self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
 
         # Installing Kirt App
@@ -1580,8 +1580,8 @@ class App(CTk):
             else:
                 self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
                 # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
-                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/setuptools* --break-system-packages")
-                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/* --break-system-packages")
+                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/setuptools* --break-system-packages\"")
+                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/* --break-system-packages\"")
                 self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
 
         # Hardening
