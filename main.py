@@ -1159,7 +1159,7 @@ class App(CTk):
             for cmd in commands:
                 try:
                     print(f"Executing: {cmd['command']}")
-                    # self.console.see(END)
+                    self.console.see(END)
                     # Run the command
                     if "input" in cmd:
                         process = subprocess.Popen(
@@ -1188,28 +1188,28 @@ class App(CTk):
                         )
 
                     # Update the console in real-time
-                    # self.console.configure(state="normal")
+                    self.console.configure(state="normal")
                     for line in process.stdout:
                         print(line, end="")
-                        # self.console.insert(END, line)
-                        # self.console.see(END)
+                        self.console.insert(END, line)
+                        self.console.see(END)
                     for line in process.stderr:
                         print(line, end="")
-                        # self.console.insert(END, line)
-                        # self.console.see(END)
+                        self.console.insert(END, line)
+                        self.console.see(END)
 
                     process.stdout.close()
                     process.stderr.close()
                     process.wait()  # Ensure the process finishes
 
-                    # self.console.configure(state="disabled")
+                    self.console.configure(state="disabled")
                     print("\n")
                 except Exception as e:
-                    # self.console.configure(state="normal")
+                    self.console.configure(state="normal")
                     print(f"Error: {str(e)}\n")
-                    # self.console.insert(END, f"Error: {str(e)}\n")
-                    # self.console.configure(state="disabled")
-                    # self.console.see(END)
+                    self.console.insert(END, f"Error: {str(e)}\n")
+                    self.console.configure(state="disabled")
+                    self.console.see(END)
 
         # Run the commands in a separate thread to avoid blocking the UI
         threading.Thread(target=run_commands, daemon=True).start()
