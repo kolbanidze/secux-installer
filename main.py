@@ -1148,84 +1148,52 @@ class App(CTk):
                 partitions.append(f"/dev/{name}")
         return partitions
 
-    def _execute(self, command: str, input: str = None, no_console_output = False):
+    def _execute(self, command: str, input: str = None):
         cmd = {"command": command}
         if input:
             cmd["input"] = input
-        if no_console_output:
-            cmd["no_console_output"] = True
         self.commands.append(cmd)
-        # if input and no_console_output:
-        #     self.commands.append({"command": command, "input": input, "no_console_output": True})
-        # if input:
-        #     self.commands.append({"command": command, "input": input})
-        # if no_console_output:
-        #     self.commands.append({"command": command, "no_console_output": True})
-        # else:
-        #     self.commands.append({"command": command})
+
 
     def _execute_commands(self, commands: list):
         def run_commands():
             for cmd in commands:
                 try:
                     print(f"Executing: {cmd['command']}")
-                    # self.console.see(END)
-                    # Run the command
+                    process = subprocess.Popen(
+                        cmd["command"],
+                        stdin=subprocess.PIPE if "input" in cmd else None,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        shell=True,
+                        text=True,
+                        executable="/bin/bash",
+                        bufsize=1  # Line-buffered output
+                    )
                     if "input" in cmd:
-                        process = subprocess.Popen(
-                            # f"stdbuf -oL {cmd["command"]}",
-                            cmd["command"],
-                            stdin=subprocess.PIPE,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            shell=True,
-                            text=True,
-                            executable="/bin/bash",
-                            bufsize=1  # Line-buffered output
-                        )
                         process.stdin.write(cmd["input"])
                         process.stdin.close()
-                    else:
-                        process = subprocess.Popen(
-                            # f"stdbuf -oL {cmd["command"]}",
-                            cmd["command"],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            shell=True,
-                            text=True,
-                            executable="/bin/bash",
-                            bufsize=1  # Line-buffered output
-                        )
-                    
-                    # Update the console in real-time
-                    # if 'no_console_output' not in cmd: 
-                    #     self.console.configure(state="normal")
+
+                    def update_console(text):
+                        self.console.configure(state="normal")
+                        self.console.insert(END, text)
+                        self.console.see(END)
+                        self.console.configure(state="disabled")
+
                     for line in process.stdout:
                         print(line, end="")
-                        # if 'no_console_output' not in cmd: 
-                            # self.console.insert(END, line)
-                            # self.console.see(END)
+                        self.console.after(0, update_console, line)
+
                     for line in process.stderr:
                         print(line, end="")
-                        # if 'no_console_output' not in cmd:
-                        #     self.console.insert(END, line)
-                        #     self.console.see(END)
+                        self.console.after(0, update_console, line)
 
-                    process.stdout.close()
-                    process.stderr.close()
-                    process.wait()  # Ensure the process finishes
-
-                    # if 'no_console_output' not in cmd:
-                    #     self.console.configure(state="disabled")
+                    process.wait()
                     print("\n")
-                except Exception as e:
-                    self.console.configure(state="normal")
-                    print(f"Error: {str(e)}\n")
-                    self.console.insert(END, f"Error: {str(e)}\n")
-                    self.console.configure(state="disabled")
-                    self.console.see(END)
 
-        # Run the commands in a separate thread to avoid blocking the UI
+                except Exception as e:
+                    self.console.after(0, update_console, f"Error: {str(e)}\n")
+
         threading.Thread(target=run_commands, daemon=True).start()
 
     def __check_secure_boot_and_setup_mode(self):
@@ -1535,12 +1503,12 @@ class App(CTk):
             self._execute("mkdir -p /mnt/etc/secureboot")
             self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
             self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
-            self._execute("sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/usr/lib/systemd/boot/efi/systemd-bootx64.efi", no_console_output=True)
+            self._execute("sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/usr/lib/systemd/boot/efi/systemd-bootx64.efi")
             self._execute("echo DEBUG thing.")
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f"echo Signing {kernel}")
-                self._execute(f"sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/Linux/arch-{kernel}.efi /mnt/efi/EFI/Linux/arch-{kernel}.efi", no_console_output=True)
-                self._execute(f"sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/Linux/arch-{kernel}-fallback.efi /mnt/efi/EFI/Linux/arch-{kernel}-fallback.efi", no_console_output=True)
+                self._execute(f"sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/Linux/arch-{kernel}.efi /mnt/efi/EFI/Linux/arch-{kernel}.efi")
+                self._execute(f"sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/Linux/arch-{kernel}-fallback.efi /mnt/efi/EFI/Linux/arch-{kernel}-fallback.efi")
                 self._execute(f"echo Successfully signed {kernel}")
             self._execute('echo Importing MOK')
             self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
