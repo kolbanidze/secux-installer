@@ -14,11 +14,13 @@ from hmac import compare_digest
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
-VERSION = "0.1.12"
+VERSION = "0.2"
 DEBUG = True
-DEBUG_SHOW_COMMANDS = False
+DEBUG_SHOW_COMMANDS = False # Default: False
 DEBUG_SHOW_COMMANDS_EFI_PARTITION = "/dev/vda1"
 DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION = "/dev/vda2"
+DEBUG_AUTOENTRY = True # Default: False
+DEBUG_AUTOENTRY_VALUES = ['asd', 'asdasdasd']
 
 MIN_PASSWORD_LENGTH = 8
 
@@ -47,7 +49,7 @@ class Notification(CTkToplevel):
         if message_bold:
             label.configure(font=(None, 16, "bold"))
         exit_button = CTkButton(self, text=exit_btn_msg, command=self.destroy)
-
+        self.bind(("<Return>"), lambda event: self.destroy())
         image_label.grid(row=0, column=0, padx=15, pady=5, sticky="nsew")
         label.grid(row=0, column=1, padx=15, pady=5, sticky="nsew")
         exit_button.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
@@ -95,6 +97,7 @@ class App(CTk):
         self.ui_scaling.grid(row=5, columnspan=2, padx=15, pady=5)
         self.white_mode.grid(row=6, columnspan=2, padx=15, pady=5)
         next_button.grid(row=7, columnspan=2, padx=15, pady=(15, 5))
+        self.bind(("<Return>"), lambda event: self.__draw_timezone_stage())
         info.grid(row=8, padx=15, columnspan=2, pady=(5, 0))
         if DEBUG: CTkLabel(self.welcome_menu, text="WARNING: DEBUG MODE", font=(None, 10), text_color=("red")).grid(row=9, columnspan=2, padx=15, pady=(5,0))
         
@@ -114,7 +117,6 @@ class App(CTk):
     def __resize(self):
         self.update_idletasks()
         resolution = f"{self.winfo_reqwidth()}x{self.winfo_reqheight()}"
-        # if DEBUG: print(resolution)
         self.geometry(resolution)
 
     def __clicks_handler(self, event):
@@ -190,16 +192,11 @@ class App(CTk):
             if hasattr(self, 'network_frame'):
                 del self.network_frame
             self.current_stage = 0
-    
-    # def __delete_widgets(self):
-    #     for widget in self.winfo_children():
-    #         if type(widget) != windows.widgets.ctk_progressbar.CTkProgressBar:
-    #             widget.destroy()
 
     def __draw_progress_bar(self, frame):
         progressbar = CTkProgressBar(frame, orientation='horizontal', width=500)
         value = self.current_stage / self.total_amount_of_stages
-        if DEBUG: print(value*100)
+        # if DEBUG: print(value*100)
         progressbar.set(value)
         progressbar.grid(row=0, column=0, padx=15, pady=(5,15), sticky="nsew", columnspan=2)
 
@@ -219,6 +216,7 @@ class App(CTk):
         self.setup_information["Timezone"] = timezone
 
     def __draw_timezone_stage(self):
+        self.bind(("<Return>"), lambda event: self.__draw_installation_type())
         self.welcome_menu.pack_forget()
         self.current_stage += 1
         self.lang = Locale(language=self.language)
@@ -227,7 +225,8 @@ class App(CTk):
         self.__draw_stage(self.timezone_stage_frame)
             
     def __return_to_welcome_menu(self):
-        
+        self.bind(("<Return>"), lambda event: self.__draw_timezone_stage())
+        self.current_stage -= 1
         self.timezone_stage_frame.pack_forget()
         self.__draw_stage(self.welcome_menu)
 
@@ -267,6 +266,7 @@ class App(CTk):
     ##### END TIME ZONE #####
 
     def __draw_installation_type(self):
+        self.bind(("<Return>"), lambda event: self.__draw_de())
         self.timezone_stage_frame.pack_forget()
         self.current_stage += 1
         if not hasattr(self, "installation_type_frame"):
@@ -275,7 +275,8 @@ class App(CTk):
 
     def __return_to_timezone(self):
         self.installation_type_frame.pack_forget()
-        
+        self.bind(("<Return>"), lambda event: self.__draw_installation_type())
+        self.current_stage -= 1
         self.__draw_stage(self.timezone_stage_frame)
 
     def __draw_stage(self, frame):
@@ -323,7 +324,7 @@ class App(CTk):
         self.insecure_type.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
         back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
         next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
-        self.__resize()
+        # self.__resize()
     
     ##### END INSTALLATION TYPE #####
 
@@ -341,12 +342,14 @@ class App(CTk):
     def __draw_de(self):
         self.installation_type_frame.pack_forget()
         self.current_stage += 1
+        self.bind(("<Return>"), lambda event: self.__draw_kernel_stage())
         if not hasattr(self, "de_frame"):
             self.desktop_environment_stage()
         self.__draw_stage(self.de_frame)
     
     def __return_to_installation_type(self):
-        
+        self.bind(("<Return>"), lambda event: self.__draw_de())
+        self.current_stage -= 1
         self.de_frame.pack_forget()
         self.__draw_stage(self.installation_type_frame)
 
@@ -399,6 +402,7 @@ class App(CTk):
 
     def __draw_kernel_stage(self):
         self.de_frame.pack_forget()
+        self.bind(("<Return>"), lambda event: self.__draw_partitioning())
         self.current_stage += 1
         if not hasattr(self, "kernel_frame"):
             self.kernel_select_stage()
@@ -406,7 +410,8 @@ class App(CTk):
     
     def __return_to_de(self):
         self.kernel_frame.pack_forget()
-        
+        self.bind(("<Return>"), lambda event: self.__draw_kernel_stage())
+        self.current_stage -= 1
         self.__draw_stage(self.de_frame)
 
     def kernel_select_stage(self):
@@ -462,7 +467,7 @@ class App(CTk):
         if len(self.setup_information["Kernel"]) == 0:
             Notification(title=self.lang.atleast_one_kernel, icon='warning.png', message=self.lang.pls_select_kernel, message_bold=False, exit_btn_msg=self.lang.exit)
             return
-
+        self.bind(("<Return>"), lambda event: self.__partitioning_next_button_handler())
         self.current_stage += 1
         self.kernel_frame.pack_forget()
         if not hasattr(self, "partitioning_frame"):
@@ -471,7 +476,8 @@ class App(CTk):
     
     def __return_to_kernel(self):
         self.partitioning_frame.pack_forget()
-        
+        self.bind(("<Return>"), lambda event: self.__draw_partitioning())
+        self.current_stage -= 1
         self.__draw_stage(self.kernel_frame)
 
     def partitioning_stage(self):
@@ -517,12 +523,14 @@ class App(CTk):
                 self.current_stage += 1
                 if not hasattr(self, "encryption_frame"):
                     self.encryption_key_stage()
+                self.bind(("<Return>"), lambda event: self.__draw_admin_creation())
                 self.__draw_stage(self.encryption_frame)
             case 1:
                 self.setup_information["Partitioning"] = "Manual"
                 self.partitioning_frame.pack_forget()
                 if not hasattr(self, "manual_partitioning_frame"):
                     self.manual_partitioning()
+                self.bind(("<Return>"), lambda event: self.__draw_encryption_stage_from_manual())
                 self.__draw_stage(self.manual_partitioning_frame)
 
     def manual_partitioning(self):
@@ -638,16 +646,19 @@ class App(CTk):
         if use_swapfile:
             swapsize = self.swap_entry.get()
             self.setup_information["SwapSize"] = swapsize
-        
+        self.bind(("<Return>"), lambda event: self.__draw_admin_creation())
         self.manual_partitioning_frame.grid_forget()
         self.current_stage += 1
+
         if not hasattr(self, "encryption_frame"):
             self.encryption_key_stage()
         self.__draw_stage(self.encryption_frame)
     
-    def __return_to_partitioning(self, frame):
+    def __return_to_partitioning(self, frame, decrement_current_stage = False):
         frame.pack_forget()
-        
+        if decrement_current_stage:
+            self.current_stage -= 1
+        self.bind(("<Return>"), lambda event: self.__partitioning_next_button_handler())
         if not hasattr(self, "partitioning_frame"):
             self.partitioning_stage()
         self.__draw_stage(self.partitioning_frame)
@@ -668,8 +679,12 @@ class App(CTk):
         self.system_partition_encryption_key_entry = CTkEntry(self.encryption_frame, show='*')
         label2 = CTkLabel(self.encryption_frame, text=self.lang.enckey2)
         self.system_partition_encryption_key_entry2 = CTkEntry(self.encryption_frame, show='*')
-        back_btn = CTkButton(self.encryption_frame, text=self.lang.back, command=lambda: self.__return_to_partitioning(self.encryption_frame))
+        back_btn = CTkButton(self.encryption_frame, text=self.lang.back, command=lambda: self.__return_to_partitioning(self.encryption_frame, decrement_current_stage=True))
         next_btn = CTkButton(self.encryption_frame, text=self.lang.next, command=self.__draw_admin_creation)
+
+        if DEBUG_AUTOENTRY:
+            self.system_partition_encryption_key_entry.insert(0, DEBUG_AUTOENTRY_VALUES[1])
+            self.system_partition_encryption_key_entry2.insert(0, DEBUG_AUTOENTRY_VALUES[1])
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         label1.grid(row=2, column=0, padx=15, pady=5, sticky="nsew", columnspan=2)
@@ -694,10 +709,13 @@ class App(CTk):
         if not hasattr(self, "admin_frame"):
             self.admin_creation_stage()
         self.encryption_frame.pack_forget()
+        self.bind(("<Return>"), lambda event: self.__draw_network_stage())
         self.__draw_stage(self.admin_frame)
 
     def __return_to_encryption_key_stage(self):
         self.admin_frame.pack_forget()
+        self.current_stage -= 1
+        self.bind(("<Return>"), lambda event: self.__draw_admin_creation())
         self.__draw_stage(self.encryption_frame)
 
     ##### END ENCRYPTION KEY #####
@@ -735,6 +753,13 @@ class App(CTk):
         back_btn = CTkButton(self.admin_frame, text=self.lang.back, command=self.__return_to_encryption_key_stage)
         next_btn = CTkButton(self.admin_frame, text=self.lang.next, command=self.__draw_network_stage)
 
+        if DEBUG_AUTOENTRY:
+            self.your_name_entry.insert(0, DEBUG_AUTOENTRY_VALUES[0])
+            self.hostname_entry.insert(0, DEBUG_AUTOENTRY_VALUES[0])
+            self.username_entry.insert(0, DEBUG_AUTOENTRY_VALUES[0])
+            self.password_entry.insert(0, DEBUG_AUTOENTRY_VALUES[1])
+            self.password_entry2.insert(0, DEBUG_AUTOENTRY_VALUES[1])
+
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         your_name_label.grid(row=2, column=0, padx=15, pady=5, sticky="nsew")
         self.your_name_entry.grid(row=2, column=1, padx=15, pady=5, sticky="nsew")
@@ -753,66 +778,6 @@ class App(CTk):
 
     #### NETWORK STAGE #####
     def __draw_network_stage(self):
-        self.admin_frame.pack_forget()
-        self.current_stage += 1
-        if not hasattr(self, "network_frame"):
-            self.network_stage()
-        self.__draw_stage(self.network_frame)
-        self.__resize()
-    
-    def __return_to_admin(self):
-        self.network_frame.pack_forget()
-        self.current_stage -= 1
-        self.__draw_stage(self.admin_frame)
-
-    def network_stage(self):
-        self.network_frame = CTkFrame(self)
-
-        self.__draw_progress_bar(self.network_frame)
-        title = CTkLabel(self.network_frame, text=self.lang.online_or_offline_title, font=(None, 16, 'bold'))
-        image = CTkImage(light_image=Image.open(f"{WORKDIR}/images/wifi.png"), dark_image=Image.open(f"{WORKDIR}/images/wifi.png"), size=(80, 80))
-        image_label = CTkLabel(self.network_frame, text="", image=image)
-        label = CTkLabel(self.network_frame, text=self.lang.package_source)
-        current_image = CTkLabel(self.network_frame, text=f"{self.lang.package_source_status}: {self.lang.offline if OFFLINE else self.lang.online}", font=(None, 14, 'bold'))
-        back_button = CTkButton(self.network_frame, text=self.lang.back, command=self.__return_to_admin)
-        offline_button = CTkButton(self.network_frame, text=self.lang.offline, command=self.__offline_handler)
-        online_button = CTkButton(self.network_frame, text=self.lang.online, command=self.__online_handler)
-
-        title.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
-        image_label.grid(row=2, column=0, padx=10, pady=5, sticky="nsew")
-        label.grid(row=2, column=1, padx=10, pady=5, sticky="nsew")
-        back_button.grid(row=3, column=0, padx=10, pady=5, sticky="nsew")
-        current_image.grid(row=3, column=1, padx=10, pady=5, sticky="nsew")
-        offline_button.grid(row=4, column=0, padx=10, pady=5, sticky="nsew")
-        online_button.grid(row=4, column=1, padx=10, pady=5, sticky="nsew")
-
-    def __online_handler(self):
-        if not self.__check_network_connection:
-            Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
-            return
-        self.online_installation = True
-        self.__draw_apps_stage()
-    
-    def __offline_handler(self):
-        self.online_installation = False
-        self.__draw_apps_stage()
-
-    def __draw_apps_stage(self):
-        self.network_frame.pack_forget()
-
-    #### END NETWORK STAGE #####
-
-    #### BEGIN APPS STAGE ####
-    def apps_stage(self):
-        self.apps_frame = CTkFrame(self)
-
-        self.__draw_progress_bar(self.apps_frame)
-        label = CTkLabel(self, text=self.lang.apps_label, font=(None, 16, 'bold'))
-        
-    #### END APPS STAGE ####
-
-    ##### BEGIN FINAL STAGE #####
-    def final_stage(self):
         if not compare_digest(self.password_entry.get(), self.password_entry2.get()):
             Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
             return
@@ -838,24 +803,231 @@ class App(CTk):
         if not self.__validate_input(input=self.username_entry.get(), russian=False, spaces=False):
             Notification(title=self.lang.mismatch, icon="warning.png", message=self.lang.username_mismatch, message_bold=False, exit_btn_msg=self.lang.exit)
             return
-        
-        
         self.setup_information["FullName"] = self.your_name_entry.get()
         self.setup_information["Hostname"] = self.hostname_entry.get()
         self.setup_information["Username"] = self.username_entry.get()
         self.setup_information["Password"] = self.password_entry.get()
 
-        self.__delete_widgets()
-        self.progressbar.set(1)
+        self.admin_frame.pack_forget()
+        self.current_stage += 1
+        if not hasattr(self, "network_frame"):
+            self.network_stage()
+        self.bind(("<Return>"), lambda event: self.__online_handler())
 
-        label = CTkLabel(self, text=self.lang.final, font=(None, 16, "bold"))
-        timezone_label = CTkLabel(self, text=self.lang.fulltimezone)
-        timezone_entry = CTkEntry(self)
+        self.__draw_stage(self.network_frame)
+        self.__resize()
+    
+    def __return_to_admin(self):
+        self.network_frame.pack_forget()
+        self.current_stage -= 1
+        self.bind(("<Return>"), lambda event: self.__draw_network_stage())
+        self.__draw_stage(self.admin_frame)
+
+    def network_stage(self):
+        self.network_frame = CTkFrame(self)
+
+        self.__draw_progress_bar(self.network_frame)
+        title = CTkLabel(self.network_frame, text=self.lang.online_or_offline_title, font=(None, 16, 'bold'))
+        image = CTkImage(light_image=Image.open(f"{WORKDIR}/images/wifi.png"), dark_image=Image.open(f"{WORKDIR}/images/wifi.png"), size=(80, 80))
+        image_label = CTkLabel(self.network_frame, text="", image=image)
+        label = CTkLabel(self.network_frame, text=self.lang.package_source)
+        current_image = CTkLabel(self.network_frame, text=f"{self.lang.package_source_status}: {self.lang.offline if OFFLINE else self.lang.online}", font=(None, 14, 'bold'))
+        back_button = CTkButton(self.network_frame, text=self.lang.back, command=self.__return_to_admin)
+        offline_button = CTkButton(self.network_frame, text=self.lang.offline, command=self.__offline_handler)
+        if not OFFLINE:
+            offline_button.configure(state="disabled")
+        online_button = CTkButton(self.network_frame, text=self.lang.online, command=self.__online_handler)
+
+        title.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
+        image_label.grid(row=2, column=0, padx=10, pady=5, sticky="nsew")
+        label.grid(row=2, column=1, padx=10, pady=5, sticky="nsew")
+        offline_button.grid(row=3, column=0, padx=10, pady=5, sticky="nsew")
+        online_button.grid(row=3, column=1, padx=10, pady=5, sticky="nsew")
+        back_button.grid(row=4, column=0, padx=10, pady=5, sticky="nsew")
+        current_image.grid(row=4, column=1, padx=10, pady=5, sticky="nsew")
+
+
+    def __online_handler(self):
+        if not self.__check_network_connection():
+            Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        self.online_installation = True
+        self.__draw_apps_stage()
+    
+    # VALIDATEEEEEEEEE
+    def __offline_handler(self):
+        self.online_installation = False
+        self.__draw_apps_stage()
+
+    def __draw_apps_stage(self):
+        self.network_frame.pack_forget()
+        self.current_stage += 1
+        if not hasattr(self, "apps_frame"):
+            self.apps_stage()
+        self.bind(("<Return>"), lambda event: self.__draw_final())
+
+        self.__draw_stage(self.apps_frame)
+
+    #### END NETWORK STAGE #####
+
+    #### BEGIN APPS STAGE ####
+
+    def __return_to_network(self):
+        self.apps_frame.pack_forget()
+        self.current_stage -= 1
+        self.bind(("<Return>"), lambda event: self.__draw_apps_stage())
+        self.__draw_stage(self.network_frame)
+
+    def apps_stage(self):
+        self.apps_frame = CTkFrame(self)
+
+        self.__draw_progress_bar(self.apps_frame)
+        label = CTkLabel(self.apps_frame, text=self.lang.apps_label, font=(None, 16, 'bold'))
+        tabview = CTkTabview(self.apps_frame)
+        tabview.add("Secux")
+        tabview.add("Flatpak")
+        tabview.add("Pacman")
+
+        tabview.set("Flatpak")
+
+        secux_tab = tabview.tab("Secux")
+        flatpak_tab = tabview.tab("Flatpak")
+        pacman_tab = tabview.tab("Pacman")
+
+        self.securitymanager = CTkCheckBox(secux_tab, text="Security Manager")
+        self.kirt_app = CTkCheckBox(secux_tab, text=f"Kirt App")
+        self.securitymanager.select()
+        self.kirt_app.select()
+
+        self.chromium_flatpak = CTkCheckBox(flatpak_tab, text="Chromium", state="disabled")
+        self.chrome_flatpak = CTkCheckBox(flatpak_tab, text="Chrome", state="disabled")
+        self.firefox_flatpak = CTkCheckBox(flatpak_tab, text="Firefox", state="disabled")
+        self.yandex_flatpak = CTkCheckBox(flatpak_tab, text="Yandex", state="disabled")
+        self.telegram_flatpak = CTkCheckBox(flatpak_tab, text="Telegram", state="disabled")
+        self.vlc_flatpak = CTkCheckBox(flatpak_tab, text="VLC", state="disabled")
+        self.keepassxc_flatpak = CTkCheckBox(flatpak_tab, text="KeePassXC", state="disabled")
+        self.onlyoffice_flatpak = CTkCheckBox(flatpak_tab, text="OnlyOffice", state="disabled")
+        self.obs_flatpak = CTkCheckBox(flatpak_tab, text="OBS", state="disabled")
+        self.libreoffice_flatpak = CTkCheckBox(flatpak_tab, text="Libreoffice", state="disabled")
+
+        self.chromium = CTkCheckBox(pacman_tab, text="Chromium")
+        self.firefox = CTkCheckBox(pacman_tab, text="Firefox")
+        self.vlc = CTkCheckBox(pacman_tab, text="VLC")
+        self.keepassxc = CTkCheckBox(pacman_tab, text="KeePassXC")
+        self.obs = CTkCheckBox(pacman_tab, text="OBS")
+        self.libreoffice = CTkCheckBox(pacman_tab, text="Libreoffice")
+        self.chromium.select()
+        self.firefox.select()
+        self.vlc.select()
+        self.libreoffice.select()
+
+        back_btn = CTkButton(self.apps_frame, text=self.lang.back, command=self.__return_to_network)
+        next_btn = CTkButton(self.apps_frame, text=self.lang.next, command=self.__draw_final)
+
+        self.apps_frame.grid_rowconfigure(2, weight=1)
+        label.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky='nsew')
+        tabview.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
+        self.securitymanager.pack(padx=10, pady=5, anchor='center')
+        self.kirt_app.pack(padx=10, pady=5, anchor='center')
+        self.chromium_flatpak.pack(padx=10, pady=5, anchor='center')
+        self.chrome_flatpak.pack(padx=10, pady=5, anchor='center')
+        self.firefox_flatpak.pack(padx=10, pady=5, anchor='center')
+        self.yandex_flatpak.pack(padx=10, pady=5, anchor='center')
+        self.telegram_flatpak.pack(padx=10, pady=5, anchor='center')
+        self.vlc_flatpak.pack(padx=10, pady=5, anchor='center')
+        self.keepassxc_flatpak.pack(padx=10, pady=5, anchor='center')
+        self.onlyoffice_flatpak.pack(padx=10, pady=5, anchor='center')
+        self.obs_flatpak.pack(padx=10, pady=5, anchor='center')
+        self.libreoffice_flatpak.pack(padx=10, pady=5, anchor='center')
+
+        self.chromium.pack(padx=10, pady=5, anchor='center')
+        self.firefox.pack(padx=10, pady=5, anchor='center')
+        self.vlc.pack(padx=10, pady=5, anchor='center')
+        self.keepassxc.pack(padx=10, pady=5, anchor='center')
+        self.obs.pack(padx=10, pady=5, anchor='center')
+        self.libreoffice.pack(padx=10, pady=5, anchor='center')
+
+        back_btn.grid(row=3, column=0, padx=10, pady=5, sticky="nsew")
+        next_btn.grid(row=3, column=1, padx=10, pady=5, sticky="nsew")
+
+
+    #### END APPS STAGE ####
+
+    ##### BEGIN FINAL STAGE #####
+    def __draw_final(self):
+        self.setup_information["Apps"] = []
+        # Secux tab
+        if self.securitymanager.get():
+            self.setup_information["Apps"].append("securitymanager")
+        if self.kirt_app.get():
+            self.setup_information["Apps"].append("kirt_app")
+        
+        # Flatpak tab
+        if self.chromium_flatpak.get():
+            self.setup_information["Apps"].append("chromium_flatpak")
+        if self.chrome_flatpak.get(): 
+            self.setup_information["Apps"].append("chrome_flatpak")
+        if self.firefox_flatpak.get(): 
+            self.setup_information["Apps"].append("firefox_flatpak")
+        if self.yandex_flatpak.get(): 
+            self.setup_information["Apps"].append("yandex_flatpak")
+        if self.telegram_flatpak.get(): 
+            self.setup_information["Apps"].append("telegram_flatpak")
+        if self.vlc_flatpak.get(): 
+            self.setup_information["Apps"].append("vlc_flatpak")
+        if self.keepassxc_flatpak.get(): 
+            self.setup_information["Apps"].append("keepassxc_flatpak")
+        if self.onlyoffice_flatpak.get(): 
+            self.setup_information["Apps"].append("onlyoffice_flatpak")
+        if self.obs_flatpak.get(): 
+            self.setup_information["Apps"].append("obs_flatpak")
+        if self.libreoffice_flatpak.get(): 
+            self.setup_information["Apps"].append("libreoffice_flatpak")
+        
+        # Pacman tab
+        if self.chromium.get(): 
+            self.setup_information["Apps"].append("chromium")
+        if self.firefox.get(): 
+            self.setup_information["Apps"].append("firefox")
+        if self.vlc.get(): 
+            self.setup_information["Apps"].append("vlc")
+        if self.keepassxc.get(): 
+            self.setup_information["Apps"].append("keepassxc")
+        if self.obs.get(): 
+            self.setup_information["Apps"].append("obs")
+        if self.libreoffice.get(): 
+            self.setup_information["Apps"].append("libreoffice")
+        
+        self.apps_frame.pack_forget()
+        self.current_stage += 1
+        self.ui_scaling.configure(state='disabled')
+        if hasattr(self, "final_frame"):
+            for widget in self.final_frame.winfo_children():
+                widget.destroy()
+            del self.final_frame
+        self.final_stage()
+        self.bind(("<Return>"), lambda event: None)
+        self.__draw_stage(self.final_frame)
+
+    def __return_to_apps(self):
+        self.final_frame.pack_forget()
+        self.current_stage -= 1
+        self.bind(("<Return>"), lambda event: self.__draw_final())
+        self.__draw_stage(self.apps_frame)
+
+    def final_stage(self):
+        self.final_frame = CTkFrame(self)
+
+        self.final_frame.grid_columnconfigure(1, weight=1)
+        self.__draw_progress_bar(self.final_frame)
+        label = CTkLabel(self.final_frame, text=self.lang.final, font=(None, 16, "bold"))
+        timezone_label = CTkLabel(self.final_frame, text=self.lang.fulltimezone)
+        timezone_entry = CTkEntry(self.final_frame)
         timezone_entry.insert(0, self.setup_information["Timezone"])
         timezone_entry.configure(state="disabled")
 
-        installation_type_label = CTkLabel(self, text=self.lang.installoption)
-        installation_type_entry = CTkEntry(self)
+        installation_type_label = CTkLabel(self.final_frame, text=self.lang.installoption)
+        installation_type_entry = CTkEntry(self.final_frame)
         match self.setup_information["InstallationType"]:
             case "Secure":
                 installation_type_entry.insert(0, self.lang.securetype)
@@ -865,61 +1037,61 @@ class App(CTk):
                 installation_type_entry.insert(0, self.lang.lessecuretype)
         installation_type_entry.configure(state="disabled")
 
-        de_label = CTkLabel(self, text=self.lang.de)
-        de_entry = CTkEntry(self)
+        de_label = CTkLabel(self.final_frame, text=self.lang.de)
+        de_entry = CTkEntry(self.final_frame)
         de_entry.insert(0, self.setup_information["DE"])
         de_entry.configure(state="disabled")
 
-        partitioning_type_label = CTkLabel(self, text=self.lang.partitioningtype)
-        partitioning_type_entry = CTkEntry(self)
+        partitioning_type_label = CTkLabel(self.final_frame, text=self.lang.partitioningtype)
+        partitioning_type_entry = CTkEntry(self.final_frame)
         if self.setup_information["Partitioning"] == "Automatic":
             partitioning_type_entry.insert(0, self.lang.automatic)
-            drive_to_format_label = CTkLabel(self, text=self.lang.systeminstallto)
-            drive_to_format_entry = CTkEntry(self)
+            drive_to_format_label = CTkLabel(self.final_frame, text=self.lang.systeminstallto)
+            drive_to_format_entry = CTkEntry(self.final_frame)
             drive_to_format_entry.insert(0, self.setup_information["DriveToFormat"])
             drive_to_format_entry.configure(state="disabled")
         else:
             partitioning_type_entry.insert(0, self.lang.manual)
-            loader_label = CTkLabel(self, text=self.lang.efipart)
-            loader_entry = CTkEntry(self)
+            loader_label = CTkLabel(self.final_frame, text=self.lang.efipart)
+            loader_entry = CTkEntry(self.final_frame)
             loader_entry.insert(0, self.setup_information["EfiPartition"])
             loader_entry.configure(state="disabled")
 
-            system_label = CTkLabel(self, text=self.lang.rootfs)
-            system_entry = CTkEntry(self)
+            system_label = CTkLabel(self.final_frame, text=self.lang.rootfs)
+            system_entry = CTkEntry(self.final_frame)
             system_entry.insert(0, self.setup_information["SystemPartition"])
             system_entry.configure(state="disabled")
         partitioning_type_entry.configure(state="disabled")
 
-        use_swap_label = CTkLabel(self, text=self.lang.useswap)
-        use_swap_entry = CTkEntry(self)
+        use_swap_label = CTkLabel(self.final_frame, text=self.lang.useswap)
+        use_swap_entry = CTkEntry(self.final_frame)
         if self.setup_information["UseSwap"]:
             use_swap_entry.insert(0, self.lang.yes)
-            swap_size_label = CTkLabel(self, text=self.lang.swapsize_final)
-            swap_size_entry = CTkEntry(self)
+            swap_size_label = CTkLabel(self.final_frame, text=self.lang.swapsize_final)
+            swap_size_entry = CTkEntry(self.final_frame)
             swap_size_entry.insert(0, self.setup_information["SwapSize"])
             swap_size_entry.configure(state="disabled")
         else:
             use_swap_entry.insert(0, self.lang.no)
         use_swap_entry.configure(state="disabled")
 
-        hostname_label =CTkLabel(self, text=self.lang.hostname)
-        hostname_entry = CTkEntry(self)
+        hostname_label =CTkLabel(self.final_frame, text=self.lang.hostname)
+        hostname_entry = CTkEntry(self.final_frame)
         hostname_entry.insert(0, self.setup_information["Hostname"])
         hostname_entry.configure(state="disabled")
 
-        fullname_label = CTkLabel(self, text=self.lang.yourname)
-        fullname_entry = CTkEntry(self)
+        fullname_label = CTkLabel(self.final_frame, text=self.lang.yourname)
+        fullname_entry = CTkEntry(self.final_frame)
         fullname_entry.insert(0, self.setup_information["FullName"])
         fullname_entry.configure(state="disabled")
 
-        username_label = CTkLabel(self, text=self.lang.username)
-        username_entry = CTkEntry(self)
+        username_label = CTkLabel(self.final_frame, text=self.lang.username)
+        username_entry = CTkEntry(self.final_frame)
         username_entry.insert(0, self.setup_information['Username'])
         username_entry.configure(state="disabled")
 
-        back_button = CTkButton(self, text=self.lang.back, command=lambda: self.admin_creation_stage(first_execution=False))
-        begin_installation_button = CTkButton(self, text=self.lang.begin_install, command=self.begin_installation_ui)
+        back_button = CTkButton(self.final_frame, text=self.lang.back, command=self.__return_to_apps)
+        begin_installation_button = CTkButton(self.final_frame, text=self.lang.begin_install, command=self.begin_installation_ui)
 
         i = 1
         label.grid(row=i, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
@@ -973,7 +1145,8 @@ class App(CTk):
         username_entry.grid(row=i, column=1, padx=15, pady=5, sticky="nsew")
 
         i += 1
-        begin_installation_button.grid(row=i, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        back_button.grid(row=i, column=0, padx=15, pady=5, sticky="nsew")
+        begin_installation_button.grid(row=i, column=1, padx=15, pady=5, sticky="nsew")
     
     ##### END FINAL STAGE #####
 
@@ -1048,8 +1221,15 @@ class App(CTk):
         threading.Thread(target=run_commands, daemon=True).start()
 
     def __check_secure_boot_and_setup_mode(self):
+        uefi_support = False
+        secure_boot = False
+        setup_mode = False
         secure_boot_path = "/sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c"
         setup_mode_path = "/sys/firmware/efi/efivars/SetupMode-8be4df61-93ca-11d2-aa0d-00e098032b8c"
+
+        process = subprocess.run("[ -d /sys/firmware/efi ] && echo -n UEFI || echo -n BIOS", shell=True, capture_output=True)
+        if process.stdout == b"UEFI":
+            uefi_support = True
 
         def read_efi_var(path):
             try:
@@ -1057,16 +1237,13 @@ class App(CTk):
                     # EFI variable data starts after the first 4 bytes of metadata
                     return ord(f.read()[4:5])  # Convert byte to int
             except FileNotFoundError:
-                return None
+                return 0
+        
+        if uefi_support:
+            secure_boot = read_efi_var(secure_boot_path)
+            setup_mode = read_efi_var(setup_mode_path)
 
-        secure_boot = read_efi_var(secure_boot_path)
-        setup_mode = read_efi_var(setup_mode_path)
-
-        if secure_boot is None or setup_mode is None:
-            print("Secure Boot or Setup Mode variables not found. Is the system EFI-enabled?")
-            return (False, 0, 0)
-
-        return (True, secure_boot, setup_mode)
+        return (uefi_support, secure_boot, setup_mode)
     
     def __get_ucode_package(self):
         try:
@@ -1092,9 +1269,6 @@ class App(CTk):
             return False
         return True
 
-    def __offline_or_online(self, online: bool):
-        self.online_installation = online
-        self.__begin_installation_ui()
 
     def __begin_installation_ui(self):
         if DEBUG:
@@ -1116,41 +1290,21 @@ class App(CTk):
         self.begin_installation()
 
     def begin_installation_ui(self):
-        # try:
-        #     answ = get("http://gstatic.com/generate_204", timeout=5)
-        # except ConnectionError:
-        #     Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
-        #     return
-        # if answ.status_code != 204:
-        #     Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
-        #     return
+        uefi_info = self.__check_secure_boot_and_setup_mode()
+        if not uefi_info[0]:
+            Notification(title=self.lang.not_uefi_title, icon="warning.png", message=self.lang.not_uefi, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
         
-        # uefi_info = self.__check_secure_boot_and_setup_mode()
-        # if not uefi_info[0]:
-        #     Notification(title=self.lang.not_uefi_title, icon="warning.png", message=self.lang.not_uefi, message_bold=True, exit_btn_msg=self.lang.exit)
-        #     return
-        # if self.setup_information["InstallationType"] != "InSecure":
-        #     if uefi_info[1] != 0 and uefi_info[2] != 1:
-        #         Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
-        #         return
+        if self.setup_information["InstallationType"] == "Secure":
+            if uefi_info[1] != 0 and uefi_info[2] != 1:
+                Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
+                return
         
-        if OFFLINE:
-            if self.__check_network_connection():
-                self.__delete_widgets()
-                self.title(self.lang.online_or_offline_title)
-                image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/information.png'), dark_image=Image.open(f'{WORKDIR}/images/information.png'), size=(80, 80))
-                image_label = CTkLabel(self, text="", image=image)
-                label = CTkLabel(self, text=self.lang.online_or_offline_message)
-                offline_btn = CTkButton(self, text=self.lang.offline, command=lambda: self.__offline_or_online(False))
-                online_btn = CTkButton(self, text=self.lang.online, command=lambda: self.__offline_or_online(True))
-
-                image_label.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
-                label.grid(row=1, column=1, padx=10, pady=5, sticky="nsew")
-                offline_btn.grid(row=2, column=0, padx=10, pady=5, sticky="nsew")
-                online_btn.grid(row=2, column=1, padx=10, pady=5, sticky="nsew")
-        else:
-            self.online_installation = False
-            self.__begin_installation_ui()
+        if self.online_installation:
+            if not self.__check_network_connection():
+                Notification(title=self.lang.network_title, icon="warning.png", message=self.lang.network, message_bold=True, exit_btn_msg=self.lang.exit)
+                return
+        self.__begin_installation_ui()
         
 
     def __split_device(self, device):
@@ -1218,17 +1372,31 @@ class App(CTk):
         # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
         if self.online_installation:
             self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
+        else:
+            self._execute("cp /etc/pacman_offline.conf /etc/pacman.conf")
         kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
-        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base base-devel cmake {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip python-dbus v4l-utils lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+
         if self.setup_information["InstallationType"] == "Secure":
             pacstrap_command += "sbctl "
         elif self.setup_information["InstallationType"] == "LessSecure":
             pacstrap_command += "shim-signed mokutil "
         
+        if 'securitymanager' in self.setup_information["Apps"] or 'kirt_app' in self.setup_information["Apps"]:
+            pacstrap_command += "base-devel cmake v4l-utils tk python-pexpect python-pillow "
+        if 'vlc' in self.setup_information["Apps"]:
+            pacstrap_command += "vlc "
+        if 'firefox' in self.setup_information["Apps"]:
+            pacstrap_command += "firefox "
+        if 'chromium' in self.setup_information["Apps"]:
+            pacstrap_command += "chromium "
+        
         if self.setup_information["DE"] == "GNOME":
-            pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm vlc firefox chromium tk python-pexpect python-pillow"
+            pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm "
         elif self.setup_information["DE"] == "KDE":
-            pacstrap_command += "xorg plasma networkmanager-openvpn kde-applications vlc firefox chromium tk python-pexpect python-pillow"
+            pacstrap_command += "xorg plasma networkmanager-openvpn kde-applications "
+
+        
         self._execute(pacstrap_command)
         
         self._execute("echo Packages were installed successfully.")
@@ -1348,7 +1516,6 @@ class App(CTk):
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}-fallback.efi")
                 self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}.efi")
         
-        self._execute("echo yooo.")
         # Creating trusted boot chain with microsoft keys
         if self.setup_information["InstallationType"] == "LessSecure":
             self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/Linux/shimx64.efi")
@@ -1375,39 +1542,52 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/Linux/grubx64.efi")
             base, num = self.__split_device(rootfs_partition)
-            self._execute("Adding bootentry.")
+            self._execute("echo Adding bootentry.")
             self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
 
         # Installing secux-apps
-        self._execute("mkdir -p /mnt/usr/local/bin/secux-apps")
-        if self.online_installation:
-            self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
-        else:
-            self._execute("cp /usr/local/share/secux-apps/* /mnt/usr/local/bin/secux-apps/ -r")
-        self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /mnt/usr/share/polkit-1/actions/")
-        self._execute("touch /mnt/usr/local/bin/secux-apps/production.conf")
-        self._execute("cp /usr/local/share/secux-installer/scripts/securitymanager.desktop /mnt/usr/share/applications")
-        self._execute("chmod +x /mnt/usr/share/applications/securitymanager.desktop")
+        if 'securitymanager' in self.setup_information["Apps"]:
+            self._execute("mkdir -p /mnt/usr/local/bin/secux-apps")
+            if self.online_installation:
+                self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
+            else:
+                self._execute("cp /usr/local/share/secux-apps/* /mnt/usr/local/bin/secux-apps/ -r")
+            self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /mnt/usr/share/polkit-1/actions/")
+            self._execute("touch /mnt/usr/local/bin/secux-apps/production.conf")
+            self._execute("cp /usr/local/share/secux-installer/scripts/securitymanager.desktop /mnt/usr/share/applications")
+            self._execute("chmod +x /mnt/usr/share/applications/securitymanager.desktop")
 
-        # Installing dependencies
-        if self.online_installation:
-            self._execute("arch-chroot /mnt pacman -S python-opencv")
-            self._execute("arch-chroot /mnt pip install customtkinter setuptools screeninfo python-dotenv --break-system-packages")
-        else:
-            self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
-            # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
-            self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/setuptools*")
-            self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/*")
+            # Dependencies
+            if self.online_installation:
+                self._execute("arch-chroot /mnt pip install customtkinter --break-system-packages")
+            else:
+                self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
+                # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
+                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/darkdetect*")
+                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/packaging*")
+                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/customtkinter*")
 
         # Installing Kirt App
-        self._execute("mkdir -p /mnt/usr/local/bin/kirt-app")
-        if self.online_installation:
-            self._execute("git clone https://github.com/kirt-king/kirt-app /mnt/usr/local/bin/kirt-app --depth=1")
-        else:
-            self._execute("cp /usr/local/share/kirt-app/* /mnt/usr/local/bin/kirt-app/ -r")
-        self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.kirt-app.policy /mnt/usr/share/polkit-1/actions/")
-        self._execute("cp /usr/local/share/secux-installer/scripts/kirt-app.desktop /mnt/usr/share/applications")
-        self._execute("chmod +x /mnt/usr/share/applications/kirt-app.desktop")
+        if 'kirt_app' in self.setup_information["Apps"]:
+            self._execute("mkdir -p /mnt/usr/local/bin/kirt-app")
+            if self.online_installation:
+                self._execute("git clone https://github.com/kirt-king/kirt-app /mnt/usr/local/bin/kirt-app --depth=1")
+            else:
+                self._execute("cp /usr/local/share/kirt-app/* /mnt/usr/local/bin/kirt-app/ -r")
+            self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.kirt-app.policy /mnt/usr/share/polkit-1/actions/")
+            self._execute("cp /usr/local/share/secux-installer/scripts/kirt-app.desktop /mnt/usr/share/applications")
+            self._execute("chmod +x /mnt/usr/share/applications/kirt-app.desktop")
+
+            # Dependencies
+            if self.online_installation:
+                self._execute("arch-chroot /mnt pacman -S python-opencv")
+                self._execute("arch-chroot /mnt pip install customtkinter setuptools screeninfo python-dotenv --break-system-packages")
+            else:
+                self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
+                # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
+                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/setuptools*")
+                self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/*")
+
 
         # Final message in console
         self._execute("echo [Installation finished!]")
