@@ -900,21 +900,18 @@ class App(CTk):
         self.kirt_app.select()
 
         self.chromium_flatpak = CTkCheckBox(flatpak_tab, text="Chromium", state="disabled")
-        self.chrome_flatpak = CTkCheckBox(flatpak_tab, text="Chrome", state="disabled")
         self.firefox_flatpak = CTkCheckBox(flatpak_tab, text="Firefox", state="disabled")
         self.yandex_flatpak = CTkCheckBox(flatpak_tab, text="Yandex", state="disabled")
         self.telegram_flatpak = CTkCheckBox(flatpak_tab, text="Telegram", state="disabled")
         self.vlc_flatpak = CTkCheckBox(flatpak_tab, text="VLC", state="disabled")
         self.keepassxc_flatpak = CTkCheckBox(flatpak_tab, text="KeePassXC", state="disabled")
         self.onlyoffice_flatpak = CTkCheckBox(flatpak_tab, text="OnlyOffice", state="disabled")
-        self.obs_flatpak = CTkCheckBox(flatpak_tab, text="OBS", state="disabled")
         self.libreoffice_flatpak = CTkCheckBox(flatpak_tab, text="Libreoffice", state="disabled")
 
         self.chromium = CTkCheckBox(pacman_tab, text="Chromium")
         self.firefox = CTkCheckBox(pacman_tab, text="Firefox")
         self.vlc = CTkCheckBox(pacman_tab, text="VLC")
         self.keepassxc = CTkCheckBox(pacman_tab, text="KeePassXC")
-        self.obs = CTkCheckBox(pacman_tab, text="OBS")
         self.libreoffice = CTkCheckBox(pacman_tab, text="Libreoffice")
         self.chromium.select()
         self.firefox.select()
@@ -930,21 +927,18 @@ class App(CTk):
         self.securitymanager.pack(padx=10, pady=5, anchor='center')
         self.kirt_app.pack(padx=10, pady=5, anchor='center')
         self.chromium_flatpak.pack(padx=10, pady=5, anchor='center')
-        self.chrome_flatpak.pack(padx=10, pady=5, anchor='center')
         self.firefox_flatpak.pack(padx=10, pady=5, anchor='center')
         self.yandex_flatpak.pack(padx=10, pady=5, anchor='center')
         self.telegram_flatpak.pack(padx=10, pady=5, anchor='center')
         self.vlc_flatpak.pack(padx=10, pady=5, anchor='center')
         self.keepassxc_flatpak.pack(padx=10, pady=5, anchor='center')
         self.onlyoffice_flatpak.pack(padx=10, pady=5, anchor='center')
-        self.obs_flatpak.pack(padx=10, pady=5, anchor='center')
         self.libreoffice_flatpak.pack(padx=10, pady=5, anchor='center')
 
         self.chromium.pack(padx=10, pady=5, anchor='center')
         self.firefox.pack(padx=10, pady=5, anchor='center')
         self.vlc.pack(padx=10, pady=5, anchor='center')
         self.keepassxc.pack(padx=10, pady=5, anchor='center')
-        self.obs.pack(padx=10, pady=5, anchor='center')
         self.libreoffice.pack(padx=10, pady=5, anchor='center')
 
         back_btn.grid(row=3, column=0, padx=10, pady=5, sticky="nsew")
@@ -965,8 +959,6 @@ class App(CTk):
         # Flatpak tab
         if self.chromium_flatpak.get():
             self.setup_information["Apps"].append("chromium_flatpak")
-        if self.chrome_flatpak.get(): 
-            self.setup_information["Apps"].append("chrome_flatpak")
         if self.firefox_flatpak.get(): 
             self.setup_information["Apps"].append("firefox_flatpak")
         if self.yandex_flatpak.get(): 
@@ -979,8 +971,6 @@ class App(CTk):
             self.setup_information["Apps"].append("keepassxc_flatpak")
         if self.onlyoffice_flatpak.get(): 
             self.setup_information["Apps"].append("onlyoffice_flatpak")
-        if self.obs_flatpak.get(): 
-            self.setup_information["Apps"].append("obs_flatpak")
         if self.libreoffice_flatpak.get(): 
             self.setup_information["Apps"].append("libreoffice_flatpak")
         
@@ -993,8 +983,6 @@ class App(CTk):
             self.setup_information["Apps"].append("vlc")
         if self.keepassxc.get(): 
             self.setup_information["Apps"].append("keepassxc")
-        if self.obs.get(): 
-            self.setup_information["Apps"].append("obs")
         if self.libreoffice.get(): 
             self.setup_information["Apps"].append("libreoffice")
         
@@ -1390,6 +1378,10 @@ class App(CTk):
             pacstrap_command += "firefox "
         if 'chromium' in self.setup_information["Apps"]:
             pacstrap_command += "chromium "
+        if 'libreoffice' in self.setup_information["Apps"]:
+            pacstrap_command += "libreoffice "
+        if 'keepassxc' in self.setup_information["Apps"]:
+            pacstrap_command += "keepassxc "
         
         if self.setup_information["DE"] == "GNOME":
             pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm "
@@ -1566,6 +1558,7 @@ class App(CTk):
                 self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/darkdetect*")
                 self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/packaging*")
                 self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/customtkinter*")
+                self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
 
         # Installing Kirt App
         if 'kirt_app' in self.setup_information["Apps"]:
@@ -1587,6 +1580,7 @@ class App(CTk):
                 # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
                 self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/setuptools*")
                 self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/*")
+                self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
 
 
         # Final message in console
