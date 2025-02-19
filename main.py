@@ -1148,11 +1148,21 @@ class App(CTk):
                 partitions.append(f"/dev/{name}")
         return partitions
 
-    def _execute(self, command: str, input: str = None):
+    def _execute(self, command: str, input: str = None, no_console_output = False):
+        cmd = {"command": command}
         if input:
-            self.commands.append({"command": command, "input": input})
-        else:
-            self.commands.append({"command": command})
+            cmd["input"] = input
+        if no_console_output:
+            cmd["no_console_output"] = True
+        self.commands.append(cmd)
+        # if input and no_console_output:
+        #     self.commands.append({"command": command, "input": input, "no_console_output": True})
+        # if input:
+        #     self.commands.append({"command": command, "input": input})
+        # if no_console_output:
+        #     self.commands.append({"command": command, "no_console_output": True})
+        # else:
+        #     self.commands.append({"command": command})
 
     def _execute_commands(self, commands: list):
         def run_commands():
@@ -1186,23 +1196,27 @@ class App(CTk):
                             executable="/bin/bash",
                             bufsize=1  # Line-buffered output
                         )
-
+                    
                     # Update the console in real-time
-                    self.console.configure(state="normal")
+                    if 'no_console_output' not in cmd: 
+                        self.console.configure(state="normal")
                     for line in process.stdout:
                         print(line, end="")
-                        self.console.insert(END, line)
-                        self.console.see(END)
+                        if 'no_console_output' not in cmd: 
+                            self.console.insert(END, line)
+                            self.console.see(END)
                     for line in process.stderr:
                         print(line, end="")
-                        self.console.insert(END, line)
-                        self.console.see(END)
+                        if 'no_console_output' not in cmd:
+                            self.console.insert(END, line)
+                            self.console.see(END)
 
                     process.stdout.close()
                     process.stderr.close()
                     process.wait()  # Ensure the process finishes
 
-                    self.console.configure(state="disabled")
+                    if 'no_console_output' not in cmd:
+                        self.console.configure(state="disabled")
                     print("\n")
                 except Exception as e:
                     self.console.configure(state="normal")
@@ -1521,12 +1535,12 @@ class App(CTk):
             self._execute("mkdir -p /mnt/etc/secureboot")
             self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
             self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
-            self._execute("sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/usr/lib/systemd/boot/efi/systemd-bootx64.efi")
+            self._execute("sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/usr/lib/systemd/boot/efi/systemd-bootx64.efi", no_console_output=True)
             self._execute("echo DEBUG thing.")
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f"echo Signing {kernel}")
-                self._execute(f"sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/Linux/arch-{kernel}.efi /mnt/efi/EFI/Linux/arch-{kernel}.efi")
-                self._execute(f"sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/Linux/arch-{kernel}-fallback.efi /mnt/efi/EFI/Linux/arch-{kernel}-fallback.efi")
+                self._execute(f"sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/Linux/arch-{kernel}.efi /mnt/efi/EFI/Linux/arch-{kernel}.efi", no_console_output=True)
+                self._execute(f"sbsign --key /mnt/etc/secureboot/sb.key --cert /mnt/etc/secureboot/sb.crt --output /mnt/efi/EFI/Linux/arch-{kernel}-fallback.efi /mnt/efi/EFI/Linux/arch-{kernel}-fallback.efi", no_console_output=True)
                 self._execute(f"echo Successfully signed {kernel}")
             self._execute('echo Importing MOK')
             self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
