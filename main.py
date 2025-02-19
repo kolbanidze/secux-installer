@@ -1170,6 +1170,7 @@ class App(CTk):
                             stderr=subprocess.PIPE,
                             shell=True,
                             text=True,
+                            executable="/bin/bash",
                             bufsize=1  # Line-buffered output
                         )
                         process.stdin.write(cmd["input"])
@@ -1182,6 +1183,7 @@ class App(CTk):
                             stderr=subprocess.PIPE,
                             shell=True,
                             text=True,
+                            executable="/bin/bash",
                             bufsize=1  # Line-buffered output
                         )
 
