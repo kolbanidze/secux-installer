@@ -1158,7 +1158,7 @@ class App(CTk):
         def run_commands():
             for cmd in commands:
                 try:
-                    print(f"Executing>{cmd['command']}")
+                    print(f"Executing: {cmd['command']}")
                     self.console.see(END)
                     # Run the command
                     if "input" in cmd:
@@ -1190,9 +1190,11 @@ class App(CTk):
                     # Update the console in real-time
                     self.console.configure(state="normal")
                     for line in process.stdout:
+                        print(line, end="")
                         self.console.insert(END, line)
                         self.console.see(END)
                     for line in process.stderr:
+                        print(line, end="")
                         self.console.insert(END, line)
                         self.console.see(END)
 
@@ -1201,8 +1203,10 @@ class App(CTk):
                     process.wait()  # Ensure the process finishes
 
                     self.console.configure(state="disabled")
+                    print("\n")
                 except Exception as e:
                     self.console.configure(state="normal")
+                    print(f"Error: {str(e)}\n")
                     self.console.insert(END, f"Error: {str(e)}\n")
                     self.console.configure(state="disabled")
                     self.console.see(END)
@@ -1575,12 +1579,12 @@ class App(CTk):
 
             # Dependencies
             if self.online_installation:
-                self._execute("arch-chroot /mnt pacman -S python-opencv")
-                self._execute("arch-chroot /mnt pip install customtkinter setuptools screeninfo python-dotenv --break-system-packages")
+                self._execute("arch-chroot /mnt pacman -Sy python-opencv python-numpy python-setuptools python-dotenv")
+                self._execute("arch-chroot /mnt pip install customtkinter screeninfo --break-system-packages")
             else:
                 self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
                 # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
-                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/setuptools* --break-system-packages\"")
+                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/setuptools* --break-system-packages\"")
                 self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/* --break-system-packages\"")
                 self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
 
