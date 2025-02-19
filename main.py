@@ -1363,7 +1363,7 @@ class App(CTk):
         else:
             self._execute("cp /etc/pacman_offline.conf /etc/pacman.conf")
         kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
-        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd "
+        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd apparmor ufw "
 
         if self.setup_information["InstallationType"] == "Secure":
             pacstrap_command += "sbctl "
@@ -1420,7 +1420,7 @@ class App(CTk):
         
         # Creating cmdline
         self._execute("mkdir /mnt/etc/cmdline.d")
-        self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet lockdown=confidentiality splash\" > /mnt/etc/cmdline.d/root.conf")
+        self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash\" > /mnt/etc/cmdline.d/root.conf")
 
         # Creating UKI config
         self._execute('echo -e "[UKI]\nOSRelease=@/etc/os-release\nPCRBanks=sha256\n\n[PCRSignature:initrd]\nPhases=enter-initrd\nPCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\nPCRPublicKey=/etc/kernel/pcr-initrd.pub.pem" > /mnt/etc/kernel/uki.conf')
@@ -1582,6 +1582,11 @@ class App(CTk):
                 self._execute(f"arch-chroot /mnt pip install /home/{self.setup_information['Username']}/python_packages/* --break-system-packages")
                 self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
 
+        # Hardening
+        self._execute("arch-chroot /mnt systemctl enable apparmor")
+        self._execute("cp /usr/local/share/secux-installer/scripts/hardening.conf /mnt/etc/sysctl.d")
+        self._execute("arch-chroot /mnt systemctl enable ufw")
+        self._execute("arch-chroot /mnt ufw default deny")
 
         # Final message in console
         self._execute("echo [Installation finished!]")
