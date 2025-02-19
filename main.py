@@ -1169,7 +1169,7 @@ class App(CTk):
             for cmd in commands:
                 try:
                     print(f"Executing: {cmd['command']}")
-                    self.console.see(END)
+                    # self.console.see(END)
                     # Run the command
                     if "input" in cmd:
                         process = subprocess.Popen(
@@ -1198,25 +1198,25 @@ class App(CTk):
                         )
                     
                     # Update the console in real-time
-                    if 'no_console_output' not in cmd: 
-                        self.console.configure(state="normal")
+                    # if 'no_console_output' not in cmd: 
+                    #     self.console.configure(state="normal")
                     for line in process.stdout:
                         print(line, end="")
-                        if 'no_console_output' not in cmd: 
-                            self.console.insert(END, line)
-                            self.console.see(END)
+                        # if 'no_console_output' not in cmd: 
+                            # self.console.insert(END, line)
+                            # self.console.see(END)
                     for line in process.stderr:
                         print(line, end="")
-                        if 'no_console_output' not in cmd:
-                            self.console.insert(END, line)
-                            self.console.see(END)
+                        # if 'no_console_output' not in cmd:
+                        #     self.console.insert(END, line)
+                        #     self.console.see(END)
 
                     process.stdout.close()
                     process.stderr.close()
                     process.wait()  # Ensure the process finishes
 
-                    if 'no_console_output' not in cmd:
-                        self.console.configure(state="disabled")
+                    # if 'no_console_output' not in cmd:
+                    #     self.console.configure(state="disabled")
                     print("\n")
                 except Exception as e:
                     self.console.configure(state="normal")
