@@ -12,9 +12,9 @@ class App(CTk):
         self.console = CTkTextbox(self)
         self.console.pack(fill='both', expand=True)
         self.commands = []
-        for _ in range(5):
-            self._execute(f'echo Trying to trigger segfault... {token_hex(randbelow(256))}')
-        self._execute("passwd bsd", input="bsd\nbsd")
+        for _ in range(1):
+            self._execute(f'flatpak install org.mozilla.firefox -y')
+        # self._execute("passwd bsd", input="bsd\nbsd")
 
         self._execute_commands(self.commands)
 
