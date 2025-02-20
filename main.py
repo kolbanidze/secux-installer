@@ -1524,7 +1524,7 @@ class App(CTk):
             if self.online_installation:
                 self._execute("arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --break-system-packages")
             else:
-                self._execute(f"cp {WORKDIR}/python_packages/ /mnt/root/")
+                self._execute(f"cp -r {WORKDIR}/python_packages/ /mnt/root/")
                 self._execute(f"arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --find-links /root/python_packages --no-index --break-system-packages")
                 self._execute(f"rm -rf /mnt/root/python_packages")
                 # self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
