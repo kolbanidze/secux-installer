@@ -1498,22 +1498,14 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/share/applications/securitymanager.desktop")
             self._execute("chmod +x /mnt/usr/local/bin/secux-apps/manager.py")
 
-            self._execute("echo TESTING PURPOSES ONLY. DELETE ME LATER. ENABLE NETWORK!!!")
-            self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
-            self._execute("pacman -Sy")
-            self._execute("sleep 10")
             # Dependencies
             self._execute("pacstrap /mnt tk python-pexpect python-pillow python-darkdetect python-packaging")
             if self.online_installation:
                 self._execute("arch-chroot /mnt pip install customtkinter --break-system-packages")
             else:
                 self._execute(f"cp {WORKDIR}/python_packages/customtkinter* /mnt/root/")
-                self._execute(f"arch-chroot /mnt pip install customtkinter --find-links /root --no-index")
-                # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
-                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/darkdetect* --break-system-packages\"")
-                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/packaging* --break-system-packages\"")
-                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/customtkinter* --break-system-packages\"")
-                self._execute(f"rm -rf /root/customtkinter*")
+                self._execute(f"arch-chroot /mnt pip install customtkinter --find-links /root --no-index --break-system-packages")
+                self._execute(f"rm -rf /mnt/root/customtkinter*")
 
         # Installing Kirt App
         if 'kirt_app' in self.setup_information["Apps"]:
@@ -1528,9 +1520,9 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/local/bin/kirt-app/app_script/app.py")
 
             # Dependencies
-            self._execute("pacstrap /mnt python-opencv python-numpy python-setuptools python-dotenv")
+            self._execute("pacstrap /mnt tk base-devel cmake python-pillow python-opencv python-numpy python-setuptools python-dotenv python-darkdetect python-packaging")
             if self.online_installation:
-                self._execute("arch-chroot /mnt pip install customtkinter screeninfo --break-system-packages")
+                self._execute("arch-chroot /mnt pip install customtkinter --break-system-packages")
             else:
                 self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
                 # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
