@@ -1511,7 +1511,7 @@ class App(CTk):
         if 'kirt_app' in self.setup_information["Apps"]:
             self._execute("mkdir -p /mnt/usr/local/bin/kirt-app")
             if self.online_installation:
-                self._execute("git clone https://github.com/kirt-king/kirt-app /mnt/usr/local/bin/kirt-app --depth=1")
+                self._execute("git clone https://github.com/kirt-king/test_app /mnt/usr/local/bin/kirt-app --depth=1")
             else:
                 self._execute("cp /usr/local/share/kirt-app/* /mnt/usr/local/bin/kirt-app/ -r")
             self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.kirt-app.policy /mnt/usr/share/polkit-1/actions/")
@@ -1520,15 +1520,18 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/local/bin/kirt-app/app_script/app.py")
 
             # Dependencies
-            self._execute("pacstrap /mnt tk base-devel cmake python-pillow python-opencv python-numpy python-setuptools python-dotenv python-darkdetect python-packaging")
+            self._execute("pacstrap /mnt tk base-devel cmake python-pillow python-opencv python-numpy python-setuptools python-dotenv python-darkdetect python-packaging python-dlib")
             if self.online_installation:
-                self._execute("arch-chroot /mnt pip install customtkinter --break-system-packages")
+                self._execute("arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --break-system-packages")
             else:
-                self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
-                # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
-                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/setuptools* --break-system-packages\"")
-                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/* --break-system-packages\"")
-                self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
+                self._execute(f"cp {WORKDIR}/python_packages/ /mnt/root/")
+                self._execute(f"arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --find-links /root/python_packages --no-index --break-system-packages")
+                self._execute(f"rm -rf /mnt/root/python_packages")
+                # self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
+                # # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
+                # # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/setuptools* --break-system-packages\"")
+                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/* --break-system-packages\"")
+                # self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
 
         # Hardening
         self._execute("arch-chroot /mnt systemctl enable apparmor")
