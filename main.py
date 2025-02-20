@@ -66,7 +66,6 @@ class App(CTk):
         self.current_stage = 0
         self.total_amount_of_stages = 10
         set_appearance_mode("dark")
-        # self.minsize(350, 500)
 
         self.welcome_menu = CTkFrame(self)
         self.welcome_menu.pack(fill='both', expand=True)
@@ -196,7 +195,6 @@ class App(CTk):
     def __draw_progress_bar(self, frame):
         progressbar = CTkProgressBar(frame, orientation='horizontal', width=500)
         value = self.current_stage / self.total_amount_of_stages
-        # if DEBUG: print(value*100)
         progressbar.set(value)
         progressbar.grid(row=0, column=0, padx=15, pady=(5,15), sticky="nsew", columnspan=2)
 
@@ -854,7 +852,6 @@ class App(CTk):
         self.online_installation = True
         self.__draw_apps_stage()
     
-    # VALIDATEEEEEEEEE
     def __offline_handler(self):
         self.online_installation = False
         self.__draw_apps_stage()
@@ -885,28 +882,17 @@ class App(CTk):
         label = CTkLabel(self.apps_frame, text=self.lang.apps_label, font=(None, 16, 'bold'))
         tabview = CTkTabview(self.apps_frame)
         tabview.add("Secux")
-        tabview.add("Flatpak")
         tabview.add("Pacman")
 
-        tabview.set("Flatpak")
+        tabview.set("Pacman")
 
         secux_tab = tabview.tab("Secux")
-        flatpak_tab = tabview.tab("Flatpak")
         pacman_tab = tabview.tab("Pacman")
 
         self.securitymanager = CTkCheckBox(secux_tab, text="Security Manager")
         self.kirt_app = CTkCheckBox(secux_tab, text=f"Kirt App")
         self.securitymanager.select()
         self.kirt_app.select()
-
-        self.chromium_flatpak = CTkCheckBox(flatpak_tab, text="Chromium", state="disabled")
-        self.firefox_flatpak = CTkCheckBox(flatpak_tab, text="Firefox", state="disabled")
-        self.yandex_flatpak = CTkCheckBox(flatpak_tab, text="Yandex", state="disabled")
-        self.telegram_flatpak = CTkCheckBox(flatpak_tab, text="Telegram", state="disabled")
-        self.vlc_flatpak = CTkCheckBox(flatpak_tab, text="VLC", state="disabled")
-        self.keepassxc_flatpak = CTkCheckBox(flatpak_tab, text="KeePassXC", state="disabled")
-        self.onlyoffice_flatpak = CTkCheckBox(flatpak_tab, text="OnlyOffice", state="disabled")
-        self.libreoffice_flatpak = CTkCheckBox(flatpak_tab, text="Libreoffice", state="disabled")
 
         self.chromium = CTkCheckBox(pacman_tab, text="Chromium")
         self.firefox = CTkCheckBox(pacman_tab, text="Firefox")
@@ -926,14 +912,6 @@ class App(CTk):
         tabview.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
         self.securitymanager.pack(padx=10, pady=5, anchor='center')
         self.kirt_app.pack(padx=10, pady=5, anchor='center')
-        self.chromium_flatpak.pack(padx=10, pady=5, anchor='center')
-        self.firefox_flatpak.pack(padx=10, pady=5, anchor='center')
-        self.yandex_flatpak.pack(padx=10, pady=5, anchor='center')
-        self.telegram_flatpak.pack(padx=10, pady=5, anchor='center')
-        self.vlc_flatpak.pack(padx=10, pady=5, anchor='center')
-        self.keepassxc_flatpak.pack(padx=10, pady=5, anchor='center')
-        self.onlyoffice_flatpak.pack(padx=10, pady=5, anchor='center')
-        self.libreoffice_flatpak.pack(padx=10, pady=5, anchor='center')
 
         self.chromium.pack(padx=10, pady=5, anchor='center')
         self.firefox.pack(padx=10, pady=5, anchor='center')
@@ -955,24 +933,6 @@ class App(CTk):
             self.setup_information["Apps"].append("securitymanager")
         if self.kirt_app.get():
             self.setup_information["Apps"].append("kirt_app")
-        
-        # Flatpak tab
-        if self.chromium_flatpak.get():
-            self.setup_information["Apps"].append("chromium_flatpak")
-        if self.firefox_flatpak.get(): 
-            self.setup_information["Apps"].append("firefox_flatpak")
-        if self.yandex_flatpak.get(): 
-            self.setup_information["Apps"].append("yandex_flatpak")
-        if self.telegram_flatpak.get(): 
-            self.setup_information["Apps"].append("telegram_flatpak")
-        if self.vlc_flatpak.get(): 
-            self.setup_information["Apps"].append("vlc_flatpak")
-        if self.keepassxc_flatpak.get(): 
-            self.setup_information["Apps"].append("keepassxc_flatpak")
-        if self.onlyoffice_flatpak.get(): 
-            self.setup_information["Apps"].append("onlyoffice_flatpak")
-        if self.libreoffice_flatpak.get(): 
-            self.setup_information["Apps"].append("libreoffice_flatpak")
         
         # Pacman tab
         if self.chromium.get(): 
@@ -1538,16 +1498,22 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/share/applications/securitymanager.desktop")
             self._execute("chmod +x /mnt/usr/local/bin/secux-apps/manager.py")
 
+            self._execute("echo TESTING PURPOSES ONLY. DELETE ME LATER. ENABLE NETWORK!!!")
+            self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
+            self._execute("pacman -Sy")
+            self._execute("sleep 10")
             # Dependencies
+            self._execute("pacstrap /mnt tk python-pexpect python-pillow python-darkdetect python-packaging")
             if self.online_installation:
                 self._execute("arch-chroot /mnt pip install customtkinter --break-system-packages")
             else:
-                self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
+                self._execute(f"cp {WORKDIR}/python_packages/customtkinter* /mnt/root/")
+                self._execute(f"arch-chroot /mnt pip install customtkinter --find-links /root --no-index")
                 # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
-                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/darkdetect* --break-system-packages\"")
-                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/packaging* --break-system-packages\"")
-                self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/customtkinter* --break-system-packages\"")
-                self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
+                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/darkdetect* --break-system-packages\"")
+                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/packaging* --break-system-packages\"")
+                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/customtkinter* --break-system-packages\"")
+                self._execute(f"rm -rf /root/customtkinter*")
 
         # Installing Kirt App
         if 'kirt_app' in self.setup_information["Apps"]:
@@ -1562,8 +1528,8 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/local/bin/kirt-app/app_script/app.py")
 
             # Dependencies
+            self._execute("pacstrap /mnt python-opencv python-numpy python-setuptools python-dotenv")
             if self.online_installation:
-                self._execute("arch-chroot /mnt pacman -Sy python-opencv python-numpy python-setuptools python-dotenv")
                 self._execute("arch-chroot /mnt pip install customtkinter screeninfo --break-system-packages")
             else:
                 self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
