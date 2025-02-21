@@ -14,7 +14,7 @@ from hmac import compare_digest
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
 VERSION = "0.2.4"
-DEBUG = True
+DEBUG = True # Default: True
 DEBUG_SHOW_COMMANDS = False # Default: False
 DEBUG_SHOW_COMMANDS_EFI_PARTITION = "/dev/vda1"
 DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION = "/dev/vda2"
@@ -396,10 +396,13 @@ class App(CTk):
         
         if self.linux_hardened.get():
             self.setup_information["Kernel"].append('linux-hardened')
+            self.setup_information["Kernel"].append('linux-hardened-headers')
         if self.linux_lts.get():
             self.setup_information["Kernel"].append('linux-lts')
+            self.setup_information["Kernel"].append('linux-lts-headers')
         if self.linux.get():
             self.setup_information["Kernel"].append("linux")
+            self.setup_information["Kernel"].append("linux-headers")
 
     def __draw_kernel_stage(self):
         self.de_frame.pack_forget()
@@ -1183,18 +1186,18 @@ class App(CTk):
 
         return (uefi_support, secure_boot, setup_mode)
     
-    def __get_ucode_package(self):
+    def __get_ucode_package(self) -> list:
         try:
             with open("/proc/cpuinfo", "r") as f:
                 for line in f:
                     if "vendor_id" in line:
                         if "GenuineIntel" in line:
-                            return "intel-ucode"
+                            return ["intel-ucode"]
                         elif "AuthenticAMD" in line:
-                            return "amd-ucode"
-            return "amd-ucode intel-ucode"
+                            return ["amd-ucode"]
+            return ["amd-ucode", "intel-ucode"]
         except FileNotFoundError:
-            return "amd-ucode intel-ucode"
+            return ["amd-ucode", "intel-ucode"]
 
     def __check_network_connection(self) -> bool:
         try:
@@ -1312,33 +1315,41 @@ class App(CTk):
             self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
         else:
             self._execute("cp /etc/pacman_offline.conf /etc/pacman.conf")
-        kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
-        pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd apparmor ufw "
+            self._execute("pacman-key --init")
+            self._execute("pacman-key --populate archlinux")
+        pacstrap_packages = ['base', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw']
+        pacstrap_packages.extend(self.__get_ucode_package())
+        pacstrap_packages.extend(self.setup_information["Kernel"])
+        # kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
+        # pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd apparmor ufw "
 
         if self.setup_information["InstallationType"] == "Secure":
-            pacstrap_command += "sbctl "
+            pacstrap_packages.append("sbctl")
         elif self.setup_information["InstallationType"] == "LessSecure":
-            pacstrap_command += "shim-signed mokutil "
+            pacstrap_packages.extend(["shim-signed", "mokutil"])
         
-        if 'securitymanager' in self.setup_information["Apps"] or 'kirt_app' in self.setup_information["Apps"]:
-            pacstrap_command += "base-devel cmake v4l-utils tk python-pexpect python-pillow "
+        if 'securitymanager' in self.setup_information["Apps"]:
+            pacstrap_packages.extend(['tk', 'python-pexpect', 'python-pillow', 'python-darkdetect', 'python-packaging'])
+        if 'kirt_app' in self.setup_information["Apps"]:
+            pacstrap_packages.extend(["tk", "v4l-utils", "python-pillow", "python-opencv", "python-numpy", "python-setuptools", "python-dotenv", "python-darkdetect", "python-packaging", "python-dlib"])
+        
         if 'vlc' in self.setup_information["Apps"]:
-            pacstrap_command += "vlc "
+            pacstrap_packages.append('vlc')
         if 'firefox' in self.setup_information["Apps"]:
-            pacstrap_command += "firefox "
+            pacstrap_packages.append('firefox')
         if 'chromium' in self.setup_information["Apps"]:
-            pacstrap_command += "chromium "
+            pacstrap_packages.append('chromium')
         if 'libreoffice' in self.setup_information["Apps"]:
-            pacstrap_command += "libreoffice "
+            pacstrap_packages.append('libreoffice')
         if 'keepassxc' in self.setup_information["Apps"]:
-            pacstrap_command += "keepassxc "
+            pacstrap_packages.append('keepassxc')
         
         if self.setup_information["DE"] == "GNOME":
-            pacstrap_command += "xorg gnome networkmanager-openvpn gnome-tweaks gdm "
-        elif self.setup_information["DE"] == "KDE":
-            pacstrap_command += "xorg plasma networkmanager-openvpn kde-applications "
-
+            pacstrap_packages.extend(["xorg", "gnome", "networkmanager-openvpn", "gnome-tweaks", "gdm"])
+        if self.setup_information["DE"] == "KDE":
+            pacstrap_packages.extend(["xorg", "plasma", "networkmanager-openvpn", "kde-applications"])
         
+        pacstrap_command = "stdbuf -oL pacstrap -K /mnt " + " ".join(pacstrap_packages)
         self._execute(pacstrap_command)
         
         self._execute("echo Packages were installed successfully.")
@@ -1466,7 +1477,6 @@ class App(CTk):
             self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
             self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
             self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
-            self._execute("echo DEBUG thing.")
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f"echo Signing {kernel}")
                 self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}.efi /efi/EFI/Linux/arch-{kernel}.efi")
@@ -1485,7 +1495,7 @@ class App(CTk):
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/Linux/grubx64.efi")
             base, num = self.__split_device(efi_partition)
             self._execute("echo Adding bootentry.")
-            self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
+            self._execute(f'efibootmgr | grep -q "SECUX SHIM" && echo "Boot entry already exists. No changes made." || efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
 
         # Installing secux-apps
         if 'securitymanager' in self.setup_information["Apps"]:
