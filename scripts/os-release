@@ -1,0 +1,5 @@
+NAME="SECUX Linux"
+PRETTY_NAME="SECUX Linux"
+BUILD_ID=rolling
+HOME_URL="https://github.com/kolbanidze/secux-iso"
+LOGO=secux
