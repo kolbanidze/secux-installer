@@ -1,3 +1,5 @@
-a = [1, 2, 3]
-a.extend([4])
+a = ["linux", 'linux-headers', 'linux-lts', 'linux-lts-headers']
+for i in a:
+    if 'headers' in i:
+        a.remove(i)
 print(a)
