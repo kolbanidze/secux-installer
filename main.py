@@ -1481,7 +1481,7 @@ class App(CTk):
             self._execute("cp /usr/local/share/secux-installer/scripts/sign-uki.sh /mnt/usr/lib/initcpio/post")
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/Linux/grubx64.efi")
-            base, num = self.__split_device(rootfs_partition)
+            base, num = self.__split_device(efi_partition)
             self._execute("echo Adding bootentry.")
             self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
 
