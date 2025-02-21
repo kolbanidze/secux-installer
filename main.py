@@ -98,6 +98,10 @@ class App(CTk):
         self.bind(("<Return>"), lambda event: self.__draw_timezone_stage())
         info.grid(row=8, padx=15, columnspan=2, pady=(5, 0))
         if DEBUG: CTkLabel(self.welcome_menu, text="WARNING: DEBUG MODE", font=(None, 10), text_color=("red")).grid(row=9, columnspan=2, padx=15, pady=(5,0))
+
+        uefi_info = self.__check_secure_boot_and_setup_mode()
+        if not uefi_info[0]:
+            Notification(title=self.lang.not_uefi_title, icon="warning.png", message=self.lang.not_uefi, message_bold=True, exit_btn_msg=self.lang.exit)
         
     def __ui_scaling_handler(self, new_scaling: str):
         self.ui_scale = int(new_scaling.replace("%", "")) / 100
