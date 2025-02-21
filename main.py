@@ -1317,6 +1317,7 @@ class App(CTk):
             self._execute("cp /etc/pacman_offline.conf /etc/pacman.conf")
             self._execute("pacman-key --init")
             self._execute("pacman-key --populate archlinux")
+            self._execute("pacman-key --populate kolbanidze")
         pacstrap_packages = ['base', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw']
         pacstrap_packages.extend(self.__get_ucode_package())
         pacstrap_packages.extend(self.setup_information["Kernel"])
@@ -1357,8 +1358,9 @@ class App(CTk):
         self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
         self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
         # self._execute("arch-chroot /mnt pacman-key --recv CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
-        self._execute("arch-chroot /mnt pacman-key --add /usr/share/pacman/keyrings/kolbanidze.gpg")
-        self._execute("arch-chroot /mnt pacman-key --lsign-key CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
+        # self._execute("arch-chroot /mnt pacman-key --add /usr/share/pacman/keyrings/kolbanidze.gpg")
+        # self._execute("arch-chroot /mnt pacman-key --lsign-key CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
+        self._execute("arch-chroot /mnt pacman-key --populate kolbanidze")
 
         # Generating fstab
         self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
