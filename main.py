@@ -1489,7 +1489,7 @@ class App(CTk):
             if self.online_installation:
                 self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
             else:
-                self._execute("cp /usr/local/share/secux-apps/* /mnt/usr/local/bin/secux-apps/ -r")
+                self._execute("cp /usr/local/share/secux-apps /mnt/usr/local/bin/ -r")
             self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /mnt/usr/share/polkit-1/actions/")
             self._execute("touch /mnt/usr/local/bin/secux-apps/production.conf")
             self._execute("cp /usr/local/share/secux-installer/scripts/securitymanager.desktop /mnt/usr/share/applications")
@@ -1511,7 +1511,7 @@ class App(CTk):
             if self.online_installation:
                 self._execute("git clone https://github.com/kirt-king/test_app /mnt/usr/local/bin/kirt-app --depth=1")
             else:
-                self._execute("cp /usr/local/share/kirt-app/* /mnt/usr/local/bin/kirt-app/ -r")
+                self._execute("cp /usr/local/share/kirt-app /mnt/usr/local/bin/ -r")
             self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.kirt-app.policy /mnt/usr/share/polkit-1/actions/")
             self._execute("cp /usr/local/share/secux-installer/scripts/kirt-app.desktop /mnt/usr/share/applications")
             self._execute("chmod +x /mnt/usr/share/applications/kirt-app.desktop")
