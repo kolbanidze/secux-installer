@@ -1510,18 +1510,18 @@ class App(CTk):
             base, num = self.__split_device(efi_partition)
             self._execute("echo Adding bootentry.")
             self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
-            for kernel in self.setup_information["Kernel"]:
-                self._execute(f'echo "title SECUX Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
-                self._execute(f'echo "title SECUX Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi" > /mnt/efi/loader/entries/secux-{kernel}-fallback.conf')
-            
-            if 'linux-hardened' in self.setup_information["Kernel"]:
-                default = "secux-linux-hardened.conf"
-            elif 'linux-lts' in self.setup_information["Kernel"]:
-                default = "secux-linux-lts.conf"
-            else:
-                default = "secux-linux.conf"
-            self._execute(f'echo "timeout 3\ndefault {default}" > /mnt/efi/loader/loader.conf')
-            # self._execute(f'echo "title SECU')
+        
+        for kernel in self.setup_information["Kernel"]:
+            self._execute(f'echo "title SECUX Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
+            self._execute(f'echo "title SECUX Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi" > /mnt/efi/loader/entries/secux-{kernel}-fallback.conf')
+        
+        if 'linux-hardened' in self.setup_information["Kernel"]:
+            default = "secux-linux-hardened.conf"
+        elif 'linux-lts' in self.setup_information["Kernel"]:
+            default = "secux-linux-lts.conf"
+        else:
+            default = "secux-linux.conf"
+        self._execute(f'echo "timeout 3\ndefault {default}" > /mnt/efi/loader/loader.conf')
 
         # Installing secux-apps
         if 'securitymanager' in self.setup_information["Apps"]:
