@@ -1408,7 +1408,7 @@ class App(CTk):
             self._execute(f"sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
             self._execute(f"sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
 
-            self._execute(f"sed -i 's/arch/secux/g' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+            self._execute(f"sed -i 's/arch-/secux-/g' /mnt/etc/mkinitcpio.d/{kernel}.preset")
 
         # Set default plymouth theme
         self._execute("arch-chroot /mnt plymouth-set-default-theme")
@@ -1444,6 +1444,7 @@ class App(CTk):
             self._execute('echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen')
             self._execute('echo LANG=\"en_US.UTF-8\" > /mnt/etc/locale.conf')
         self._execute("arch-chroot /mnt locale-gen")
+        self._execute('echo "FONT=cyr-sun16" >> /mnt/etc/vconsole.conf')
 
         # Hostname
         self._execute(f'echo "{self.setup_information["Hostname"]}" > /mnt/etc/hostname')
