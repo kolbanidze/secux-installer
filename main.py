@@ -1577,6 +1577,9 @@ class App(CTk):
         self._execute("arch-chroot /mnt systemctl enable ufw")
         self._execute("arch-chroot /mnt ufw default deny")
 
+        # Flatpak offline installation support
+        self._execute("arch-chroot /mnt flatpak remote-modify --collection-id org.flathub.Stable flathub")
+
         # Final message in console
         self._execute("echo [Installation finished!]")
         self._execute("echo [Now you can close this window and reboot into the system.]")
