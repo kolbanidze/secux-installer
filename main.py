@@ -13,7 +13,7 @@ from hmac import compare_digest
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
-VERSION = "0.2.5"
+VERSION = "0.2.6"
 DEBUG = True # Default: True
 DEBUG_SHOW_COMMANDS = False # Default: False
 DEBUG_SHOW_COMMANDS_EFI_PARTITION = "/dev/vda1"
@@ -1408,6 +1408,8 @@ class App(CTk):
             self._execute(f"sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
             self._execute(f"sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
 
+            self._execute(f"sed -i 's/arch/secux/g' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+
         # Set default plymouth theme
         self._execute("arch-chroot /mnt plymouth-set-default-theme")
 
@@ -1463,6 +1465,9 @@ class App(CTk):
         # Install bootloader
         self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
         
+        # Create timeout
+        self._execute('echo "timeout 3" > /mnt/efi/loader/loader.conf')
+
         # Generate sbctl keys
         if self.setup_information["InstallationType"] == "Secure":
             self._execute("arch-chroot /mnt sbctl create-keys")
@@ -1473,8 +1478,8 @@ class App(CTk):
             self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
             self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
             for kernel in self.setup_information["Kernel"]:
-                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}-fallback.efi")
-                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/arch-{kernel}.efi")
+                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/secux-{kernel}-fallback.efi")
+                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/secux-{kernel}.efi")
         
         # Creating trusted boot chain with microsoft keys
         if self.setup_information["InstallationType"] == "LessSecure":
@@ -1486,8 +1491,8 @@ class App(CTk):
             self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f"echo Signing {kernel}")
-                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}.efi /efi/EFI/Linux/arch-{kernel}.efi")
-                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/arch-{kernel}-fallback.efi /efi/EFI/Linux/arch-{kernel}-fallback.efi")
+                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/secux-{kernel}.efi /efi/EFI/Linux/secux-{kernel}.efi")
+                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/secux-{kernel}-fallback.efi /efi/EFI/Linux/secux-{kernel}-fallback.efi")
                 self._execute(f"echo Successfully signed {kernel}")
             self._execute('echo Importing MOK')
             self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
@@ -1502,7 +1507,18 @@ class App(CTk):
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/Linux/grubx64.efi")
             base, num = self.__split_device(efi_partition)
             self._execute("echo Adding bootentry.")
-            self._execute(f'efibootmgr | grep -q "SECUX SHIM" && echo "Boot entry already exists. No changes made." || efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
+            self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
+            for kernel in self.setup_information["Kernel"]:
+                self._execute(f'echo "title SECUX Linux ({kernel})\nefi /EFI/Linux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
+            
+            if 'linux-hardened' in self.setup_information["Kernel"]:
+                default = "secux-linux-hardened.conf"
+            elif 'linux-lts' in self.setup_information["Kernel"]:
+                default = "secux-linux-lts.conf"
+            else:
+                default = "secux-linux.conf"
+            self._execute(f'echo "timeout 3\ndefault {default}" > /mnt/efi/loader/loader.conf')
+            # self._execute(f'echo "title SECU')
 
         # Installing secux-apps
         if 'securitymanager' in self.setup_information["Apps"]:
