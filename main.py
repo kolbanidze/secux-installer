@@ -1512,6 +1512,7 @@ class App(CTk):
             self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f'echo "title SECUX Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
+                self._execute(f'echo "title SECUX Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi" > /mnt/efi/loader/entries/secux-{kernel}-fallback.conf')
             
             if 'linux-hardened' in self.setup_information["Kernel"]:
                 default = "secux-linux-hardened.conf"
