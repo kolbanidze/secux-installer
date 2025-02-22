@@ -1509,7 +1509,7 @@ class App(CTk):
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/secux/grubx64.efi")
             base, num = self.__split_device(efi_partition)
             self._execute("echo Adding bootentry.")
-            self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
+            self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\secux\\shimx64.efi"')
         
         for kernel in self.setup_information["Kernel"]:
             self._execute(f'echo "title SECUX Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
