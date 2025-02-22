@@ -1409,12 +1409,13 @@ class App(CTk):
             self._execute(f"sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
 
             self._execute(f"sed -i 's/arch-/secux-/g' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+            self._execute(f"sed -i 's/Linux/secux/g' /mnt/etc/mkinitcpio.d/{kernel}.preset")
 
         # Set default plymouth theme
         self._execute("arch-chroot /mnt plymouth-set-default-theme")
 
         # Prepare EFI Partition
-        self._execute("mkdir -p /mnt/efi/EFI/Linux")
+        self._execute("mkdir -p /mnt/efi/EFI/secux")
         
         # Change distro info and logo
         self._execute("cp /usr/local/share/secux-installer/scripts/os-release /mnt/etc/os-release")
@@ -1479,21 +1480,21 @@ class App(CTk):
             self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
             self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
             for kernel in self.setup_information["Kernel"]:
-                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/secux-{kernel}-fallback.efi")
-                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/Linux/secux-{kernel}.efi")
+                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/secux/secux-{kernel}-fallback.efi")
+                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/secux/secux-{kernel}.efi")
         
         # Creating trusted boot chain with microsoft keys
         if self.setup_information["InstallationType"] == "LessSecure":
-            self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/Linux/shimx64.efi")
-            self._execute("cp /mnt/usr/share/shim-signed/mmx64.efi /mnt/efi/EFI/Linux/mmx64.efi")
+            self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/secux/shimx64.efi")
+            self._execute("cp /mnt/usr/share/shim-signed/mmx64.efi /mnt/efi/EFI/secux/mmx64.efi")
             self._execute("mkdir -p /mnt/etc/secureboot")
             self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
             self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
             self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
             for kernel in self.setup_information["Kernel"]:
                 self._execute(f"echo Signing {kernel}")
-                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/secux-{kernel}.efi /efi/EFI/Linux/secux-{kernel}.efi")
-                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/Linux/secux-{kernel}-fallback.efi /efi/EFI/Linux/secux-{kernel}-fallback.efi")
+                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/secux/secux-{kernel}.efi /efi/EFI/secux/secux-{kernel}.efi")
+                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/secux/secux-{kernel}-fallback.efi /efi/EFI/secux/secux-{kernel}-fallback.efi")
                 self._execute(f"echo Successfully signed {kernel}")
             self._execute('echo Importing MOK')
             self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
@@ -1505,12 +1506,12 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/share/systemd-boot-sign.sh")
             self._execute("cp /usr/local/share/secux-installer/scripts/sign-uki.sh /mnt/usr/lib/initcpio/post")
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
-            self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/Linux/grubx64.efi")
+            self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/secux/grubx64.efi")
             base, num = self.__split_device(efi_partition)
             self._execute("echo Adding bootentry.")
             self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\Linux\\shimx64.efi"')
             for kernel in self.setup_information["Kernel"]:
-                self._execute(f'echo "title SECUX Linux ({kernel})\nefi /EFI/Linux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
+                self._execute(f'echo "title SECUX Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
             
             if 'linux-hardened' in self.setup_information["Kernel"]:
                 default = "secux-linux-hardened.conf"

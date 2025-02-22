@@ -2,7 +2,7 @@
 set -e
 
 SYSTEMD_BOOT_SRC="/usr/lib/systemd/boot/efi/systemd-bootx64.efi"
-TARGET_DIR="/efi/EFI/Linux"
+TARGET_DIR="/efi/EFI/secux"
 TARGET_FILE="${TARGET_DIR}/grubx64.efi"
 KEY="/etc/secureboot/sb.key"
 CERT="/etc/secureboot/sb.crt"

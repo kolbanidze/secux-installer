@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-TARGET_DIR="/efi/EFI/Linux"
+TARGET_DIR="/efi/EFI/secux"
 SOURCE_DIR="/usr/lib/shim-signed"
 
 [ -d "$TARGET_DIR" ] || mkdir -p "$TARGET_DIR"
