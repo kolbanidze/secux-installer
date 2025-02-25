@@ -651,7 +651,7 @@ class App(CTk):
             swapsize = self.swap_entry.get()
             self.setup_information["SwapSize"] = swapsize
         self.bind(("<Return>"), lambda event: self.__draw_admin_creation())
-        self.manual_partitioning_frame.grid_forget()
+        self.manual_partitioning_frame.pack_forget()
         self.current_stage += 1
 
         if not hasattr(self, "encryption_frame"):
