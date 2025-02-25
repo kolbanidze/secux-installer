@@ -4,7 +4,7 @@ from subprocess import run
 #   pacman -Sg metapackage | awk '{print $2}' | paste -sd ' '
 
 # OS, Apps and dependencies
-PACKAGES = "base linux linux-lts linux-hardened linux-headers linux-lts-headers linux-hardened-headers linux-firmware amd-ucode intel-ucode vim nano efibootmgr sudo plymouth python-pip python-dbus v4l-utils lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd sbctl shim-signed mokutil networkmanager-openvpn gnome-tweaks"
+PACKAGES = "base base-devel linux linux-lts linux-hardened linux-headers linux-lts-headers linux-hardened-headers linux-firmware amd-ucode intel-ucode vim nano efibootmgr sudo plymouth python-pip python-dbus v4l-utils lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd sbctl shim-signed mokutil networkmanager-openvpn gnome-tweaks"
 
 PACKAGES += " vlc firefox chromium libreoffice keepassxc"
 
