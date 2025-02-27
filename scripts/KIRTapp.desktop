@@ -4,6 +4,6 @@ Encoding=UTF-8
 Name=KIRTapp
 Comment=KIRTapp
 Icon=/usr/share/icons/secux.svg
-Exec=/usr/bin/python /usr/local/bin/kirt-app/app_script/app.py
+Exec=/usr/bin/python /usr/local/bin/KIRTapp/app_script/app.py
 Terminal=false
 Categories=Kirt;Secux;Face;Recognition
