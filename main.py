@@ -896,9 +896,9 @@ class App(CTk):
         pacman_tab = tabview.tab("Pacman")
 
         self.securitymanager = CTkCheckBox(secux_tab, text="Security Manager")
-        self.kirt_app = CTkCheckBox(secux_tab, text=f"Kirt App")
+        self.KIRTapp = CTkCheckBox(secux_tab, text=f"KIRTapp")
         self.securitymanager.select()
-        self.kirt_app.select()
+        self.KIRTapp.select()
 
         self.chromium = CTkCheckBox(pacman_tab, text="Chromium")
         self.firefox = CTkCheckBox(pacman_tab, text="Firefox")
@@ -917,7 +917,7 @@ class App(CTk):
         label.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky='nsew')
         tabview.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
         self.securitymanager.pack(padx=10, pady=5, anchor='center')
-        self.kirt_app.pack(padx=10, pady=5, anchor='center')
+        self.KIRTapp.pack(padx=10, pady=5, anchor='center')
 
         self.chromium.pack(padx=10, pady=5, anchor='center')
         self.firefox.pack(padx=10, pady=5, anchor='center')
@@ -936,9 +936,9 @@ class App(CTk):
         self.setup_information["Apps"] = []
         # Secux tab
         if self.securitymanager.get():
-            self.setup_information["Apps"].append("securitymanager")
-        if self.kirt_app.get():
-            self.setup_information["Apps"].append("kirt_app")
+            self.setup_information["Apps"].append("Security Manager")
+        if self.KIRTapp.get():
+            self.setup_information["Apps"].append("KIRTapp")
         
         # Pacman tab
         if self.chromium.get(): 
@@ -1330,9 +1330,9 @@ class App(CTk):
         elif self.setup_information["InstallationType"] == "LessSecure":
             pacstrap_packages.extend(["shim-signed", "mokutil"])
         
-        if 'securitymanager' in self.setup_information["Apps"]:
+        if 'Security Manager' in self.setup_information["Apps"]:
             pacstrap_packages.extend(['tk', 'python-pexpect', 'python-pillow', 'python-darkdetect', 'python-packaging'])
-        if 'kirt_app' in self.setup_information["Apps"]:
+        if 'KIRTapp' in self.setup_information["Apps"]:
             pacstrap_packages.extend(["tk", "v4l-utils", "python-pillow", "python-opencv", "python-numpy", "python-setuptools", "python-dotenv", "python-darkdetect", "python-packaging", "python-dlib"])
         
         if 'vlc' in self.setup_information["Apps"]:
@@ -1525,7 +1525,7 @@ class App(CTk):
         self._execute(f'echo "timeout 3\ndefault {default}" > /mnt/efi/loader/loader.conf')
 
         # Installing secux-apps
-        if 'securitymanager' in self.setup_information["Apps"]:
+        if 'Security Manager' in self.setup_information["Apps"]:
             self._execute("mkdir -p /mnt/usr/local/bin/secux-apps")
             if self.online_installation:
                 self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
@@ -1547,16 +1547,16 @@ class App(CTk):
                 self._execute(f"rm -rf /mnt/root/customtkinter*")
 
         # Installing Kirt App
-        if 'kirt_app' in self.setup_information["Apps"]:
-            self._execute("mkdir -p /mnt/usr/local/bin/kirt-app")
+        if 'KIRTapp' in self.setup_information["Apps"]:
+            self._execute("mkdir -p /mnt/usr/local/bin/KIRTapp")
             if self.online_installation:
-                self._execute("git clone https://github.com/kirt-king/test_app /mnt/usr/local/bin/kirt-app --depth=1")
+                self._execute("git clone https://github.com/kirt-king/test_app /mnt/usr/local/bin/KIRTapp --depth=1")
             else:
-                self._execute("cp /usr/local/share/kirt-app /mnt/usr/local/bin/ -r")
-            self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.kirt-app.policy /mnt/usr/share/polkit-1/actions/")
-            self._execute("cp /usr/local/share/secux-installer/scripts/kirt-app.desktop /mnt/usr/share/applications")
-            self._execute("chmod +x /mnt/usr/share/applications/kirt-app.desktop")
-            self._execute("chmod +x /mnt/usr/local/bin/kirt-app/app_script/app.py")
+                self._execute("cp /usr/local/share/KIRTapp /mnt/usr/local/bin/ -r")
+            self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.KIRTapp.policy /mnt/usr/share/polkit-1/actions/")
+            self._execute("cp /usr/local/share/secux-installer/scripts/KIRTapp.desktop /mnt/usr/share/applications")
+            self._execute("chmod +x /mnt/usr/share/applications/KIRTapp.desktop")
+            self._execute("chmod +x /mnt/usr/local/bin/KIRTapp/app_script/app.py")
 
             # Dependencies
             # self._execute("pacstrap /mnt tk base-devel cmake python-pillow python-opencv python-numpy python-setuptools python-dotenv python-darkdetect python-packaging python-dlib")
