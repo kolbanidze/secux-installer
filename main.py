@@ -137,6 +137,7 @@ class App(CTk):
         self.updater_textbox = CTkTextbox(self, state="disabled")
         after_update = CTkLabel(self, text="Для применения обновлений необходимо перезапустить программу.\nTo apply updates, you must restart the program.")
         exit_button = CTkButton(self, text="Закрыть программу | Close the program", command=self.destroy)
+        if DEBUG: print("I will remember this code forever. How much time was spent to fix this unfortunate segmentation fault... Interesting adventure: https://pastebin.com/ASiE2FVe")
 
         update_image_label.pack(padx=15, pady=15)
         updater_welcome.pack(padx=15, pady=15)
