@@ -81,7 +81,7 @@ class Locale:
             self.package_source_status = "Current image"
             self.apps_label = "Software installation"
             self.secure_label = "Trust own Secure Boot keys. Custom Mode must be enabled"
-            self.less_secure_label = "Trust Microsoft keys. Use SHIM and own MOK"
+            self.less_secure_label = "Trust Microsoft keys. Use SHIM and own MOK (one time password - 123)"
             self.hardened_security = "hardened security"
             self.error = "Error"
             self.swapsize_error = "Invalid swap file size"
@@ -174,7 +174,7 @@ class Locale:
             self.package_source_status = "Текущий образ"
             self.apps_label = "Установка ПО"
             self.secure_label = "Доверие собственным ключам Secure Boot. Необходимо включить Custom Mode"
-            self.less_secure_label = "Доверие к ключам Microsoft. Использование SHIM и собственного MOK"
+            self.less_secure_label = "Доверие к ключам Microsoft. Использование SHIM и собственного MOK (одноразовый пароль - 123)"
             self.hardened_security = "усиленная безопасность"
             self.error = 'Ошибка'
             self.swapsize_error = "Неверно введен размер файла подкачки"
