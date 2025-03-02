@@ -304,7 +304,9 @@ class App(CTk):
         label = CTkLabel(self.installation_type_frame, text=self.lang.select_install_option, font=(None, 16, "bold"))
         self.installation_type_variable = IntVar(value=0)
         self.secure_type = CTkRadioButton(self.installation_type_frame, value=0, variable=self.installation_type_variable, text=self.lang.securetype, command=self.__installation_type_radio_button_handler)
+        secure_type_label = CTkLabel(self.installation_type_frame, text=self.lang.secure_label, font=("Arial", 12), text_color="light grey")
         self.less_secure_type = CTkRadioButton(self.installation_type_frame, value=1, variable=self.installation_type_variable, text=self.lang.lessecuretype, command=self.__installation_type_radio_button_handler)
+        less_secure_type_label = CTkLabel(self.installation_type_frame, text=self.lang.less_secure_label, font=("Arial", 12), text_color="light grey")
         self.insecure_type = CTkRadioButton(self.installation_type_frame, value=2, variable=self.installation_type_variable, text=self.lang.insecuretype, command=self.__installation_type_radio_button_handler)
         back_btn = CTkButton(self.installation_type_frame, text=self.lang.back, command=self.__return_to_timezone)
         next_btn = CTkButton(self.installation_type_frame, text=self.lang.next, command=self.__draw_de)
@@ -321,12 +323,14 @@ class App(CTk):
             self.__installation_type_radio_button_handler()
 
         label.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        self.secure_type.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        self.less_secure_type.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        self.insecure_type.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=5)
-        back_btn.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
-        # self.__resize()
+        self.secure_type.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=15, pady=(5, 0))
+        secure_type_label.grid(row=3, column=0, columnspan=2, padx=45, pady=(0,10), sticky="w")
+        self.less_secure_type.grid(row=4, column=0, columnspan=2, sticky="nsew", padx=15, pady=0)
+        less_secure_type_label.grid(row=5, column=0, columnspan=2, padx=45, pady=(0,10), sticky="w")
+        self.insecure_type.grid(row=6, column=0, columnspan=2, sticky="nsew", padx=15, pady=(0,5))
+
+        back_btn.grid(row=7, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=7, column=1, padx=15, pady=5, sticky="nsew")
     
     ##### END INSTALLATION TYPE #####
 
@@ -424,7 +428,7 @@ class App(CTk):
 
         self.__draw_progress_bar(self.kernel_frame)
         label = CTkLabel(self.kernel_frame, text=self.lang.kernel_label, font=(None, 16, "bold"))
-        self.linux_hardened = CTkCheckBox(self.kernel_frame, text="Linux hardened", command=self.__kernel_select_handler)
+        self.linux_hardened = CTkCheckBox(self.kernel_frame, text=f"Linux Hardened ({self.lang.hardened_security})", command=self.__kernel_select_handler)
         self.linux_lts = CTkCheckBox(self.kernel_frame, text="Linux LTS", command=self.__kernel_select_handler)
         self.linux = CTkCheckBox(self.kernel_frame, text="Linux", command=self.__kernel_select_handler)
         back_btn = CTkButton(self.kernel_frame, text=self.lang.back, command=self.__return_to_de)
@@ -1285,28 +1289,23 @@ class App(CTk):
         self._execute("vgcreate volumegroup /dev/mapper/cryptlvm")
         
         # Creating swap partition if needed
-        if self.setup_information["UseSwap"] == False:
-            self._execute("lvcreate -l 100%FREE volumegroup -n root")
-        else:
-            self._execute(f"lvcreate -L {self.setup_information["SwapSize"]}G volumegroup -n swap")
-            self._execute("lvcreate -l 100%FREE volumegroup -n root")
+        self._execute("lvcreate -l 100%FREE volumegroup -n root")
         
         # Formatting root partition
         self._execute("mkfs.ext4 /dev/volumegroup/root")
-        
-        # Formatting swap partition
-        if self.setup_information["UseSwap"]:
-            self._execute("mkswap /dev/volumegroup/swap")
-        
+                
         # Formatting EFI partition if needed
         if self.setup_information["Partitioning"] == "Automatic":
             self._execute(f"mkfs.fat -F32 {efi_partition}")
 
         # Mounting root partition to /mnt and enabling swap if needed
-        self._execute(f"mount /dev/volumegroup/root /mnt")
+        self._execute("mount /dev/volumegroup/root /mnt")
         if self.setup_information["UseSwap"]:
-            self._execute("swapon /dev/volumegroup/swap")
-        
+            self._execute(f"fallocate -l {self.setup_information["SwapSize"]}G /mnt/swapfile")
+            self._execute("chmod 600 /mnt/swapfile")
+            self._execute("mkswap /mnt/swapfile")
+            self._execute("swapon /mnt/swapfile")
+
         # Creating and mounting EFI partition
         self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
@@ -1322,8 +1321,6 @@ class App(CTk):
         pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw']
         pacstrap_packages.extend(self.__get_ucode_package())
         pacstrap_packages.extend(self.setup_information["Kernel"])
-        # kernels = " ".join(self.setup_information["Kernel"]) + " " + " ".join([i+'-headers' for i in self.setup_information["Kernel"]])
-        # pacstrap_command = f"stdbuf -oL pacstrap -K /mnt base {kernels} linux-firmware {self.__get_ucode_package()} vim nano efibootmgr sudo plymouth python-pip lvm2 networkmanager systemd-ukify sbsigntools efitools less git ntfs-3g gvfs gvfs-mtp xdg-user-dirs fwupd apparmor ufw "
 
         if self.setup_information["InstallationType"] == "Secure":
             pacstrap_packages.append("sbctl")
@@ -1363,9 +1360,6 @@ class App(CTk):
         # Adding custom repo
         self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
         self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
-        # self._execute("arch-chroot /mnt pacman-key --recv CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
-        # self._execute("arch-chroot /mnt pacman-key --add /usr/share/pacman/keyrings/kolbanidze.gpg")
-        # self._execute("arch-chroot /mnt pacman-key --lsign-key CE48F2CC9BE03B4EFAB02343AA0A42D146D35FCE")
         self._execute("arch-chroot /mnt pacman-key --populate kolbanidze")
 
         # Generating fstab
@@ -1538,7 +1532,6 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/local/bin/secux-apps/manager.py")
 
             # Dependencies
-            # self._execute("pacstrap /mnt tk python-pexpect python-pillow python-darkdetect python-packaging")
             if self.online_installation:
                 self._execute("arch-chroot /mnt pip install customtkinter --break-system-packages")
             else:
@@ -1559,18 +1552,12 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/local/bin/KIRTapp/app_script/app.py")
 
             # Dependencies
-            # self._execute("pacstrap /mnt tk base-devel cmake python-pillow python-opencv python-numpy python-setuptools python-dotenv python-darkdetect python-packaging python-dlib")
             if self.online_installation:
                 self._execute("arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --break-system-packages")
             else:
                 self._execute(f"cp -r {WORKDIR}/python_packages/ /mnt/root/")
                 self._execute(f"arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --find-links /root/python_packages --no-index --break-system-packages")
                 self._execute(f"rm -rf /mnt/root/python_packages")
-                # self._execute(f"cp {WORKDIR}/python_packages /mnt/home/{self.setup_information["Username"]} -r")
-                # # self._execute(f"arch-chroot /mnt pip install --find-links /tmp/python_packages customtkinter setuptools screeninfo python-dotenv face_recognition face_recognition_models --break-system-packages")
-                # # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/setuptools* --break-system-packages\"")
-                # self._execute(f"arch-chroot /mnt bash -c \"pip install /home/{self.setup_information['Username']}/python_packages/* --break-system-packages\"")
-                # self._execute(f"rm -rf /home/{self.setup_information['Username']}/python_packages")
 
         # Hardening
         self._execute("arch-chroot /mnt systemctl enable apparmor")
