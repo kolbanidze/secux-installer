@@ -1176,8 +1176,17 @@ class App(CTk):
 
     def __installation_failed(self):
         popup = CTkToplevel(self)
-        label = CTkLabel(popup, text="INSTALLATION FAILED!!!")
-        label.pack(padx=50, pady=50)
+        popup.title(self.lang.success)
+        image = CTkImage(light_image=Image.open(f"{WORKDIR}/images/redcross.png"), dark_image=Image.open(f"{WORKDIR}/images/redcross.png"), size=(80,80))
+        image_label = CTkLabel(popup, text="", image=image)
+        label = CTkLabel(popup, text=self.lang.installation_failed, font=(None, 16, "bold"))
+        continue_working = CTkButton(popup, text=self.lang.continue_working, command=lambda: self.__close(popup, close_self=False, reboot=False))
+        reboot = CTkButton(popup, text=self.lang.reboot, command=lambda: self.__close(popup, close_self=True, reboot=True))
+
+        image_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        label.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        continue_working.grid(row=2, column=0, padx=(10,5), pady=10, sticky="nsew")
+        reboot.grid(row=2, column=1, padx=(5, 10), pady=10, sticky="nsew")
 
     def _execute_commands(self, commands: list):
         def run_commands():
