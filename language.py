@@ -92,6 +92,8 @@ class Locale:
             self.installation_success = "Secux Linux has been successfully installed on this device.\nYou can continue using the Secux Linux Live CD or reboot."
             self.continue_working = "Continue using"
             self.reboot = "Reboot"
+            self.installation_failed = "A critical error occurred while installing Secux Linux\nYou can continue using the Secux Linux Live CD or reboot."
+
         elif language == "ru":
             self.select_time_zone = "Выберите часовой пояс"
             self.region = "Регион"
