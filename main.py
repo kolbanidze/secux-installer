@@ -10,6 +10,7 @@ import threading
 import re
 import string
 from hmac import compare_digest
+from psutil import virtual_memory
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
@@ -242,6 +243,7 @@ class App(CTk):
         self.zone_box = CTkOptionMenu(self.timezone_stage_frame, command=self.__time_zone_write_to_setup_info)
         back_btn = CTkButton(self.timezone_stage_frame, text=self.lang.back, command=self.__return_to_welcome_menu)
         next_btn = CTkButton(self.timezone_stage_frame, text=self.lang.next, command=self.__draw_installation_type)
+        self.__installation_success()
         
         if "Timezone" not in self.setup_information:
             self.__timezone_handler("Europe")
@@ -544,8 +546,7 @@ class App(CTk):
 
     def manual_partitioning(self):
         self.manual_partitioning_frame = CTkFrame(self)
-        # self.manual_partitioning_frame.pack(fill='both', expand=True)
-        
+
         self.partitions = []
         disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,FSTYPE,MOUNTPOINT,TYPE', '--json'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
         for disk in disks:
@@ -553,40 +554,47 @@ class App(CTk):
                 for partition in disk['children']:
                     self.partitions.append(f"{partition['name']} | {partition['size']} | {partition.get('fstype', 'N/A')}")
 
+        # Max swap size: Total RAM (GiB) + 8 GiB
+        max_swap = round(virtual_memory().total / (1024*1024*1024)) + 8
+
         self.__draw_progress_bar(self.manual_partitioning_frame)
         label = CTkLabel(self.manual_partitioning_frame, text=self.lang.selfpart, font=(None, 16, "bold"))
         run_gparted_btn = CTkButton(self.manual_partitioning_frame, text=self.lang.rungparted, command=lambda: os.system("/usr/bin/sudo /usr/bin/gparted"))
         update_disks = CTkButton(self.manual_partitioning_frame, text=self.lang.refreshparts, command=self.__update_partitions)
         efi_partition_label = CTkLabel(self.manual_partitioning_frame, text=self.lang.efipart)
         self.efi_partition_optionmenu = CTkOptionMenu(self.manual_partitioning_frame, values=self.partitions)
-        efi_partition_explain_label = CTkLabel(self.manual_partitioning_frame, text="Раздел, в котором хранится загрузчик системы. Должен быть отформатирован в FAT32 и иметь размер не менее 200 МиБ", font=("Arial", 12), text_color="light grey")
+        efi_partition_explain_label = CTkLabel(self.manual_partitioning_frame, text="Раздел, в котором хранится загрузчик системы. Должен быть отформатирован в FAT32 и иметь размер не менее 200 МиБ (рекомендуется 1 ГиБ)", font=("Arial", 12), text_color="light grey")
         root_partition_label = CTkLabel(self.manual_partitioning_frame, text=self.lang.rootfs)
-        self.root_partition_optionmenu = CTkOptionMenu(self.manual_partitioning_frame, values=self.partitions, command=self.__change_max_swapfile)
+        self.root_partition_optionmenu = CTkOptionMenu(self.manual_partitioning_frame, values=self.partitions)
+        root_partition_explain = CTkLabel(self.manual_partitioning_frame, text="Основной раздел для установки операционной системы и хранения данных. Используется LVM с файловой системой EXT4", font=("Arial", 12), text_color="light grey")
         self.use_swap = StringVar(value="on")
         self.swap_checkbox = CTkCheckBox(self.manual_partitioning_frame, text=self.lang.useswap, variable=self.use_swap, onvalue="on", offvalue="off", command=self.__swapfile_handler)
+        swapfile_explain = CTkLabel(self.manual_partitioning_frame, text="Файл подкачки расширяет оперативную память за счёт диска", font=("Arial", 12), text_color="light grey")
         swap_label = CTkLabel(self.manual_partitioning_frame, text=self.lang.swapsize)
         self.swap_entry = CTkEntry(self.manual_partitioning_frame)
         self.swap_entry.insert(0, "1")
-        self.swap_scrollbar = CTkSlider(self.manual_partitioning_frame, command=self.__scroll_handler, to=16)
+        self.swap_scrollbar = CTkSlider(self.manual_partitioning_frame, command=self.__scroll_handler, to=max_swap)
         back_btn = CTkButton(self.manual_partitioning_frame, text=self.lang.back, command=lambda: self.__return_to_partitioning(self.manual_partitioning_frame))
         next_btn = CTkButton(self.manual_partitioning_frame, text=self.lang.next, command=self.__draw_encryption_stage_from_manual)
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
-        run_gparted_btn.grid(row=2, column=0, padx=15, pady=5, sticky="nsew")
-        update_disks.grid(row=2, column=1, padx=15, pady=5, sticky="nsew")
-        efi_partition_label.grid(row=3, column=0, padx=15, pady=5, sticky="nsew")
-        self.efi_partition_optionmenu.grid(row=3, column=1, padx=15, pady=5, sticky="nsew")
-        efi_partition_explain_label.grid(row=4, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        run_gparted_btn.grid(row=2, column=0, padx=15, pady=(5, 10), sticky="nsew")
+        update_disks.grid(row=2, column=1, padx=15, pady=(5, 10), sticky="nsew")
+        efi_partition_label.grid(row=3, column=0, padx=15, pady=0, sticky="nsew")
+        self.efi_partition_optionmenu.grid(row=3, column=1, padx=15, pady=0, sticky="nsew")
+        efi_partition_explain_label.grid(row=4, column=0, columnspan=2, padx=15, pady=(0, 10), sticky="nsew")
 
-        root_partition_label.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
-        self.root_partition_optionmenu.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
-        self.swap_checkbox.grid(row=6, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
-        swap_label.grid(row=7, column=0, padx=15, pady=5, sticky="nsew")
-        self.swap_entry.grid(row=8, column=0, padx=15, pady=5, sticky="nsew")
-        self.swap_scrollbar.grid(row=8, column=1, padx=15, pady=5, sticky="nsew")
-        back_btn.grid(row=9, column=0, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=9, column=1, padx=15, pady=5, sticky="nsew")
-        # self.__resize()
+        root_partition_label.grid(row=5, column=0, padx=15, pady=(5,0), sticky="nsew")
+        self.root_partition_optionmenu.grid(row=5, column=1, padx=15, pady=(5, 0), sticky="nsew")
+        root_partition_explain.grid(row=6, column=0, columnspan=2, padx=15, pady=(0, 10), sticky="nsew")
+
+        self.swap_checkbox.grid(row=7, column=0, padx=15, pady=(5,0), sticky="nsew")
+        swapfile_explain.grid(row=8, column=1, padx=15, pady=(5,0), sticky="nsew")
+        swap_label.grid(row=8, column=0, padx=15, pady=0, sticky="nsew")
+        self.swap_entry.grid(row=9, column=0, padx=15, pady=(0,5), sticky="nsew")
+        self.swap_scrollbar.grid(row=9, column=1, padx=15, pady=(0,5), sticky="nsew")
+        back_btn.grid(row=10, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=10, column=1, padx=15, pady=5, sticky="nsew")
 
     def __scroll_handler(self, newvalue):
         newvalue = round(newvalue, 1)
@@ -600,7 +608,6 @@ class App(CTk):
         else:
             self.swap_entry.configure(state="normal")
             self.swap_scrollbar.configure(state="normal")
-            self.__change_max_swapfile(None)
 
     def __update_partitions(self):
         self.partitions.clear()
@@ -612,52 +619,71 @@ class App(CTk):
         self.efi_partition_optionmenu.configure(values=self.partitions)
         self.root_partition_optionmenu.configure(values=self.partitions)
 
-    def __change_max_swapfile(self, newvalue):
-        if self.swap_checkbox.get() == "off":
-            return
-        half_of_max_space = int(self.__get_max_swap_size() / (2**30))//2
-        if half_of_max_space == 0:
-            Notification(title=self.lang.swap_part_too_small, icon="warning.png", message=self.lang.swap_part_too_small, message_bold=False, exit_btn_msg=self.lang.exit)
-            self.swap_scrollbar.configure(state="disabled")
-            return 
-        else:
-            self.swap_scrollbar.configure(state="normal")
-        self.swap_scrollbar.configure(to=half_of_max_space)
+    # def __change_max_swapfile(self, newvalue):
+    #     if self.swap_checkbox.get() == "off":
+    #         return
+    #     half_of_max_space = int(self.__get_max_swap_size() / (2**30))//2
+    #     if half_of_max_space == 0:
+    #         Notification(title=self.lang.swap_part_too_small, icon="warning.png", message=self.lang.swap_part_too_small, message_bold=False, exit_btn_msg=self.lang.exit)
+    #         self.swap_scrollbar.configure(state="disabled")
+    #         return 
+    #     else:
+    #         self.swap_scrollbar.configure(state="normal")
+    #     self.swap_scrollbar.configure(to=half_of_max_space)
 
-    def __get_max_swap_size(self):
-        """by default returns 16 GiB in bytes"""
-        current_partition = self.root_partition_optionmenu.get().split(" | ")[0]
-        disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
-        current_partition_size = 17179869184 # bytes
-        for disk in disks:
-            if 'children'in disk:
-                for partition in disk['children']:
-                    if partition['name'] == current_partition:
-                        current_partition_size = partition['size']
-                        break
-        return current_partition_size
+    # def __get_max_swap_size(self):
+    #     """by default returns 16 GiB in bytes"""
+    #     current_partition = self.root_partition_optionmenu.get().split(" | ")[0]
+    #     disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
+    #     current_partition_size = 17179869184 # bytes
+    #     for disk in disks:
+    #         if 'children'in disk:
+    #             for partition in disk['children']:
+    #                 if partition['name'] == current_partition:
+    #                     current_partition_size = partition['size']
+    #                     break
+    #     return current_partition_size
 
     def __draw_encryption_stage_from_manual(self):
         efi_partition = self.efi_partition_optionmenu.get().split(" | ")[0]
-        disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
+        disks = json.loads(subprocess.run(['lsblk', '-o', 'NAME,SIZE,FSTYPE', '--json', '-ba'], text=True, capture_output=True, check=True).stdout).get('blockdevices', [])
         for disk in disks:
             if 'children' in disk:
                 for partition in disk['children']:
                     if partition['name'] == efi_partition:
                         efi_partition_size = partition['size']
-                        break
+                        efi_fstype = partition['fstype']
+                    if partition['name'] == self.root_partition_optionmenu.get().split(" | ")[0]:
+                        system_partition_size = partition['size']
         if efi_partition_size < 209715200:
             Notification(title=self.lang.efi_small_title, icon="warning.png", message=self.lang.efi_small, message_bold=True, exit_btn_msg=self.lang.exit)
             return
+        if efi_fstype != "vfat":
+            Notification(title=self.lang.error, icon="warning.png", message=self.lang.efi_fstype_error, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
         system_partition = "/dev/" + self.root_partition_optionmenu.get().split(" | ")[0]
         use_swapfile = ("on" == self.swap_checkbox.get())
+
+        if use_swapfile:
+            swapsize = self.swap_entry.get()
+            try:
+                swapsize = swapsize.replace(',', '.')
+                swapsize = float(swapsize)
+            except ValueError:
+                Notification(title=self.lang.error, icon='warning.png', message=self.lang.swapsize_error, message_bold=False, exit_btn_msg=self.lang.exit)
+                return
+            if swapsize*(1024*1024*1024) > system_partition_size:
+                Notification(title=self.lang.error, icon='warning.png', message=self.lang.swapsize_large, message_bold=False, exit_btn_msg=self.lang.exit)
+                return
+            self.setup_information["SwapSize"] = str(swapsize)
+        if system_partition_size < (10*1024*1024*1024 + swapsize*1024*1024*1024):
+            Notification(title=self.lang.error, icon='warning.png', message=self.lang.system_partition_small, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
         self.setup_information["Partitioning"] = "Manual"
         self.setup_information["EfiPartition"] = "/dev/" + efi_partition
         self.setup_information["SystemPartition"] = system_partition
         self.setup_information["UseSwap"] = use_swapfile
-        if use_swapfile:
-            swapsize = self.swap_entry.get()
-            self.setup_information["SwapSize"] = swapsize
+        
         self.bind(("<Return>"), lambda event: self.__draw_admin_creation())
         self.manual_partitioning_frame.pack_forget()
         self.current_stage += 1
@@ -1127,10 +1153,38 @@ class App(CTk):
             cmd["input"] = input
         self.commands.append(cmd)
 
+    def __close(self, popup, close_self: bool, reboot: bool):
+        popup.destroy()
+        if close_self: 
+            self.destroy()
+        if reboot:
+            os.system("systemctl reboot")
+
+    def __installation_success(self):
+        popup = CTkToplevel(self)
+        popup.title(self.lang.success)
+        image = CTkImage(light_image=Image.open(f"{WORKDIR}/images/greencheck.png"), dark_image=Image.open(f"{WORKDIR}/images/greencheck.png"), size=(80,80))
+        image_label = CTkLabel(popup, text="", image=image)
+        label = CTkLabel(popup, text=self.lang.installation_success, font=(None, 16, "bold"))
+        continue_working = CTkButton(popup, text=self.lang.continue_working, command=lambda: self.__close(popup, close_self=True, reboot=False))
+        reboot = CTkButton(popup, text=self.lang.reboot, command=lambda: self.__close(popup, close_self=True, reboot=True))
+
+        image_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        label.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        continue_working.grid(row=2, column=0, padx=(10,5), pady=10, sticky="nsew")
+        reboot.grid(row=2, column=1, padx=(5, 10), pady=10, sticky="nsew")
+
+    def __installation_failed(self):
+        popup = CTkToplevel(self)
+        label = CTkLabel(popup, text="INSTALLATION FAILED!!!")
+        label.pack(padx=50, pady=50)
 
     def _execute_commands(self, commands: list):
         def run_commands():
             for cmd in commands:
+                if cmd["command"] == "__INTERNAL_INSTALLATION_SUCCESS":
+                    self.__installation_success()
+                    break
                 try:
                     print(f"Executing: {cmd['command']}")
                     process = subprocess.Popen(
@@ -1141,7 +1195,7 @@ class App(CTk):
                         shell=True,
                         text=True,
                         executable="/bin/bash",
-                        bufsize=1  # Line-buffered output
+                        bufsize=1
                     )
                     if "input" in cmd:
                         process.stdin.write(cmd["input"])
@@ -1162,6 +1216,10 @@ class App(CTk):
                         self.console.after(0, update_console, line)
 
                     process.wait()
+                    if process.returncode != 0:
+                        print(f"An error occured while executing: {cmd['command']}.")
+                        self.__installation_failed()
+                        break
                     print("\n")
 
                 except Exception as e:
@@ -1283,9 +1341,13 @@ class App(CTk):
             efi_partition = DEBUG_SHOW_COMMANDS_EFI_PARTITION
             rootfs_partition = DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION
 
+        # Making EFI partition ef00
+        efi_base_drive, efi_number = self.__split_device(efi_partition)
+        self._execute(f"sgdisk --typecode={efi_number}:ef00 {efi_base_drive}")
+
         # Creating LUKS partition
-        self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=f"{self.setup_information["EncryptionKey"]}")
-        self._execute(f"cryptsetup luksOpen {rootfs_partition} cryptlvm", input=f"{self.setup_information["EncryptionKey"]}")
+        self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=self.setup_information["EncryptionKey"])
+        self._execute(f"cryptsetup luksOpen {rootfs_partition} cryptlvm", input=self.setup_information["EncryptionKey"])
         
         # Creating LVM
         self._execute("pvcreate /dev/mapper/cryptlvm")
@@ -1505,9 +1567,8 @@ class App(CTk):
             self._execute("cp /usr/local/share/secux-installer/scripts/sign-uki.sh /mnt/usr/lib/initcpio/post")
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/secux/grubx64.efi")
-            base, num = self.__split_device(efi_partition)
             self._execute("echo Adding bootentry.")
-            self._execute(f'efibootmgr --create --disk {base} --part {num} --label "SECUX SHIM" --loader "\\EFI\\secux\\shimx64.efi"')
+            self._execute(f'efibootmgr --create --disk {efi_base_drive} --part {efi_number} --label "SECUX SHIM" --loader "\\EFI\\secux\\shimx64.efi"')
         
         for kernel in self.setup_information["Kernel"]:
             self._execute(f'echo "title SECUX Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
@@ -1576,6 +1637,7 @@ class App(CTk):
         self._execute("echo [Now you can close this window and reboot into the system.]")
         self._execute("echo [Установка завершена!]")
         self._execute("echo [Теперь вы можете закрыть это окно и перезагрузиться в систему.]")
+        self._execute("__INTERNAL_INSTALLATION_SUCCESS")
 
         # Execute commands
         if not DEBUG_SHOW_COMMANDS:
