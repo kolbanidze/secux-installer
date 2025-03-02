@@ -559,6 +559,7 @@ class App(CTk):
         update_disks = CTkButton(self.manual_partitioning_frame, text=self.lang.refreshparts, command=self.__update_partitions)
         efi_partition_label = CTkLabel(self.manual_partitioning_frame, text=self.lang.efipart)
         self.efi_partition_optionmenu = CTkOptionMenu(self.manual_partitioning_frame, values=self.partitions)
+        efi_partition_explain_label = CTkLabel(self.manual_partitioning_frame, text="Раздел, в котором хранится загрузчик системы. Должен быть отформатирован в FAT32 и иметь размер не менее 200 МиБ", font=("Arial", 12), text_color="light grey")
         root_partition_label = CTkLabel(self.manual_partitioning_frame, text=self.lang.rootfs)
         self.root_partition_optionmenu = CTkOptionMenu(self.manual_partitioning_frame, values=self.partitions, command=self.__change_max_swapfile)
         self.use_swap = StringVar(value="on")
@@ -575,14 +576,16 @@ class App(CTk):
         update_disks.grid(row=2, column=1, padx=15, pady=5, sticky="nsew")
         efi_partition_label.grid(row=3, column=0, padx=15, pady=5, sticky="nsew")
         self.efi_partition_optionmenu.grid(row=3, column=1, padx=15, pady=5, sticky="nsew")
-        root_partition_label.grid(row=4, column=0, padx=15, pady=5, sticky="nsew")
-        self.root_partition_optionmenu.grid(row=4, column=1, padx=15, pady=5, sticky="nsew")
-        self.swap_checkbox.grid(row=5, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
-        swap_label.grid(row=6, column=0, padx=15, pady=5, sticky="nsew")
-        self.swap_entry.grid(row=7, column=0, padx=15, pady=5, sticky="nsew")
-        self.swap_scrollbar.grid(row=7, column=1, padx=15, pady=5, sticky="nsew")
-        back_btn.grid(row=8, column=0, padx=15, pady=5, sticky="nsew")
-        next_btn.grid(row=8, column=1, padx=15, pady=5, sticky="nsew")
+        efi_partition_explain_label.grid(row=4, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+
+        root_partition_label.grid(row=5, column=0, padx=15, pady=5, sticky="nsew")
+        self.root_partition_optionmenu.grid(row=5, column=1, padx=15, pady=5, sticky="nsew")
+        self.swap_checkbox.grid(row=6, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
+        swap_label.grid(row=7, column=0, padx=15, pady=5, sticky="nsew")
+        self.swap_entry.grid(row=8, column=0, padx=15, pady=5, sticky="nsew")
+        self.swap_scrollbar.grid(row=8, column=1, padx=15, pady=5, sticky="nsew")
+        back_btn.grid(row=9, column=0, padx=15, pady=5, sticky="nsew")
+        next_btn.grid(row=9, column=1, padx=15, pady=5, sticky="nsew")
         # self.__resize()
 
     def __scroll_handler(self, newvalue):
@@ -1318,7 +1321,7 @@ class App(CTk):
             self._execute("pacman-key --init")
             self._execute("pacman-key --populate archlinux")
             self._execute("pacman-key --populate kolbanidze")
-        pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw']
+        pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak']
         pacstrap_packages.extend(self.__get_ucode_package())
         pacstrap_packages.extend(self.setup_information["Kernel"])
 
