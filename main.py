@@ -1498,7 +1498,7 @@ class App(CTk):
         # Change distro info and logo
         self._execute("cp /usr/local/share/secux-installer/scripts/os-release /mnt/etc/os-release")
         self._execute("cp /usr/local/share/secux-installer/images/bootlogo.bmp /mnt/usr/share/icons")
-        self._execute("cp /usr/local/share/secux-installer/images/secux.svg /mnt/usr/share/icons")
+        self._execute("cp /usr/local/share/secux-installer/images/SecuxLinux.svg /mnt/usr/share/icons")
         for kernel in self.setup_information["Kernel"]:
             self._execute(f"sed -i 's|/usr/share/systemd/bootctl/splash-arch.bmp|/usr/share/icons/bootlogo.bmp|' /mnt/etc/mkinitcpio.d/{kernel}.preset")
         self._execute("rm /mnt/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf")
