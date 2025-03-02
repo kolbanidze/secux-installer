@@ -243,7 +243,6 @@ class App(CTk):
         self.zone_box = CTkOptionMenu(self.timezone_stage_frame, command=self.__time_zone_write_to_setup_info)
         back_btn = CTkButton(self.timezone_stage_frame, text=self.lang.back, command=self.__return_to_welcome_menu)
         next_btn = CTkButton(self.timezone_stage_frame, text=self.lang.next, command=self.__draw_installation_type)
-        self.__installation_success()
         
         if "Timezone" not in self.setup_information:
             self.__timezone_handler("Europe")
@@ -573,7 +572,7 @@ class App(CTk):
         swap_label = CTkLabel(self.manual_partitioning_frame, text=self.lang.swapsize)
         self.swap_entry = CTkEntry(self.manual_partitioning_frame)
         self.swap_entry.insert(0, "1")
-        self.swap_scrollbar = CTkSlider(self.manual_partitioning_frame, command=self.__scroll_handler, to=max_swap)
+        self.swap_scrollbar = CTkSlider(self.manual_partitioning_frame, command=self.__scroll_handler, to=max_swap, number_of_steps=max_swap)
         back_btn = CTkButton(self.manual_partitioning_frame, text=self.lang.back, command=lambda: self.__return_to_partitioning(self.manual_partitioning_frame))
         next_btn = CTkButton(self.manual_partitioning_frame, text=self.lang.next, command=self.__draw_encryption_stage_from_manual)
 
@@ -597,9 +596,9 @@ class App(CTk):
         next_btn.grid(row=10, column=1, padx=15, pady=5, sticky="nsew")
 
     def __scroll_handler(self, newvalue):
-        newvalue = round(newvalue, 1)
+        newvalue = round(newvalue)
         self.swap_entry.delete(0, 'end')
-        self.swap_entry.insert(0, str(newvalue))
+        self.swap_entry.insert(0, str(int(newvalue)))
     
     def __swapfile_handler(self):
         if self.swap_checkbox.get() == "off":
@@ -667,8 +666,9 @@ class App(CTk):
         if use_swapfile:
             swapsize = self.swap_entry.get()
             try:
-                swapsize = swapsize.replace(',', '.')
-                swapsize = float(swapsize)
+                if '.' in swapsize or ',' in swapsize:
+                    raise ValueError
+                swapsize = int(swapsize)
             except ValueError:
                 Notification(title=self.lang.error, icon='warning.png', message=self.lang.swapsize_error, message_bold=False, exit_btn_msg=self.lang.exit)
                 return
