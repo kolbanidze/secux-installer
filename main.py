@@ -1384,7 +1384,6 @@ class App(CTk):
         self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
 
         # Installing OS
-        # NOTE: when installing linux-lts or linux-hardened DO NOT forget about linux-lts-headers and linux-hardened-headers
         if self.online_installation:
             self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
         else:
