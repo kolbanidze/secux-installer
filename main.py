@@ -102,7 +102,7 @@ class App(CTk):
 
         uefi_info = self.__check_secure_boot_and_setup_mode()
         if not uefi_info[0]:
-            Notification(title=self.lang.not_uefi_title, icon="warning.png", message=self.lang.not_uefi, message_bold=True, exit_btn_msg=self.lang.exit)
+            Notification(title="Отсутствие поддержки UEFI | No UEFI support", icon="warning.png", message="Система не поддерживает UEFI. Установка невозможна.\nThe system does not support UEFI. Installation is not possible.", message_bold=True, exit_btn_msg=self.lang.exit)
         
     def __ui_scaling_handler(self, new_scaling: str):
         self.ui_scale = int(new_scaling.replace("%", "")) / 100
