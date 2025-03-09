@@ -93,7 +93,7 @@ class Locale:
             self.continue_working = "Continue using"
             self.reboot = "Reboot"
             self.installation_failed = "A critical error occurred while installing Secux Linux\nYou can continue using the Secux Linux Live CD or reboot."
-
+            self.drives_not_found = "Drives not found"
         elif language == "ru":
             self.select_time_zone = "Выберите часовой пояс"
             self.region = "Регион"
@@ -186,3 +186,4 @@ class Locale:
             self.continue_working = "Продолжить использование"
             self.reboot = "Перезагрузиться"
             self.installation_failed = "Произошла критическая ошибка во время установки Secux Linux\nВы можете продолжить использование загрузочного образа или перезагрузиться."
+            self.drives_not_found = "Диски не найдены"
