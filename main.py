@@ -507,7 +507,6 @@ class App(CTk):
         erase_all_disks = [f"/dev/{drive} | {self.__convert_bytes_to_human_readable(size)}" for drive, size in sorted_raw_disks]
         if len(erase_all_disks) == 0:
             erase_all_disks = [self.lang.drives_not_found]
-            next_btn.configure(state="disabled")
         
         self.partitioning_type = IntVar(value=0)
         erase_all_partitioning = CTkRadioButton(self.partitioning_frame, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
@@ -515,6 +514,8 @@ class App(CTk):
         manual_partitioning = CTkRadioButton(self.partitioning_frame, text=self.lang.manual, variable=self.partitioning_type, value=1)
         back_btn = CTkButton(self.partitioning_frame, text=self.lang.back, command=self.__return_to_kernel)
         next_btn = CTkButton(self.partitioning_frame, text=self.lang.next, command=self.__partitioning_next_button_handler)
+        if erase_all_disks == [self.lang.drives_not_found]:
+            next_btn.configure(state="disabled")
 
         label.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
         erase_all_partitioning.grid(row=2, column=0, columnspan=2, padx=15, pady=5, sticky="nsew")
