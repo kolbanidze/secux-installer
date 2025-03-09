@@ -24,7 +24,7 @@ DEBUG_AUTOENTRY_VALUES = ['asd', 'asdasdasd']
 
 MIN_PASSWORD_LENGTH = 8
 
-DISTRO_NAME="SECUX"
+DISTRO_NAME="Secux Linux"
 
 REPO_URL = "https://kolbanidze.github.io/secux-repo/x86_64/"
 
@@ -1551,7 +1551,7 @@ class App(CTk):
             self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/secux/shimx64.efi")
             self._execute("cp /mnt/usr/share/shim-signed/mmx64.efi /mnt/efi/EFI/secux/mmx64.efi")
             self._execute("mkdir -p /mnt/etc/secureboot")
-            self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=SECUX MOK/"')
+            self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=Secux Linux MOK/"')
             self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
             self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
             for kernel in self.setup_information["Kernel"]:
@@ -1571,11 +1571,11 @@ class App(CTk):
             self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
             self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/secux/grubx64.efi")
             self._execute("echo Adding bootentry.")
-            self._execute(f'efibootmgr --create --disk {efi_base_drive} --part {efi_number} --label "SECUX SHIM" --loader "\\EFI\\secux\\shimx64.efi"')
+            self._execute(f'efibootmgr --create --disk {efi_base_drive} --part {efi_number} --label "Secux Linux shim" --loader "\\EFI\\secux\\shimx64.efi"')
         
         for kernel in self.setup_information["Kernel"]:
-            self._execute(f'echo "title SECUX Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
-            self._execute(f'echo "title SECUX Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi" > /mnt/efi/loader/entries/secux-{kernel}-fallback.conf')
+            self._execute(f'echo "title Secux Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
+            self._execute(f'echo "title Secux Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi" > /mnt/efi/loader/entries/secux-{kernel}-fallback.conf')
         
         if 'linux-hardened' in self.setup_information["Kernel"]:
             default = "secux-linux-hardened.conf"
