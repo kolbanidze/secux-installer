@@ -507,6 +507,7 @@ class App(CTk):
         erase_all_disks = [f"/dev/{drive} | {self.__convert_bytes_to_human_readable(size)}" for drive, size in sorted_raw_disks]
         if len(erase_all_disks) == 0:
             erase_all_disks = [self.lang.drives_not_found]
+            self.bind(("<Return>"), None)
         
         self.partitioning_type = IntVar(value=0)
         erase_all_partitioning = CTkRadioButton(self.partitioning_frame, text=self.lang.erase_all_and_install, variable=self.partitioning_type, value=0)
