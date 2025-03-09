@@ -1245,7 +1245,7 @@ class App(CTk):
         process = subprocess.run("mokutil --sb-state", shell=True, capture_output=True)
         mokutil_output = process.stdout
         print("MOK", mokutil_output)
-        if b"EFI variables are not supported on this system" == mokutil_output:
+        if b"not supported" in mokutil_output or len(mokutil_output) == 0:
             uefi_support = False
         if b"enabled" in mokutil_output:
             secure_boot = True
