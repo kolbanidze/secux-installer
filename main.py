@@ -1304,7 +1304,7 @@ class App(CTk):
             return
         
         if self.setup_information["InstallationType"] == "Secure":
-            if uefi_info[1] != 0 and uefi_info[2] != 1:
+            if not uefi_info[2]:
                 Notification(title=self.lang.not_setup_mode_title, icon="warning.png", message=self.lang.not_setup_mode, message_bold=False, exit_btn_msg=self.lang.exit)
                 return
         
