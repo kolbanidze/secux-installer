@@ -945,9 +945,6 @@ class App(CTk):
         self.keepassxc = CTkCheckBox(pacman_tab, text="KeePassXC")
         self.libreoffice = CTkCheckBox(pacman_tab, text="Libreoffice")
         self.chromium.select()
-        self.firefox.select()
-        self.vlc.select()
-        self.libreoffice.select()
 
         back_btn = CTkButton(self.apps_frame, text=self.lang.back, command=self.__return_to_network)
         next_btn = CTkButton(self.apps_frame, text=self.lang.next, command=self.__draw_final)
