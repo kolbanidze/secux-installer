@@ -1,0 +1,28 @@
+-w /var/log/wtmp -p wa -k logins
+-w /var/log/btmp -p wa -k logins
+-w /var/log/lastlog -p wa -k logins
+
+-w /etc/passwd -p wa -k auth
+-w /etc/shadow -p wa -k auth
+-w /etc/group -p wa -k auth
+-w /etc/gshadow -p wa -k auth
+
+-w /etc/sudoers -p wa -k sudo
+-w /etc/sudoers.d/ -p wa -k sudo
+
+-a always,exit -F arch=b64 -S execve -C uid!=euid -k priv_escalation
+-a always,exit -F arch=b32 -S execve -C uid!=euid -k priv_escalation
+
+-w /etc/audit/ -p wa -k audit_conf
+-w /etc/libaudit.conf -p wa -k audit_conf
+
+-w /sbin/insmod -p x -k kernel_modules
+-w /sbin/rmmod -p x -k kernel_modules
+-w /sbin/modprobe -p x -k kernel_modules
+-a always,exit -F arch=b64 -S init_module,finit_module,delete_module -k kernel_modules
+
+-a always,exit -F arch=b64 -S open,openat,creat,unlink,unlinkat,truncate,ftruncate -F exit=-EPERM -k fs_mod
+
+-a always,exit -F arch=b64 -S execve -k exec_monitor
+
+-b 8192
