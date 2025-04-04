@@ -1,25 +1,29 @@
 from customtkinter import *
 from PIL import Image
 from language import Locale
-import subprocess
-import json
 from requests import get
 from requests.exceptions import ConnectionError
-import os
-import threading
-import re
-import string
 from hmac import compare_digest
 from psutil import virtual_memory
+from contextlib import redirect_stdout, redirect_stderr
+from collections.abc import Callable
+from typing import Any, Optional, List, Dict, Tuple, Union
+import subprocess
+import json
+import os
+import re
+import io
+import string
+import shlex
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
-VERSION = "0.2.16"
+VERSION = "0.3"
 DEBUG = True # Default: True
 DEBUG_SHOW_COMMANDS = False # Default: False
 DEBUG_SHOW_COMMANDS_EFI_PARTITION = "/dev/vda1"
 DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION = "/dev/vda2"
-DEBUG_AUTOENTRY = False # Default: False
+DEBUG_AUTOENTRY = True # Default: False
 DEBUG_AUTOENTRY_VALUES = ['asd', 'asdasdasd']
 
 MIN_PASSWORD_LENGTH = 8
@@ -43,7 +47,8 @@ class Notification(CTkToplevel):
     def __init__(self, title: str, icon: str, message: str, message_bold: bool, exit_btn_msg: str):
         super().__init__()
         self.title(title)
-        image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/{icon}'), dark_image=Image.open(f'{WORKDIR}/images/{icon}'), size=(80, 80))
+        img = Image.open(os.path.join(WORKDIR, "images", icon))
+        image = CTkImage(light_image=img, dark_image=img, size=(80, 80))
         image_label = CTkLabel(self, text="", image=image)
         label = CTkLabel(self, text=message)
         if message_bold:
@@ -1150,12 +1155,6 @@ class App(CTk):
                 partitions.append(f"/dev/{name}")
         return partitions
 
-    def _execute(self, command: str, input: str = None):
-        cmd = {"command": command}
-        if input:
-            cmd["input"] = input
-        self.commands.append(cmd)
-
     def __close(self, popup, close_self: bool, reboot: bool):
         popup.destroy()
         if close_self: 
@@ -1191,60 +1190,12 @@ class App(CTk):
         continue_working.grid(row=2, column=0, padx=(10,5), pady=10, sticky="nsew")
         reboot.grid(row=2, column=1, padx=(5, 10), pady=10, sticky="nsew")
 
-    def _execute_commands(self, commands: list):
-        def run_commands():
-            for cmd in commands:
-                if cmd["command"] == "__INTERNAL_INSTALLATION_SUCCESS":
-                    self.__installation_success()
-                    break
-                try:
-                    print(f"Executing: {cmd['command']}")
-                    process = subprocess.Popen(
-                        cmd["command"],
-                        stdin=subprocess.PIPE if "input" in cmd else None,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        shell=True,
-                        text=True,
-                        executable="/bin/bash",
-                        bufsize=1
-                    )
-                    if "input" in cmd:
-                        process.stdin.write(cmd["input"])
-                        process.stdin.close()
-
-                    def update_console(text):
-                        self.console.configure(state="normal")
-                        self.console.insert(END, text)
-                        self.console.see(END)
-                        self.console.configure(state="disabled")
-
-                    for line in process.stdout:
-                        print(line, end="")
-                        self.console.after(0, update_console, line)
-
-                    for line in process.stderr:
-                        print(line, end="")
-                        self.console.after(0, update_console, line)
-
-                    process.wait()
-                    if process.returncode != 0:
-                        print(f"An error occured while executing: {cmd['command']}.")
-                        self.__installation_failed()
-                        break
-                    print("\n")
-
-                except Exception as e:
-                    self.console.after(0, update_console, f"Error: {str(e)}\n")
-
-        threading.Thread(target=run_commands, daemon=True).start()
-
     def __check_secure_boot_and_setup_mode(self):
         uefi_support = True
         secure_boot = False
         setup_mode = False
 
-        process = subprocess.run("mokutil --sb-state", shell=True, capture_output=True)
+        process = subprocess.run(["/usr/bin/mokutil", "--sb-state"], capture_output=True)
         mokutil_output = process.stdout
         if b"not supported" in process.stderr or len(mokutil_output) == 0:
             uefi_support = False
@@ -1295,8 +1246,8 @@ class App(CTk):
         calm_emoji_label.pack(padx=10, pady=10)
         label = CTkLabel(self, text=self.lang.installing)
         label.pack(padx=10, pady=10)
-        self.console = CTkTextbox(self)
-        self.console.pack(padx=10, pady=10, expand=True, fill="both")
+        self.console = CTkTextbox(self, wrap='word', state='disabled', font=("monospace", 12))
+        self.console.pack(fill='both', expand=True, padx=10, pady=10)
         self.begin_installation()
 
     def begin_installation_ui(self):
@@ -1326,73 +1277,361 @@ class App(CTk):
             return base, num.lstrip("p")  # Remove 'p' from number
         return device, ""
 
+    def update_console(self, text: str):
+        """Safely updates the console Textbox from the main thread."""
+        if self.console.winfo_exists(): # Check if widget exists
+            try:
+                self.console.configure(state="normal")
+                self.console.insert(END, str(text)) # Ensure text is string
+                self.console.see(END) # Scroll to the end
+                self.console.configure(state="disabled")
+                # Process pending GUI events to make the update visible immediately
+                # Use sparingly if performance is critical, but needed here
+                # due to blocking nature of _execute/_execute_function
+                self.update_idletasks()
+            except Exception as e:
+                # Fallback if GUI update fails (e.g., during shutdown)
+                print(f"{self.lang.gui_update_error} {e}\n{text}", file=sys.stderr)
+
+
+    def _execute(self,
+                 command: List[str],
+                 input_str: Optional[str] = None):
+        """
+        Executes a shell command immediately and blocks until completion.
+        Outputs stdout/stderr to the console in real-time.
+
+        Args:
+            command: A list of strings representing the command and its arguments.
+            input_str: Optional string to be passed to the command's stdin.
+
+        Returns:
+            The exit code of the command (int) or None if execution failed before starting.
+        """
+        if not command:
+            self.update_console(f"{self.lang.empty_cli}\n")
+            return None
+
+        if command == ["__INTERNAL_INSTALLATION_SUCCESS"]:
+            self.__installation_success()
+            return
+
+        # Display the command being executed
+        display_cmd = ' '.join(shlex.quote(str(c)) for c in command)
+        self.update_console(f"\n▶ {self.lang.executing_command} {display_cmd}\n")
+
+        process = None
+        return_code = None
+        try:
+            # Start the process
+            process = subprocess.Popen(
+                command,
+                stdin=subprocess.PIPE if input_str is not None else None,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,        # Decode stdout/stderr as text
+                bufsize=1,        # Line buffered
+                encoding='utf-8', # Explicit encoding
+                errors='replace'  # Handle potential decoding errors
+            )
+
+            # Handle stdin if provided
+            if input_str is not None and process.stdin:
+                try:
+                    process.stdin.write(input_str)
+                    process.stdin.close() # Signal end of input
+                except OSError as e:
+                    self.update_console(f"{self.lang.error_writing_to_stdin} {e}\n")
+                    # Attempt to kill the process if stdin fails critically
+                    try:
+                        process.kill()
+                    except OSError:
+                        pass # Ignore if already terminated
+                    # Indicate failure
+                    self.__installation_failed()
+                    self.update_console(f"✘ {self.lang.stdin_failed}\n")
+                    return None # Early exit
+
+            # Real-time reading of stdout and stderr
+            while True:
+                output_line = ""
+                error_line = ""
+                process_finished = process.poll() is not None
+
+                # Read stdout non-blockingly (or as non-blocking as readline gets)
+                if process.stdout:
+                    try:
+                        output_line = process.stdout.readline()
+                        if output_line:
+                            self.update_console(output_line)
+                    except Exception as e:
+                        self.update_console(f"\n{self.lang.error_reading_stdout} {e}\n")
+
+                # Read stderr non-blockingly
+                if process.stderr:
+                     try:
+                        error_line = process.stderr.readline()
+                        if error_line:
+                            self.update_console(f"{self.lang.stderr} {error_line}") # Mark stderr
+                     except Exception as e:
+                        self.update_console(f"\n{self.lang.error_reading_stderr} {e}\n")
+
+                # Force GUI update to show the output read so far
+                self.update() # Process Tkinter events
+
+                # Break condition: process finished AND no more output in pipes
+                if process_finished and not output_line and not error_line:
+                    break
+
+                # Optional small sleep if CPU usage is high, but update() might suffice
+                # time.sleep(0.01)
+
+            # Wait for process to fully terminate and get final return code
+            return_code = process.wait() # Get final exit code
+
+            if return_code == 0:
+                self.update_console(f"✔ {self.lang.command_success} {return_code})\n")
+            else:
+                self.update_console(f"✘ {self.lang.command_failed} {return_code})\n")
+
+        except FileNotFoundError:
+            self.update_console(f"✘ {self.lang.command_not_found} '{command[0]}'\n")
+            return_code = -1 # Indicate specific error
+        except Exception as e:
+            self.update_console(f"✘ {self.lang.unexpected_error} {e}\n")
+            return_code = -2 # Indicate general error
+        finally:
+            # Ensure streams are closed and process is cleaned up
+            if process:
+                if process.stdin:
+                    try: process.stdin.close()
+                    except OSError: pass
+                if process.stdout:
+                    try: process.stdout.close()
+                    except OSError: pass
+                if process.stderr:
+                    try: process.stderr.close()
+                    except OSError: pass
+                # Ensure process is terminated if something went wrong before wait()
+                if process.poll() is None:
+                    try:
+                        process.terminate()
+                        process.wait(timeout=1) # Brief wait for graceful exit
+                    except subprocess.TimeoutExpired:
+                        process.kill() # Force kill
+                    except Exception:
+                        pass # Ignore cleanup errors
+                    if return_code is None: return_code = -3 # Indicate killed process
+
+        return return_code
+
+    def _execute_function(self,
+                          func: Callable[..., Any],
+                          args: Tuple[Any, ...] = (),
+                          kwargs: Optional[Dict[str, Any]] = None) -> Any:
+        """
+        Executes a Python function immediately, captures its stdout/stderr and return value.
+
+        Args:
+            func: The Python function to execute.
+            args: Positional arguments for the function.
+            kwargs: Keyword arguments for the function.
+
+        Returns:
+            The return value of the function, or None if an exception occurred.
+        """
+        if kwargs is None:
+            kwargs = {}
+
+        func_name = getattr(func, '__name__', repr(func))
+        self.update_console(f"\n▶ {self.lang.executing_function} {func_name}\n")
+
+        # Redirect stdout/stderr to capture function's print statements
+        f_stdout = io.StringIO()
+        f_stderr = io.StringIO()
+        return_value = None
+        success = False
+
+        try:
+            # Use context managers to ensure redirection is properly handled
+            with redirect_stdout(f_stdout), redirect_stderr(f_stderr):
+                # Execute the function
+                return_value = func(*args, **kwargs)
+            success = True
+
+        except Exception as e:
+            # Capture exception details
+            import traceback
+            self.update_console(f"✘ {self.lang.error_during_function_execution} {e}\n")
+            # Also print traceback to the console widget
+            self.update_console("-" * 10 + " Traceback " + "-" * 10 + "\n")
+            self.update_console(traceback.format_exc())
+
+        finally:
+            # Get captured output
+            stdout_val = f_stdout.getvalue()
+            stderr_val = f_stderr.getvalue()
+            f_stdout.close()
+            f_stderr.close()
+
+            # Display captured output
+            if stdout_val:
+                self.update_console(stdout_val)
+            if stderr_val:
+                self.update_console(stderr_val)
+
+            if success:
+                self.update_console(f"✔ {self.lang.function} '{func_name}' {self.lang.succeed}.\n")
+                # Display return value safely
+                try:
+                    # Limit length of displayed return value if it's very long
+                    return_repr = repr(return_value)
+                    if len(return_repr) > 200:
+                        return_repr = return_repr[:200] + "..."
+                    self.update_console(f"  {self.lang.return_value} {return_repr}\n")
+                except Exception as repr_e:
+                     self.update_console(f"  {self.lang.couldnt_return_value} {repr_e})\n")
+            else:
+                self.update_console(f"✘ {self.lang.function} '{func_name}' {self.lang.failed}\n")
+
+        # Process GUI events after function execution
+        self.update()
+        return return_value if success else None
+
+
+    def on_closing(self):
+        """Handles window closing."""
+        self.destroy()
+
     def begin_installation(self):
         self.commands = []
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
         
-        if not DEBUG_SHOW_COMMANDS:
-            # Prepare partitions
-            if self.setup_information["Partitioning"] == "Automatic":
-                os.system(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
-                os.system(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
-                partitions = self.__list_partitions(self.setup_information["DriveToFormat"])
-                efi_partition = partitions[0]
-                rootfs_partition = partitions[1]
-            else:
-                efi_partition = self.setup_information["EfiPartition"]
-                rootfs_partition = self.setup_information["SystemPartition"]
-        else:
-            efi_partition = DEBUG_SHOW_COMMANDS_EFI_PARTITION
-            rootfs_partition = DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION
+        # if not DEBUG_SHOW_COMMANDS:
+        #     # Prepare partitions
+        #     if self.setup_information["Partitioning"] == "Automatic":
+        #         os.system(f"sgdisk -Z {self.setup_information["DriveToFormat"]}")
+        #         os.system(f"sgdisk -n1:0:+1G -t1:ef00 -c1:EFI -N2 -t2:8304 {self.setup_information["DriveToFormat"]}")
+        #         partitions = self.__list_partitions(self.setup_information["DriveToFormat"])
+        #         efi_partition = partitions[0]
+        #         rootfs_partition = partitions[1]
+        #     else:
+        #         efi_partition = self.setup_information["EfiPartition"]
+        #         rootfs_partition = self.setup_information["SystemPartition"]
+        # else:
+        #     efi_partition = DEBUG_SHOW_COMMANDS_EFI_PARTITION
+        #     rootfs_partition = DEBUG_SHOW_COMMANDS_ROOTFS_PARTITION
 
-        # Making EFI partition ef00
-        efi_base_drive, efi_number = self.__split_device(efi_partition)
-        self._execute(f"sgdisk --typecode={efi_number}:ef00 {efi_base_drive}")
+        # # Making EFI partition ef00
+        # efi_base_drive, efi_number = self.__split_device(efi_partition)
+        # self._execute(f"sgdisk --typecode={efi_number}:ef00 {efi_base_drive}")
+        efi_partition = ""
+        rootfs_partition = ""
+        if self.setup_information["Partitioning"] == "Automatic":
+            drive = self.setup_information["DriveToFormat"]
+            self.update_console(f"INFO: Автоматическая разметка диска {drive}\n")
+            if self._execute(['sgdisk', '-Z', drive]) != 0:
+                self.update_console("ERROR: Не удалось очистить таблицу разделов!\n")
+                return
+
+            if self._execute(['sgdisk', f'-n1:0:+1G', '-t1:ef00', '-c1:EFI', '-N2', '-t2:8304', drive]) != 0:
+                self.update_console("ERROR: Не удалось создать разделы!\n")
+                return
+
+            partitions = self.__list_partitions(drive)
+            if len(partitions) < 2:
+                self.update_console(f"ERROR: Не удалось найти созданные разделы на {drive}!\n")
+                return
+            
+            efi_partition = partitions[0]
+            rootfs_partition = partitions[1]
+            self.update_console(f"INFO: EFI раздел: {efi_partition}, Корневой раздел: {rootfs_partition}\n")
+        else: # Manual Partitioning
+            efi_partition = self.setup_information["EfiPartition"]
+            rootfs_partition = self.setup_information["SystemPartition"]
+            self.update_console(f"INFO: Ручная разметка. EFI: {efi_partition}, System: {rootfs_partition}\n")
+
+            efi_base_drive, efi_number = self.__split_device(efi_partition)
+            self._execute(['sgdisk', f'--typecode={efi_number}:ef00', efi_base_drive])
+
+        if not efi_partition or not rootfs_partition:
+             self.update_console("ERROR: Переменные efi_partition или rootfs_partition не установлены!\n")
+             return
+
 
         # Creating LUKS partition
-        self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=self.setup_information["EncryptionKey"])
-        self._execute(f"cryptsetup luksOpen {rootfs_partition} cryptlvm", input=self.setup_information["EncryptionKey"])
+        # self._execute(f"cryptsetup luksFormat {rootfs_partition}", input=self.setup_information["EncryptionKey"])
+        self._execute(['cryptsetup', 'luksFormat', rootfs_partition], input_str=self.setup_information["EncryptionKey"]) 
+        # self._execute(f"cryptsetup luksOpen {rootfs_partition} cryptlvm", input=self.setup_information["EncryptionKey"])
+        self._execute(['cryptsetup', 'luksOpen', rootfs_partition, 'cryptlvm'], input_str=self.setup_information["EncryptionKey"])
         
         # Creating LVM
-        self._execute("pvcreate /dev/mapper/cryptlvm")
-        self._execute("vgcreate volumegroup /dev/mapper/cryptlvm")
+        # self._execute("pvcreate /dev/mapper/cryptlvm")
+        # self._execute("vgcreate volumegroup /dev/mapper/cryptlvm")
+        self._execute(['pvcreate', '/dev/mapper/cryptlvm'])
+        self._execute(['vgcreate', 'volumegroup', '/dev/mapper/cryptlvm'])
         
         # Creating swap partition if needed
-        self._execute("lvcreate -l 100%FREE volumegroup -n root")
+        # self._execute("lvcreate -l 100%FREE volumegroup -n root")
+        self._execute(['lvcreate', '-l', '100%FREE', 'volumegroup', '-n', 'root']) 
         
         # Formatting root partition
-        self._execute("mkfs.ext4 /dev/volumegroup/root")
+        # self._execute("mkfs.ext4 /dev/volumegroup/root")
+        root_lv_path = "/dev/volumegroup/root"
+        self._execute(['mkfs.ext4', root_lv_path])
                 
         # Formatting EFI partition if needed
         if self.setup_information["Partitioning"] == "Automatic":
-            self._execute(f"mkfs.fat -F32 {efi_partition}")
+            # self._execute(f"mkfs.fat -F32 {efi_partition}")
+            self._execute(['mkfs.fat', '-F32', efi_partition])
 
         # Mounting root partition to /mnt and enabling swap if needed
-        self._execute("mount /dev/volumegroup/root /mnt")
+        mount_point = '/mnt'
+        efi_mount_point = os.path.join(mount_point, 'efi')
+
+        # self._execute("mount /dev/volumegroup/root /mnt")
+        self._execute(['mount', root_lv_path, mount_point])
         if self.setup_information["UseSwap"]:
-            self._execute(f"fallocate -l {self.setup_information["SwapSize"]}G /mnt/swapfile")
-            self._execute("chmod 600 /mnt/swapfile")
-            self._execute("mkswap /mnt/swapfile")
-            self._execute("swapon /mnt/swapfile")
+            # self._execute(f"fallocate -l {self.setup_information["SwapSize"]}G /mnt/swapfile")
+            # self._execute("chmod 600 /mnt/swapfile")
+            # self._execute("mkswap /mnt/swapfile")
+            # self._execute("swapon /mnt/swapfile")
+            swap_path = f'{mount_point}/swapfile'
+            swap_size_gb = self.setup_information["SwapSize"]
+            self._execute(['fallocate', '-l', f'{swap_size_gb}G', swap_path])
+            self._execute(['chmod', '600', swap_path]) 
+            self._execute(['mkswap', swap_path])
+            self._execute(['swapon', swap_path])
+
 
         # Creating and mounting EFI partition
-        self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
+        # self._execute(f"mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 {efi_partition} /mnt/efi")
+        self._execute(['mount', '--mkdir', '-o', 'uid=0,gid=0,fmask=0077,dmask=0077', efi_partition, efi_mount_point])
 
         # Installing OS
         if self.online_installation:
-            self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
+            # self._execute("cp /etc/pacman_online.conf /etc/pacman.conf")
+            self._execute(['cp', '/etc/pacman_online.conf', '/etc/pacman.conf'])
         else:
-            self._execute("cp /etc/pacman_offline.conf /etc/pacman.conf")
-            self._execute("pacman-key --init")
-            self._execute("pacman-key --populate archlinux")
-            self._execute("pacman-key --populate kolbanidze")
-        pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak']
+            # self._execute("cp /etc/pacman_offline.conf /etc/pacman.conf")
+            # self._execute("pacman-key --init")
+            # self._execute("pacman-key --populate archlinux")
+            # self._execute("pacman-key --populate kolbanidze")
+            self._execute(['cp', '/etc/pacman_offline.conf', '/etc/pacman.conf'])
+            self._execute(['pacman-key', '--init'])
+            self._execute(['pacman-key', '--populate', 'archlinux'])
+            self._execute(['pacman-key', '--populate', 'kolbanidze'])
+
+        pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil']
         pacstrap_packages.extend(self.__get_ucode_package())
-        pacstrap_packages.extend(self.setup_information["Kernel"])
+        kernels_no_headers = [k for k in self.setup_information["Kernel"] if 'headers' not in k]
+        pacstrap_packages.extend(kernels_no_headers)
+        # pacstrap_packages.extend(self.setup_information["Kernel"])
 
         if self.setup_information["InstallationType"] == "Secure":
             pacstrap_packages.append("sbctl")
         elif self.setup_information["InstallationType"] == "LessSecure":
-            pacstrap_packages.extend(["shim-signed", "mokutil"])
+            pacstrap_packages.append("shim-signed")
         
         if 'Security Manager' in self.setup_information["Apps"]:
             pacstrap_packages.extend(['tk', 'python-pexpect', 'python-pillow', 'python-darkdetect', 'python-packaging', 'libpam-google-authenticator', 'python-qrcode'])
@@ -1415,235 +1654,431 @@ class App(CTk):
         if self.setup_information["DE"] == "KDE":
             pacstrap_packages.extend(["xorg", "plasma", "networkmanager-openvpn", "kde-applications"])
         
-        pacstrap_command = "stdbuf -oL pacstrap -K /mnt " + " ".join(pacstrap_packages)
+        # pacstrap_command = "stdbuf -oL pacstrap -K /mnt " + " ".join(pacstrap_packages)
+        pacstrap_cmd = ['stdbuf', '-oL', 'pacstrap', '-K', mount_point] + pacstrap_packages
 
         # Leaving only kernels, not headers
-        self._execute(pacstrap_command)
-        for i in self.setup_information["Kernel"]:
-            if 'headers' in i:
-                self.setup_information["Kernel"].remove(i)
+        # self._execute(pacstrap_command)
+        self._execute(pacstrap_cmd) 
+        # for i in self.setup_information["Kernel"]:
+        #     if 'headers' in i:
+        #         self.setup_information["Kernel"].remove(i)
         
-        self._execute("echo Packages were installed successfully.")
         # Adding custom repo
-        self._execute(f'echo "[kolbanidze]\nServer = {REPO_URL}\n" >> /mnt/etc/pacman.conf')
-        self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
-        self._execute("arch-chroot /mnt pacman-key --populate kolbanidze")
+        repo_conf_line = f'\n[kolbanidze]\nServer = {REPO_URL}\n'
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{repo_conf_line}" >> /etc/pacman.conf'])
+        # self._execute("cp /usr/share/pacman/keyrings/kolbanidze* /mnt/usr/share/pacman/keyrings")
+        # self._execute("arch-chroot /mnt pacman-key --populate kolbanidze")
+        self._execute(['cp', '/usr/share/pacman/keyrings/kolbanidze.gpg', f'{mount_point}/usr/share/pacman/keyrings/'])
+        self._execute(['cp', '/usr/share/pacman/keyrings/kolbanidze-trusted', f'{mount_point}/usr/share/pacman/keyrings/'])
+        self._execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'kolbanidze'])
+
 
         # Generating fstab
-        self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
+        # self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', 'genfstab -U / >> /etc/fstab']) 
 
         # Creating user
-        self._execute(f"arch-chroot /mnt useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
+        username = self.setup_information["Username"]
+        fullname = self.setup_information["FullName"]
+        # self._execute(f"arch-chroot /mnt useradd -m {self.setup_information["Username"]} -c \"{self.setup_information["FullName"]}\"")
+        self._execute(['arch-chroot', mount_point, 'useradd', '-m', username, '-c', fullname])
         
         # Setting password for user
-        self._execute(f"arch-chroot /mnt passwd {self.setup_information["Username"]}", input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n")
+        password = self.setup_information["Password"]
+        passwd_input = f"{password}\n{password}\n"
+        self._execute(['arch-chroot', mount_point, 'passwd', username], input_str=passwd_input) 
+        # self._execute(f"arch-chroot /mnt passwd {self.setup_information["Username"]}", input=f"{self.setup_information["Password"]}\n{self.setup_information["Password"]}\n")
 
         # Making user admin
-        self._execute("echo \"%wheel ALL=(ALL:ALL) ALL\" >> /mnt/etc/sudoers ")
-        self._execute(f"arch-chroot /mnt usermod -aG wheel {self.setup_information["Username"]}")
+        sudoers_line = '"%wheel ALL=(ALL:ALL) ALL"'
+        # self._execute("echo \"%wheel ALL=(ALL:ALL) ALL\" >> /mnt/etc/sudoers ")
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', f'echo {sudoers_line} >> /etc/sudoers']) 
+        # self._execute(f"arch-chroot /mnt usermod -aG wheel {self.setup_information["Username"]}")
+        self._execute(['arch-chroot', mount_point, 'usermod', '-aG', 'wheel', username])
         
         # Configuring timezone
-        self._execute(f"arch-chroot /mnt ln -sf /usr/share/zoneinfo/{self.setup_information['Timezone']} /etc/localtime")
+        # self._execute(f"arch-chroot /mnt ln -sf /usr/share/zoneinfo/{self.setup_information['Timezone']} /etc/localtime")
+        self._execute(['arch-chroot', mount_point, 'ln', '-sf', f'/usr/share/zoneinfo/{self.setup_information['Timezone']}', '/etc/localtime'])
+
         
         # Creating mkinitcpio.conf
-        self._execute('echo -e "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt lvm2 filesystems fsck)" > /mnt/etc/mkinitcpio.conf')
+        mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt lvm2 filesystems fsck)\n"
+        # self._execute('echo -e "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt lvm2 filesystems fsck)" > /mnt/etc/mkinitcpio.conf')
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
         
         # Creating cmdline
-        self._execute("mkdir /mnt/etc/cmdline.d")
-        self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash\" > /mnt/etc/cmdline.d/root.conf")
+        # self._execute("mkdir /mnt/etc/cmdline.d")
+        self._execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/cmdline.d'])
+        process = subprocess.run(["blkid", '-s', 'UUID', '-o', 'value', rootfs_partition], check=True, capture_output=True)
+        uuid = process.stdout.strip().decode()
+        cmdline_content = f"rd.luks.name={uuid}=cryptlvm root={root_lv_path} rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality audit=1 lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{cmdline_content}" > /etc/cmdline.d/root.conf'])
+        # self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash\" > /mnt/etc/cmdline.d/root.conf")
 
         # Creating UKI config
-        self._execute('echo -e "[UKI]\nOSRelease=@/etc/os-release\nPCRBanks=sha256\n\n[PCRSignature:initrd]\nPhases=enter-initrd\nPCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\nPCRPublicKey=/etc/kernel/pcr-initrd.pub.pem" > /mnt/etc/kernel/uki.conf')
+        uki_conf_content = "[UKI]\nOSRelease=@/etc/os-release\nPCRBanks=sha256\n\n[PCRSignature:initrd]\nPhases=enter-initrd\nPCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\nPCRPublicKey=/etc/kernel/pcr-initrd.pub.pem\n"
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{uki_conf_content}\' > /etc/kernel/uki.conf'])
+        # self._execute('echo -e "[UKI]\nOSRelease=@/etc/os-release\nPCRBanks=sha256\n\n[PCRSignature:initrd]\nPhases=enter-initrd\nPCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\nPCRPublicKey=/etc/kernel/pcr-initrd.pub.pem" > /mnt/etc/kernel/uki.conf')
 
         # Generate ukify keys
-        self._execute("arch-chroot /mnt ukify genkey --config=/etc/kernel/uki.conf")
+        # self._execute("arch-chroot /mnt ukify genkey --config=/etc/kernel/uki.conf")
+        self._execute(['arch-chroot', mount_point, 'ukify', 'genkey', '--config=/etc/kernel/uki.conf'])
 
         # Configure UKI generation
-        for kernel in self.setup_information["Kernel"]:
-            self._execute(f"sed -i '/^default_config/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
-            self._execute(f"sed -i '/^default_image/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
-            self._execute(f"sed -i '/^#default_uki/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
-            self._execute(f"sed -i '/^#default_options/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        # for kernel in self.setup_information["Kernel"]:
+        #     self._execute(f"sed -i '/^default_config/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        #     self._execute(f"sed -i '/^default_image/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        #     self._execute(f"sed -i '/^#default_uki/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        #     self._execute(f"sed -i '/^#default_options/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
             
-            self._execute(f"sed -i '/^fallback_config/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
-            self._execute(f"sed -i '/^fallback_image/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
-            self._execute(f"sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
-            self._execute(f"sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        #     self._execute(f"sed -i '/^fallback_config/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        #     self._execute(f"sed -i '/^fallback_image/s/^/#/' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        #     self._execute(f"sed -i '/^#fallback_uki/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        #     self._execute(f"sed -i '/^#fallback_options/s/^#//' /mnt/etc/mkinitcpio.d/{kernel}.preset")
 
-            self._execute(f"sed -i 's/arch-/secux-/g' /mnt/etc/mkinitcpio.d/{kernel}.preset")
-            self._execute(f"sed -i 's/Linux/secux/g' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        #     self._execute(f"sed -i 's/arch-/secux-/g' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        #     self._execute(f"sed -i 's/Linux/secux/g' /mnt/etc/mkinitcpio.d/{kernel}.preset")
+        for kernel in kernels_no_headers: # Используем список без headers
+            preset_file = f'{mount_point}/etc/mkinitcpio.d/{kernel}.preset'
+
+            self._execute(['sed', '-i', '/^default_config/s/^/#/', preset_file])
+            self._execute(['sed', '-i', '/^default_image/s/^/#/', preset_file])
+            self._execute(['sed', '-i', '/^#default_uki/s/^#//', preset_file])
+            self._execute(['sed', '-i', '/^#default_options/s/^#//', preset_file])
+
+            self._execute(['sed', '-i', '/^fallback_config/s/^/#/', preset_file])
+            self._execute(['sed', '-i', '/^fallback_image/s/^/#/', preset_file])
+            self._execute(['sed', '-i', '/^#fallback_uki/s/^#//', preset_file])
+            self._execute(['sed', '-i', '/^#fallback_options/s/^#//', preset_file])
+
+            self._execute(['sed', '-i', 's/arch-/secux-/g', preset_file])
+            self._execute(['sed', '-i', 's/Linux/secux/g', preset_file])
+
+            self._execute(['sed', '-i', 's|--splash /usr/share/systemd/bootctl/splash-arch.bmp||', preset_file])
+
+            #         for kernel in self.setup_information["Kernel"]:
+            # self._execute(f"sed -i 's|--splash /usr/share/systemd/bootctl/splash-arch.bmp||' /mnt/etc/mkinitcpio.d/{kernel}.preset")
 
         # Add languages support
-        if self.language == 'ru':
-            self._execute('echo "ru_RU.UTF-8 UTF-8" >> /mnt/etc/locale.gen')
-            self._execute('echo LANG=\"ru_RU.UTF-8\" > /mnt/etc/locale.conf')
-        else:
-            self._execute('echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen')
-            self._execute('echo LANG=\"en_US.UTF-8\" > /mnt/etc/locale.conf')
-        self._execute("arch-chroot /mnt locale-gen")
-        self._execute('echo "FONT=cyr-sun16" >> /mnt/etc/vconsole.conf')
+        locale_to_gen = "ru_RU.UTF-8 UTF-8" if self.language == 'ru' else "en_US.UTF-8 UTF-8"
+        locale_conf = "LANG=ru_RU.UTF-8" if self.language == 'ru' else "LANG=en_US.UTF-8"
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{locale_to_gen}" >> /etc/locale.gen'])
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{locale_conf}" > /etc/locale.conf'])
+        self._execute(['arch-chroot', mount_point, 'locale-gen'])
+
+        # if self.language == 'ru':
+        #     self._execute('echo "ru_RU.UTF-8 UTF-8" >> /mnt/etc/locale.gen')
+        #     self._execute('echo LANG=\"ru_RU.UTF-8\" > /mnt/etc/locale.conf')
+        # else:
+        #     self._execute('echo "en_US.UTF-8 UTF-8" >> /mnt/etc/locale.gen')
+        #     self._execute('echo LANG=\"en_US.UTF-8\" > /mnt/etc/locale.conf')
+        # self._execute("arch-chroot /mnt locale-gen")
+        # self._execute('echo "FONT=cyr-sun16" >> /mnt/etc/vconsole.conf')
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "FONT=cyr-sun16" >> /etc/vconsole.conf'])
 
         # Set plymouth theme
-        self._execute("cp /usr/share/plymouth/themes/* /mnt/usr/share/plymouth/themes -r")
-        self._execute("arch-chroot /mnt plymouth-set-default-theme bgrt-nologo")
+        # self._execute("cp /usr/share/plymouth/themes/* /mnt/usr/share/plymouth/themes -r")
+        self._execute(['cp', '-r', '/usr/share/plymouth/themes/', f'{mount_point}/usr/share/plymouth/themes/'])
+        # self._execute("arch-chroot /mnt plymouth-set-default-theme bgrt-nologo")
+        self._execute(['arch-chroot', mount_point, 'plymouth-set-default-theme', 'bgrt-nologo']) 
 
         # Prepare EFI Partition
-        self._execute("mkdir -p /mnt/efi/EFI/secux")
-        
+        # self._execute("mkdir -p /mnt/efi/EFI/secux")
+        self._execute(['mkdir', '-p', f'{mount_point}/efi/EFI/secux'])
+
         # Change distro info and logo
-        self._execute("cp /usr/local/share/secux-installer/scripts/os-release /mnt/etc/os-release")
-        # self._execute("cp /usr/local/share/secux-installer/images/bootlogo.bmp /mnt/usr/share/icons")
-        self._execute("cp /usr/local/share/secux-installer/images/SecuxLinux.svg /mnt/usr/share/icons")
-        for kernel in self.setup_information["Kernel"]:
-            self._execute(f"sed -i 's|--splash /usr/share/systemd/bootctl/splash-arch.bmp||' /mnt/etc/mkinitcpio.d/{kernel}.preset")
-        self._execute("rm /mnt/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf")
-        self._execute("rm /mnt/etc/debuginfod/archlinux.urls")
-        self._execute("rm /etc/ssh/sshd_config.d/99-archlinux.conf")
-        self._execute("rm /mnt/etc/arch-release")
-        self._execute("rm /mnt/usr/share/factory/etc/arch-release")
-        self._execute("rm /mnt/usr/share/plymouth/themes/spinner/watermark.png")
+        installer_path = "/usr/local/share/secux-installer" # Пример пути к файлам инсталлятора
+        self._execute(['cp', f'{installer_path}/scripts/os-release', f'{mount_point}/etc/os-release'])
+        self._execute(['cp', f'{installer_path}/images/SecuxLinux.svg', f'{mount_point}/usr/share/icons/']) # Пример лого
+
+        # self._execute("cp /usr/local/share/secux-installer/scripts/os-release /mnt/etc/os-release")
+        # # self._execute("cp /usr/local/share/secux-installer/images/bootlogo.bmp /mnt/usr/share/icons")
+        # self._execute("cp /usr/local/share/secux-installer/images/SecuxLinux.svg /mnt/usr/share/icons")
+        # self._execute("rm /mnt/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf")
+        # self._execute("rm /mnt/etc/debuginfod/archlinux.urls")
+        # self._execute("rm /etc/ssh/sshd_config.d/99-archlinux.conf")
+        # self._execute("rm /mnt/etc/arch-release")
+        # self._execute("rm /mnt/usr/share/factory/etc/arch-release")
+        # self._execute("rm /mnt/usr/share/plymouth/themes/spinner/watermark.png")
+        self._execute(['rm', '-f', f'{mount_point}/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf'])
+        self._execute(['rm', '-f', f'{mount_point}/etc/debuginfod/archlinux.urls'])
+        self._execute(['rm', '-f', f'{mount_point}/etc/ssh/sshd_config.d/99-archlinux.conf'])
+        self._execute(['rm', '-f', f'{mount_point}/etc/arch-release'])
+        self._execute(['rm', '-f', f'{mount_point}/usr/share/factory/etc/arch-release'])
+        self._execute(['rm', '-f', f'{mount_point}/usr/share/plymouth/themes/spinner/watermark.png'])
 
         # Generate UKI
-        for kernel in self.setup_information["Kernel"]:
-            self._execute(f"arch-chroot /mnt mkinitcpio -p {kernel}")
+        # for kernel in self.setup_information["Kernel"]:
+        #     self._execute(f"arch-chroot /mnt mkinitcpio -p {kernel}")
+        for kernel in kernels_no_headers:
+            self._execute(['arch-chroot', mount_point, 'mkinitcpio', '-p', kernel])
         
         # Make NetworkManager run at boot
-        self._execute("arch-chroot /mnt systemctl enable NetworkManager")
+        # self._execute("arch-chroot /mnt systemctl enable NetworkManager")
+        self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'NetworkManager.service'])
+        self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'systemd-timesyncd.service'])
+        self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'auditd.service'])
+        self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'apparmor.service'])
+        self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'ufw.service'])
+
+        if self.setup_information["DE"] == "GNOME":
+            self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'gdm.service'])
+            self._execute(['arch-chroot', mount_point, 'sudo', '-u', 'gdm', 'dbus-launch', 'gsettings', 'set', 'org.gnome.login-screen', 'logo', '""'])
+        elif self.setup_information["DE"] == "KDE":
+            self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'sddm.service'])
+            # Установка темы SDDM (пример - breeze)
+            self._execute(['sed', '-i', '/^\\[Theme\\]/a Current=breeze', f'{mount_point}/usr/lib/sddm/sddm.conf.d/default.conf']) 
 
         # Hostname
-        self._execute(f'echo "{self.setup_information["Hostname"]}" > /mnt/etc/hostname')
+        # self._execute(f'echo "{self.setup_information["Hostname"]}" > /mnt/etc/hostname')
+        hostname = self.setup_information["Hostname"]
+        self._execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{hostname}" > /etc/hostname'])
 
-        # Make GDM/SDDM run at boot
-        if self.setup_information["DE"] == "GNOME":
-            self._execute("arch-chroot /mnt systemctl enable gdm")
-        elif self.setup_information["DE"] == "KDE":
-            self._execute("arch-chroot /mnt systemctl enable sddm")
+        # # Make GDM/SDDM run at boot
+        # if self.setup_information["DE"] == "GNOME":
+        #     self._execute("arch-chroot /mnt systemctl enable gdm")
+        # elif self.setup_information["DE"] == "KDE":
+        #     self._execute("arch-chroot /mnt systemctl enable sddm")
         
-        # SDDM Theme
-        if self.setup_information["DE"] == "KDE":
-            self._execute("sed -i '/^\\# Current theme name/{n;s/^Current=.*/Current=breeze/}' /mnt/usr/lib/sddm/sddm.conf.d/default.conf")
+        # # SDDM Theme
+        # if self.setup_information["DE"] == "KDE":
+        #     self._execute("sed -i '/^\\# Current theme name/{n;s/^Current=.*/Current=breeze/}' /mnt/usr/lib/sddm/sddm.conf.d/default.conf")
         
-        # GDM remove arch logo
-        if self.setup_information["DE"] == "GNOME":
-            self._execute("arch-chroot /mnt sudo -u gdm dbus-launch gsettings set org.gnome.login-screen logo ''")
+        # # GDM remove arch logo
+        # if self.setup_information["DE"] == "GNOME":
+        #     self._execute("arch-chroot /mnt sudo -u gdm dbus-launch gsettings set org.gnome.login-screen logo ''")
 
         # Install bootloader
-        self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
+        # self._execute("arch-chroot /mnt bootctl install --esp-path=/efi")
+        self._execute(['arch-chroot', mount_point, 'bootctl', 'install', '--esp-path=/efi']) 
+
+        default_kernel_conf = ""
+        if 'linux-hardened' in kernels_no_headers: default_kernel_conf = "secux-linux-hardened.conf"
+        elif 'linux-lts' in kernels_no_headers: default_kernel_conf = "secux-linux-lts.conf"
+        elif 'linux' in kernels_no_headers: default_kernel_conf = "secux-linux.conf"
+
+        loader_conf_content = f"timeout 3\ndefault {default_kernel_conf}\nconsole-mode keep\nreboot-for-bitlocker yes"
+        self._execute(['bash', '-c', f'echo -e "{loader_conf_content}" > {mount_point}/efi/loader/loader.conf'])
         
+        for kernel in kernels_no_headers:
+            entry_content = f"title Secux Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi\n"
+            entry_fallback_content = f"title Secux Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi\n"
+            self._execute(['bash', '-c', f'echo -e "{entry_content}" > {mount_point}/efi/loader/entries/secux-{kernel}.conf'])
+            self._execute(['bash', '-c', f'echo -e "{entry_fallback_content}" > {mount_point}/efi/loader/entries/secux-{kernel}-fallback.conf'])
+
         # Create timeout
-        self._execute('echo "timeout 3" > /mnt/efi/loader/loader.conf')
+        # self._execute('echo "timeout 3" > /mnt/efi/loader/loader.conf')
 
         # Generate sbctl keys
         if self.setup_information["InstallationType"] == "Secure":
-            self._execute("arch-chroot /mnt sbctl create-keys")
-            self._execute("arch-chroot /mnt sbctl enroll-keys --yes-this-might-brick-my-machine")
+            self._execute(['arch-chroot', mount_point, 'sbctl', 'create-keys'])
+            self._execute(['arch-chroot', mount_point, 'sbctl', 'enroll-keys', '--yes-this-might-brick-my-machine'])
+            self._execute(['arch-chroot', mount_point, 'sbctl', 'sign', '--save', '/efi/EFI/BOOT/BOOTX64.EFI'])
+            self._execute(['arch-chroot', mount_point, 'sbctl', 'sign', '--save', '/efi/EFI/systemd/systemd-bootx64.efi'])
+            for kernel in kernels_no_headers:
+                 self._execute(['arch-chroot', mount_point, 'sbctl', 'sign', '--save', f'/efi/EFI/secux/secux-{kernel}.efi'])
+                 self._execute(['arch-chroot', mount_point, 'sbctl', 'sign', '--save', f'/efi/EFI/secux/secux-{kernel}-fallback.efi'])
+
+        elif self.setup_information["InstallationType"] == "LessSecure":
+            self._execute(['cp', f'{mount_point}/usr/share/shim-signed/shimx64.efi', f'{mount_point}/efi/EFI/secux/shimx64.efi'])
+            self._execute(['cp', f'{mount_point}/usr/share/shim-signed/mmx64.efi', f'{mount_point}/efi/EFI/secux/mmx64.efi'])
+            self._execute(['mkdir', '-p', f'{mount_point}/etc/secureboot'])
+            self._execute(['openssl', 'req', '-newkey', 'rsa:4096', '-nodes', '-keyout', f'{mount_point}/etc/secureboot/sb.key', '-new', '-x509', '-sha256', '-days', '3650', '-subj', '/CN=Secux Linux MOK/', '-out', f'{mount_point}/etc/secureboot/sb.crt'])
+            self._execute(['openssl', 'x509', '-outform', 'DER', '-in', f'{mount_point}/etc/secureboot/sb.crt', '-out', f'{mount_point}/etc/secureboot/sb.cer'])
+            self._execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', '/efi/EFI/systemd/systemd-bootx64.efi', '/usr/lib/systemd/boot/efi/systemd-bootx64.efi'])
+            for kernel in kernels_no_headers:
+                self._execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', f'/efi/EFI/secux/secux-{kernel}.efi', f'/efi/EFI/secux/secux-{kernel}.efi'])
+                self._execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', f'/efi/EFI/secux/secux-{kernel}-fallback.efi', f'/efi/EFI/secux/secux-{kernel}-fallback.efi'])
+
+            mok_input = f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n"
+            self._execute(['arch-chroot', mount_point, 'mokutil', '--import', '/etc/secureboot/sb.cer'], input_str=mok_input)
+
+            self._execute(['cp', f'{installer_path}/scripts/92-shim-signed.hook', f'{mount_point}/usr/share/libalpm/hooks/'])
+            self._execute(['cp', f'{installer_path}/scripts/shim-copy.sh', f'{mount_point}/usr/share/'])
+            self._execute(['chmod', '+x', f'{mount_point}/usr/share/shim-copy.sh'])
+            self._execute(['cp', f'{installer_path}/scripts/91-systemd-boot.hook', f'{mount_point}/usr/share/libalpm/hooks/'])
+            self._execute(['cp', f'{installer_path}/scripts/systemd-boot-sign.sh', f'{mount_point}/usr/share'])
+            self._execute(['chmod', '+x', f'{mount_point}/usr/share/systemd-boot-sign.sh'])
+            self._execute(['cp', f'{installer_path}/scripts/sign-uki.sh', f'{mount_point}/usr/lib/initcpio/post/'])
+            self._execute(['chmod', '+x', f'{mount_point}/usr/lib/initcpio/post/sign-uki.sh'])
+
+            self._execute(['cp', f'{mount_point}/efi/EFI/systemd/systemd-bootx64.efi', f'{mount_point}/efi/EFI/secux/grubx64.efi'])
+
+            efi_base_drive, efi_number_str = self.__split_device(efi_partition)
+            efi_part_num = ''.join(filter(str.isdigit, efi_number_str))
+            if efi_base_drive and efi_part_num:
+                self._execute(['efibootmgr', '--create', '--disk', efi_base_drive, '--part', efi_part_num, '--label', "Secux Linux shim", '--loader', '\\EFI\\secux\\shimx64.efi'])
+
+        apps_path = f'{mount_point}/usr/local/bin'
+        polkit_path = f'{mount_point}/usr/share/polkit-1/actions'
+        desktop_path = f'{mount_point}/usr/share/applications'
+
+
+        # if self.setup_information["InstallationType"] == "Secure":
+        #     self._execute("arch-chroot /mnt sbctl create-keys")
+        #     self._execute("arch-chroot /mnt sbctl enroll-keys --yes-this-might-brick-my-machine")
         
         # Signing EFI executables and storing them in the database for signing during updates
-        if self.setup_information["InstallationType"] == "Secure":
-            self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
-            self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
-            for kernel in self.setup_information["Kernel"]:
-                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/secux/secux-{kernel}-fallback.efi")
-                self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/secux/secux-{kernel}.efi")
+        # if self.setup_information["InstallationType"] == "Secure":
+        #     self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/BOOT/BOOTX64.EFI")
+        #     self._execute("arch-chroot /mnt sbctl sign --save /efi/EFI/systemd/systemd-bootx64.efi")
+        #     for kernel in self.setup_information["Kernel"]:
+        #         self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/secux/secux-{kernel}-fallback.efi")
+        #         self._execute(f"arch-chroot /mnt sbctl sign --save /efi/EFI/secux/secux-{kernel}.efi")
         
         # Creating trusted boot chain with microsoft keys
-        if self.setup_information["InstallationType"] == "LessSecure":
-            self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/secux/shimx64.efi")
-            self._execute("cp /mnt/usr/share/shim-signed/mmx64.efi /mnt/efi/EFI/secux/mmx64.efi")
-            self._execute("mkdir -p /mnt/etc/secureboot")
-            self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=Secux Linux MOK/"')
-            self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
-            self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
-            for kernel in self.setup_information["Kernel"]:
-                self._execute(f"echo Signing {kernel}")
-                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/secux/secux-{kernel}.efi /efi/EFI/secux/secux-{kernel}.efi")
-                self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/secux/secux-{kernel}-fallback.efi /efi/EFI/secux/secux-{kernel}-fallback.efi")
-                self._execute(f"echo Successfully signed {kernel}")
-            self._execute('echo Importing MOK')
-            self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
-            self._execute("cp /usr/local/share/secux-installer/scripts/92-shim-signed.hook /mnt/usr/share/libalpm/hooks/")
-            self._execute("cp /usr/local/share/secux-installer/scripts/shim-copy.sh /mnt/usr/share/")
-            self._execute("chmod +x /mnt/usr/share/shim-copy.sh")
-            self._execute("cp /usr/local/share/secux-installer/scripts/91-systemd-boot.hook /mnt/usr/share/libalpm/hooks/")
-            self._execute("cp /usr/local/share/secux-installer/scripts/systemd-boot-sign.sh /mnt/usr/share")
-            self._execute("chmod +x /mnt/usr/share/systemd-boot-sign.sh")
-            self._execute("cp /usr/local/share/secux-installer/scripts/sign-uki.sh /mnt/usr/lib/initcpio/post")
-            self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
-            self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/secux/grubx64.efi")
-            self._execute("echo Adding bootentry.")
-            self._execute(f'efibootmgr --create --disk {efi_base_drive} --part {efi_number} --label "Secux Linux shim" --loader "\\EFI\\secux\\shimx64.efi"')
+        # if self.setup_information["InstallationType"] == "LessSecure":
+        #     self._execute("cp /mnt/usr/share/shim-signed/shimx64.efi /mnt/efi/EFI/secux/shimx64.efi")
+        #     self._execute("cp /mnt/usr/share/shim-signed/mmx64.efi /mnt/efi/EFI/secux/mmx64.efi")
+        #     self._execute("mkdir -p /mnt/etc/secureboot")
+        #     self._execute('openssl req -newkey rsa:4096 -nodes -keyout /mnt/etc/secureboot/sb.key -x509 -out /mnt/etc/secureboot/sb.crt -subj "/CN=Secux Linux MOK/"')
+        #     self._execute("openssl x509 -outform DER -in /mnt/etc/secureboot/sb.crt -out /mnt/etc/secureboot/sb.cer")
+        #     self._execute("arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/systemd/systemd-bootx64.efi /usr/lib/systemd/boot/efi/systemd-bootx64.efi")
+        #     for kernel in self.setup_information["Kernel"]:
+        #         self._execute(f"echo Signing {kernel}")
+        #         self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/secux/secux-{kernel}.efi /efi/EFI/secux/secux-{kernel}.efi")
+        #         self._execute(f"arch-chroot /mnt sbsign --key /etc/secureboot/sb.key --cert /etc/secureboot/sb.crt --output /efi/EFI/secux/secux-{kernel}-fallback.efi /efi/EFI/secux/secux-{kernel}-fallback.efi")
+        #         self._execute(f"echo Successfully signed {kernel}")
+        #     self._execute('echo Importing MOK')
+        #     self._execute("arch-chroot /mnt mokutil --import /etc/secureboot/sb.cer", input=f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n")
+        #     self._execute("cp /usr/local/share/secux-installer/scripts/92-shim-signed.hook /mnt/usr/share/libalpm/hooks/")
+        #     self._execute("cp /usr/local/share/secux-installer/scripts/shim-copy.sh /mnt/usr/share/")
+        #     self._execute("chmod +x /mnt/usr/share/shim-copy.sh")
+        #     self._execute("cp /usr/local/share/secux-installer/scripts/91-systemd-boot.hook /mnt/usr/share/libalpm/hooks/")
+        #     self._execute("cp /usr/local/share/secux-installer/scripts/systemd-boot-sign.sh /mnt/usr/share")
+        #     self._execute("chmod +x /mnt/usr/share/systemd-boot-sign.sh")
+        #     self._execute("cp /usr/local/share/secux-installer/scripts/sign-uki.sh /mnt/usr/lib/initcpio/post")
+        #     self._execute("chmod +x /mnt/usr/lib/initcpio/post/sign-uki.sh")
+        #     self._execute("cp /mnt/efi/EFI/systemd/systemd-bootx64.efi /mnt/efi/EFI/secux/grubx64.efi")
+        #     self._execute("echo Adding bootentry.")
+        #     self._execute(f'efibootmgr --create --disk {efi_base_drive} --part {efi_number} --label "Secux Linux shim" --loader "\\EFI\\secux\\shimx64.efi"')
         
-        for kernel in self.setup_information["Kernel"]:
-            self._execute(f'echo "title Secux Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
-            self._execute(f'echo "title Secux Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi" > /mnt/efi/loader/entries/secux-{kernel}-fallback.conf')
+        # for kernel in self.setup_information["Kernel"]:
+        #     self._execute(f'echo "title Secux Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi" > /mnt/efi/loader/entries/secux-{kernel}.conf')
+        #     self._execute(f'echo "title Secux Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi" > /mnt/efi/loader/entries/secux-{kernel}-fallback.conf')
         
-        if 'linux-hardened' in self.setup_information["Kernel"]:
-            default = "secux-linux-hardened.conf"
-        elif 'linux-lts' in self.setup_information["Kernel"]:
-            default = "secux-linux-lts.conf"
-        else:
-            default = "secux-linux.conf"
-        self._execute(f'echo "timeout 3\ndefault {default}" > /mnt/efi/loader/loader.conf')
+        # if 'linux-hardened' in self.setup_information["Kernel"]:
+        #     default = "secux-linux-hardened.conf"
+        # elif 'linux-lts' in self.setup_information["Kernel"]:
+        #     default = "secux-linux-lts.conf"
+        # else:
+        #     default = "secux-linux.conf"
+        # self._execute(f'echo "timeout 3\ndefault {default}" > /mnt/efi/loader/loader.conf')
 
-        # Installing secux-apps
         if 'Security Manager' in self.setup_information["Apps"]:
-            self._execute("mkdir -p /mnt/usr/local/bin/secux-apps")
-            if self.online_installation:
-                self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
-            else:
-                self._execute("cp /usr/local/share/secux-apps /mnt/usr/local/bin/ -r")
-            self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /mnt/usr/share/polkit-1/actions/")
-            self._execute("touch /mnt/usr/local/bin/secux-apps/production.conf")
-            self._execute("cp /usr/local/share/secux-installer/scripts/securitymanager.desktop /mnt/usr/share/applications")
-            self._execute("chmod +x /mnt/usr/share/applications/securitymanager.desktop")
-            self._execute("chmod +x /mnt/usr/local/bin/secux-apps/manager.py")
+             app_dir = f"{apps_path}/secux-apps"
+             self._execute(['mkdir', '-p', app_dir])
+             if self.online_installation:
+                 self._execute(['git', 'clone', 'https://github.com/kolbanidze/secux-apps', app_dir, '--depth=1'])
+             else:
+                 self._execute(['cp', '-r', '/usr/local/share/secux-apps', apps_path]) # Путь к исходникам
+             # Polkit и .desktop файлы
+             self._execute(['cp', f'{installer_path}/scripts/org.freedesktop.policykit.securitymanager.policy', polkit_path])
+             self._execute(['touch', f'{app_dir}/production.conf']) # Файл-маркер
+             self._execute(['cp', f'{installer_path}/scripts/securitymanager.desktop', desktop_path])
+             self._execute(['chmod', '+x', f'{desktop_path}/securitymanager.desktop'])
+             self._execute(['chmod', '+x', f'{app_dir}/manager.py'])
+             # Зависимости pip
+             if self.online_installation:
+                 self._execute(['arch-chroot', mount_point, 'pip', 'install', 'customtkinter', '--break-system-packages'])
+             else:
+                 # Копируем wheel файлы и устанавливаем локально
+                 self._execute(['mkdir', '-p', f'{mount_point}/root/pip_cache'])
+                 self._execute(['cp', f'{WORKDIR}/python_packages/customtkinter*.whl', f'{mount_point}/root/pip_cache/'])
+                 self._execute(['arch-chroot', mount_point, 'pip', 'install', 'customtkinter', '--no-index', f'--find-links=file:///root/pip_cache', '--break-system-packages'])
+                 self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
 
-            # Dependencies
-            if self.online_installation:
-                self._execute("arch-chroot /mnt pip install customtkinter --break-system-packages")
-            else:
-                self._execute(f"cp {WORKDIR}/python_packages/customtkinter* /mnt/root/")
-                self._execute(f"arch-chroot /mnt pip install customtkinter --find-links /root --no-index --break-system-packages")
-                self._execute(f"rm -rf /mnt/root/customtkinter*")
-
-        # Installing Kirt App
         if 'KIRTapp' in self.setup_information["Apps"]:
-            self._execute("mkdir -p /mnt/usr/local/bin/KIRTapp")
+            app_dir = f"{apps_path}/KIRTapp"
+            self._execute(['mkdir', '-p', app_dir])
             if self.online_installation:
-                self._execute("git clone https://github.com/kirt-king/test_app /mnt/usr/local/bin/KIRTapp --depth=1")
+                 self._execute(['git', 'clone', 'https://github.com/kirt-king/test_app', app_dir, '--depth=1'])
             else:
-                self._execute("cp /usr/local/share/KIRTapp /mnt/usr/local/bin/ -r")
-            self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.KIRTapp.policy /mnt/usr/share/polkit-1/actions/")
-            self._execute("cp /usr/local/share/secux-installer/scripts/KIRTapp.desktop /mnt/usr/share/applications")
-            self._execute("chmod +x /mnt/usr/share/applications/KIRTapp.desktop")
-            self._execute("chmod +x /mnt/usr/local/bin/KIRTapp/app_script/app.py")
+                 self._execute(['cp', '-r', '/usr/local/share/KIRTapp', apps_path])
+            # Polkit и .desktop файлы
+            self._execute(['cp', f'{installer_path}/scripts/org.freedesktop.policykit.KIRTapp.policy', polkit_path])
+            self._execute(['cp', f'{installer_path}/scripts/KIRTapp.desktop', desktop_path])
+            self._execute(['chmod', '+x', f'{desktop_path}/KIRTapp.desktop'])
+            self._execute(['chmod', '+x', f'{app_dir}/app_script/app.py'])
+            # Зависимости pip
+            pip_packages_kirt = ['customtkinter', 'face_recognition', 'face_recognition_models']
+            if self.online_installation:
+                self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--break-system-packages'])
+            else:
+                self._execute(['mkdir', '-p', f'{mount_point}/root/pip_cache'])
+                self._execute(['cp', f'{WORKDIR}/python_packages/*.whl', f'{mount_point}/root/pip_cache/'])
+                self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--no-index', f'--find-links=file:///root/pip_cache', '--break-system-packages'])
+                self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
 
-            # Dependencies
-            if self.online_installation:
-                self._execute("arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --break-system-packages")
-            else:
-                self._execute(f"cp -r {WORKDIR}/python_packages/ /mnt/root/")
-                self._execute(f"arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --find-links /root/python_packages --no-index --break-system-packages")
-                self._execute(f"rm -rf /mnt/root/python_packages")
+
+        # # Installing secux-apps
+        # if 'Security Manager' in self.setup_information["Apps"]:
+        #     self._execute("mkdir -p /mnt/usr/local/bin/secux-apps")
+        #     if self.online_installation:
+        #         self._execute("git clone https://github.com/kolbanidze/secux-apps /mnt/usr/local/bin/secux-apps --depth=1")
+        #     else:
+        #         self._execute("cp /usr/local/share/secux-apps /mnt/usr/local/bin/ -r")
+        #     self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.securitymanager.policy /mnt/usr/share/polkit-1/actions/")
+        #     self._execute("touch /mnt/usr/local/bin/secux-apps/production.conf")
+        #     self._execute("cp /usr/local/share/secux-installer/scripts/securitymanager.desktop /mnt/usr/share/applications")
+        #     self._execute("chmod +x /mnt/usr/share/applications/securitymanager.desktop")
+        #     self._execute("chmod +x /mnt/usr/local/bin/secux-apps/manager.py")
+
+        #     # Dependencies
+        #     if self.online_installation:
+        #         self._execute("arch-chroot /mnt pip install customtkinter --break-system-packages")
+        #     else:
+        #         self._execute(f"cp {WORKDIR}/python_packages/customtkinter* /mnt/root/")
+        #         self._execute(f"arch-chroot /mnt pip install customtkinter --find-links /root --no-index --break-system-packages")
+        #         self._execute(f"rm -rf /mnt/root/customtkinter*")
+
+        # # Installing Kirt App
+        # if 'KIRTapp' in self.setup_information["Apps"]:
+        #     self._execute("mkdir -p /mnt/usr/local/bin/KIRTapp")
+        #     if self.online_installation:
+        #         self._execute("git clone https://github.com/kirt-king/test_app /mnt/usr/local/bin/KIRTapp --depth=1")
+        #     else:
+        #         self._execute("cp /usr/local/share/KIRTapp /mnt/usr/local/bin/ -r")
+        #     self._execute("cp /usr/local/share/secux-installer/scripts/org.freedesktop.policykit.KIRTapp.policy /mnt/usr/share/polkit-1/actions/")
+        #     self._execute("cp /usr/local/share/secux-installer/scripts/KIRTapp.desktop /mnt/usr/share/applications")
+        #     self._execute("chmod +x /mnt/usr/share/applications/KIRTapp.desktop")
+        #     self._execute("chmod +x /mnt/usr/local/bin/KIRTapp/app_script/app.py")
+
+        #     # Dependencies
+        #     if self.online_installation:
+        #         self._execute("arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --break-system-packages")
+        #     else:
+        #         self._execute(f"cp -r {WORKDIR}/python_packages/ /mnt/root/")
+        #         self._execute(f"arch-chroot /mnt pip install customtkinter face_recognition face_recognition_models --find-links /root/python_packages --no-index --break-system-packages")
+        #         self._execute(f"rm -rf /mnt/root/python_packages")
 
         # Hardening
-        self._execute("arch-chroot /mnt systemctl enable apparmor")
-        self._execute("cp /usr/local/share/secux-installer/scripts/hardening.conf /mnt/etc/sysctl.d")
-        self._execute("arch-chroot /mnt systemctl enable ufw")
-        self._execute("arch-chroot /mnt ufw default deny")
-        self._execute("arch-chroot /mnt systemctl enable systemd-timesyncd")
-        self._execute("arch-chroot /mnt systemctl enable auditd")
-        self._execute("cp /usr/local/share/secux-installer/scripts/secux.rules /mnt/etc/audit/rules.d/secux.rules")
+        self._execute(['cp', f'{installer_path}/scripts/hardening.conf', f'{mount_point}/etc/sysctl.d/'])
+        self._execute(['arch-chroot', mount_point, 'ufw', 'default', 'deny'])
+        self._execute(['cp', f'{installer_path}/scripts/secux.rules', f'{mount_point}/etc/audit/rules.d/secux.rules'])
+
+        # self._execute("arch-chroot /mnt systemctl enable apparmor")
+        # self._execute("cp /usr/local/share/secux-installer/scripts/hardening.conf /mnt/etc/sysctl.d")
+        # self._execute("arch-chroot /mnt systemctl enable ufw")
+        # self._execute("arch-chroot /mnt ufw default deny")
+        # self._execute("arch-chroot /mnt systemctl enable systemd-timesyncd")
+        # self._execute("arch-chroot /mnt systemctl enable auditd")
+        # self._execute("cp /usr/local/share/secux-installer/scripts/secux.rules /mnt/etc/audit/rules.d/secux.rules")
 
         # Flatpak offline installation support
-        self._execute("arch-chroot /mnt flatpak remote-modify --collection-id org.flathub.Stable flathub")
+        # self._execute("arch-chroot /mnt flatpak remote-modify --collection-id org.flathub.Stable flathub")
+        self._execute(['arch-chroot', mount_point, 'flatpak', 'remote-modify', '--collection-id=org.flathub.Stable', 'flathub'])
+
 
         # Final message in console
-        self._execute("echo [Installation finished!]")
-        self._execute("echo [Now you can close this window and reboot into the system.]")
-        self._execute("echo [Установка завершена!]")
-        self._execute("echo [Теперь вы можете закрыть это окно и перезагрузиться в систему.]")
-        self._execute("__INTERNAL_INSTALLATION_SUCCESS")
+        self._execute(['echo', "[Installation finished!]"])
+        self._execute(["echo", "[Now you can close this window and reboot into the system.]"])
+        self._execute(["echo", "[Установка завершена!]"])
+        self._execute(["echo", "[Теперь вы можете закрыть это окно и перезагрузиться в систему.]"])
+        # self._execute("__INTERNAL_INSTALLATION_SUCCESS")
+        self._execute(["__INTERNAL_INSTALLATION_SUCCESS"])
+
 
         # Execute commands
         if not DEBUG_SHOW_COMMANDS:
