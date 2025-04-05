@@ -1290,8 +1290,8 @@ class App(CTk):
             if self.console.winfo_exists(): # Check if widget exists
                 try:
                     self.console.configure(state="normal")
-                    self.console.insert(ctk.END, str(text)) # Ensure text is string
-                    self.console.see(ctk.END) # Scroll to the end
+                    self.console.insert(END, str(text)) # Ensure text is string
+                    self.console.see(END) # Scroll to the end
                     self.console.configure(state="disabled")
                     # NO self.update_idletasks() here - rely on main loop / wait loop
                 except Exception as e:
