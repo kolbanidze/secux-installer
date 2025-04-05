@@ -1795,7 +1795,7 @@ class App(CTk):
 
         # Generating fstab
         # self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
-        self._execute(['bash', '-c', 'genfstab -U / >> /mnt/etc/fstab']) 
+        self._execute(['bash', '-c', 'genfstab -U /mnt >> /mnt/etc/fstab']) 
 
         # Creating user
         username = self.setup_information["Username"]
