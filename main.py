@@ -73,6 +73,7 @@ class App(CTk):
         self.current_stage = 0
         self.total_amount_of_stages = 10
         set_appearance_mode("dark")
+        self.installation_failed = False
 
         self.welcome_menu = CTkFrame(self)
         self.welcome_menu.pack(fill='both', expand=True)
@@ -1165,32 +1166,35 @@ class App(CTk):
             os.system("systemctl reboot")
 
     def __installation_success(self):
-        popup = CTkToplevel(self)
-        popup.title(self.lang.success)
-        image = CTkImage(light_image=Image.open(f"{WORKDIR}/images/greencheck.png"), dark_image=Image.open(f"{WORKDIR}/images/greencheck.png"), size=(80,80))
-        image_label = CTkLabel(popup, text="", image=image)
-        label = CTkLabel(popup, text=self.lang.installation_success, font=(None, 16, "bold"))
-        continue_working = CTkButton(popup, text=self.lang.continue_working, command=lambda: self.__close(popup, close_self=True, reboot=False))
-        reboot = CTkButton(popup, text=self.lang.reboot, command=lambda: self.__close(popup, close_self=True, reboot=True))
+        if not self.installation_failed:
+            popup = CTkToplevel(self)
+            popup.title(self.lang.success)
+            image = CTkImage(light_image=Image.open(f"{WORKDIR}/images/greencheck.png"), dark_image=Image.open(f"{WORKDIR}/images/greencheck.png"), size=(80,80))
+            image_label = CTkLabel(popup, text="", image=image)
+            label = CTkLabel(popup, text=self.lang.installation_success, font=(None, 16, "bold"))
+            continue_working = CTkButton(popup, text=self.lang.continue_working, command=lambda: self.__close(popup, close_self=True, reboot=False))
+            reboot = CTkButton(popup, text=self.lang.reboot, command=lambda: self.__close(popup, close_self=True, reboot=True))
 
-        image_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
-        label.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
-        continue_working.grid(row=2, column=0, padx=(10,5), pady=10, sticky="nsew")
-        reboot.grid(row=2, column=1, padx=(5, 10), pady=10, sticky="nsew")
+            image_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+            label.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+            continue_working.grid(row=2, column=0, padx=(10,5), pady=10, sticky="nsew")
+            reboot.grid(row=2, column=1, padx=(5, 10), pady=10, sticky="nsew")
 
     def __installation_failed(self):
-        popup = CTkToplevel(self)
-        popup.title(self.lang.success)
-        image = CTkImage(light_image=Image.open(f"{WORKDIR}/images/redcross.png"), dark_image=Image.open(f"{WORKDIR}/images/redcross.png"), size=(80,80))
-        image_label = CTkLabel(popup, text="", image=image)
-        label = CTkLabel(popup, text=self.lang.installation_failed, font=(None, 16, "bold"))
-        continue_working = CTkButton(popup, text=self.lang.continue_working, command=lambda: self.__close(popup, close_self=False, reboot=False))
-        reboot = CTkButton(popup, text=self.lang.reboot, command=lambda: self.__close(popup, close_self=True, reboot=True))
+        if not self.installation_failed:
+            popup = CTkToplevel(self)
+            popup.title(self.lang.success)
+            image = CTkImage(light_image=Image.open(f"{WORKDIR}/images/redcross.png"), dark_image=Image.open(f"{WORKDIR}/images/redcross.png"), size=(80,80))
+            image_label = CTkLabel(popup, text="", image=image)
+            label = CTkLabel(popup, text=self.lang.installation_failed, font=(None, 16, "bold"))
+            continue_working = CTkButton(popup, text=self.lang.continue_working, command=lambda: self.__close(popup, close_self=False, reboot=False))
+            reboot = CTkButton(popup, text=self.lang.reboot, command=lambda: self.__close(popup, close_self=True, reboot=True))
 
-        image_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
-        label.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
-        continue_working.grid(row=2, column=0, padx=(10,5), pady=10, sticky="nsew")
-        reboot.grid(row=2, column=1, padx=(5, 10), pady=10, sticky="nsew")
+            image_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+            label.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+            continue_working.grid(row=2, column=0, padx=(10,5), pady=10, sticky="nsew")
+            reboot.grid(row=2, column=1, padx=(5, 10), pady=10, sticky="nsew")
+            self.installation_failed = True
 
     def __check_secure_boot_and_setup_mode(self):
         uefi_support = True
@@ -2102,7 +2106,7 @@ class App(CTk):
                  # Копируем wheel файлы и устанавливаем локально
                  self._execute(['mkdir', '-p', f'{mount_point}/root/pip_cache'])
                  self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/', '-r'])
-                 self._execute(['arch-chroot', mount_point, 'pip', 'install', 'customtkinter', '--no-index', f'--find-links=file:///root/pip_cache', '--break-system-packages'])
+                 self._execute(['arch-chroot', mount_point, 'pip', 'install', 'customtkinter', '--no-index', f'--find-links=file:///root/pip_cache/python_packages', '--break-system-packages'])
                  self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
 
         if 'KIRTapp' in self.setup_information["Apps"]:
@@ -2124,7 +2128,7 @@ class App(CTk):
             else:
                 self._execute(['mkdir', '-p', f'{mount_point}/root/pip_cache'])
                 self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/', '-r'])
-                self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--no-index', f'--find-links=file:///root/pip_cache', '--break-system-packages'])
+                self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--no-index', f'--find-links=file:///root/pip_cache/python_packages', '--break-system-packages'])
                 self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
 
 
