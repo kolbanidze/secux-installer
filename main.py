@@ -1526,6 +1526,10 @@ class App(CTk):
         if not command:
             self.update_console(f"{self.lang.empty_cli}\n")
             return None # Or a specific error code like -10
+        
+        if command[0] == '__INTERNAL_INSTALLATION_SUCCESS':
+            self.__installation_success()
+            return
 
         completion_event = threading.Event()
         task_data = (command, input_str)
@@ -1782,7 +1786,7 @@ class App(CTk):
 
         # Generating fstab
         # self._execute("genfstab -U /mnt >> /mnt/etc/fstab")
-        self._execute(['arch-chroot', mount_point, 'bash', '-c', 'genfstab -U / >> /etc/fstab']) 
+        self._execute(['bash', '-c', 'genfstab -U / >> /mnt/etc/fstab']) 
 
         # Creating user
         username = self.setup_information["Username"]
@@ -1885,6 +1889,7 @@ class App(CTk):
 
         # Set plymouth theme
         # self._execute("cp /usr/share/plymouth/themes/* /mnt/usr/share/plymouth/themes -r")
+        self._execute(['rm', '-rf', f'{mount_point}/usr/share/plymouth/themes'])
         self._execute(['cp', '-r', '/usr/share/plymouth/themes/', f'{mount_point}/usr/share/plymouth/themes/'])
         # self._execute("arch-chroot /mnt plymouth-set-default-theme bgrt-nologo")
         self._execute(['arch-chroot', mount_point, 'plymouth-set-default-theme', 'bgrt-nologo']) 
@@ -2091,7 +2096,7 @@ class App(CTk):
              else:
                  # Копируем wheel файлы и устанавливаем локально
                  self._execute(['mkdir', '-p', f'{mount_point}/root/pip_cache'])
-                 self._execute(['cp', f'{WORKDIR}/python_packages/customtkinter*.whl', f'{mount_point}/root/pip_cache/'])
+                 self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/'])
                  self._execute(['arch-chroot', mount_point, 'pip', 'install', 'customtkinter', '--no-index', f'--find-links=file:///root/pip_cache', '--break-system-packages'])
                  self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
 
@@ -2113,7 +2118,7 @@ class App(CTk):
                 self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--break-system-packages'])
             else:
                 self._execute(['mkdir', '-p', f'{mount_point}/root/pip_cache'])
-                self._execute(['cp', f'{WORKDIR}/python_packages/*.whl', f'{mount_point}/root/pip_cache/'])
+                self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/'])
                 self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--no-index', f'--find-links=file:///root/pip_cache', '--break-system-packages'])
                 self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
 
