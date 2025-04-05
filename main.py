@@ -14,7 +14,9 @@ import os
 import re
 import io
 import string
+import threading
 import shlex
+import queue
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
@@ -1278,61 +1280,92 @@ class App(CTk):
         return device, ""
 
     def update_console(self, text: str):
-        """Safely updates the console Textbox from the main thread."""
-        if self.console.winfo_exists(): # Check if widget exists
+        """
+        Safely updates the console Textbox from any thread by scheduling
+        the update in the main thread's event loop.
+        """
+        # Use self.after(0, ...) to ensure this runs in the main GUI thread
+        # This is thread-safe
+        def _do_update():
+            if self.console.winfo_exists(): # Check if widget exists
+                try:
+                    self.console.configure(state="normal")
+                    self.console.insert(ctk.END, str(text)) # Ensure text is string
+                    self.console.see(ctk.END) # Scroll to the end
+                    self.console.configure(state="disabled")
+                    # NO self.update_idletasks() here - rely on main loop / wait loop
+                except Exception as e:
+                    # Fallback if GUI update fails (e.g., during shutdown)
+                    print(f"ERROR (update_console): {e}\n{text}", file=sys.stderr)
+
+        # Schedule the actual update to run in the main thread
+        self.after(0, _do_update)
+
+
+    def _worker_loop(self):
+        """The loop run by the background worker thread."""
+        while True:
             try:
-                self.console.configure(state="normal")
-                self.console.insert(END, str(text)) # Ensure text is string
-                self.console.see(END) # Scroll to the end
-                self.console.configure(state="disabled")
-                # Process pending GUI events to make the update visible immediately
-                # Use sparingly if performance is critical, but needed here
-                # due to blocking nature of _execute/_execute_function
-                self.update_idletasks()
+                # Wait for a task from the main thread
+                task = self.task_queue.get()
+                if task is None: # Sentinel for stopping the thread
+                    # print("Worker thread received stop signal.")
+                    break
+
+                task_type, task_data, completion_event = task
+                result = None
+                exception = None
+
+                try:
+                    if task_type == 'execute':
+                        command, input_str = task_data
+                        result = self._run_command_in_worker(command, input_str)
+                    elif task_type == 'execute_function':
+                        func, args, kwargs = task_data
+                        result = self._run_function_in_worker(func, args, kwargs)
+                    else:
+                        raise ValueError(f"Unknown task type: {task_type}")
+                except Exception as e:
+                    # Capture any exception during task execution
+                    exception = e
+                    self.update_console(f"✘ {self.lang.unexpected_error} in worker: {e}\n")
+                    import traceback
+                    self.update_console(traceback.format_exc() + "\n")
+                    # Ensure result indicates failure if needed (e.g., return code for command)
+                    if task_type == 'execute':
+                        result = -2 # General error code
+                finally:
+                    # Store result and signal completion *regardless* of success/failure
+                    # The main thread needs to know the task is done
+                    self._current_task_result = result
+                    self._current_task_exception = exception
+                    completion_event.set() # Signal the waiting main thread
+
             except Exception as e:
-                # Fallback if GUI update fails (e.g., during shutdown)
-                print(f"{self.lang.gui_update_error} {e}\n{text}", file=sys.stderr)
+                # Handle errors in the worker loop itself (e.g., queue issues)
+                # Use print as update_console might rely on the main loop which could be blocked
+                print(f"FATAL ERROR in worker loop: {e}", file=sys.stderr)
+                # Optionally break or log more severely
 
 
-    def _execute(self,
-                 command: List[str],
-                 input_str: Optional[str] = None):
-        """
-        Executes a shell command immediately and blocks until completion.
-        Outputs stdout/stderr to the console in real-time.
-
-        Args:
-            command: A list of strings representing the command and its arguments.
-            input_str: Optional string to be passed to the command's stdin.
-
-        Returns:
-            The exit code of the command (int) or None if execution failed before starting.
-        """
-        if not command:
-            self.update_console(f"{self.lang.empty_cli}\n")
-            return None
-
-        if command == ["__INTERNAL_INSTALLATION_SUCCESS"]:
-            self.__installation_success()
-            return
-
-        # Display the command being executed
+    def _run_command_in_worker(self, command: List[str], input_str: Optional[str]) -> int:
+        """Executed by the worker thread to run an external command."""
         display_cmd = ' '.join(shlex.quote(str(c)) for c in command)
         self.update_console(f"\n▶ {self.lang.executing_command} {display_cmd}\n")
 
         process = None
-        return_code = None
+        return_code = -1 # Default to error
+
         try:
-            # Start the process
             process = subprocess.Popen(
                 command,
                 stdin=subprocess.PIPE if input_str is not None else None,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True,        # Decode stdout/stderr as text
-                bufsize=1,        # Line buffered
-                encoding='utf-8', # Explicit encoding
-                errors='replace'  # Handle potential decoding errors
+                text=True,
+                bufsize=1,
+                encoding='utf-8',
+                errors='replace'
             )
 
             # Handle stdin if provided
@@ -1341,131 +1374,105 @@ class App(CTk):
                     process.stdin.write(input_str)
                     process.stdin.close() # Signal end of input
                 except OSError as e:
-                    self.update_console(f"{self.lang.error_writing_to_stdin} {e}\n")
-                    # Attempt to kill the process if stdin fails critically
+                    self.update_console(f"✘ {self.lang.error_writing_to_stdin} {e}\n")
+                    try: process.kill()
+                    except OSError: pass
+                    process.wait() # Wait after killing
+                    self.update_console(f"✘ {self.lang.command_failed_stdin}\n")
+                    return process.returncode if process.returncode is not None else -1
+
+            # --- Real-time Output Handling (Worker Thread) ---
+            stdout_lines = []
+            stderr_lines = []
+
+            def read_stream(stream, output_list, prefix=""):
+                """Reads lines from a stream and schedules updates."""
+                try:
+                    for line in iter(stream.readline, ''):
+                        if line:
+                            output_list.append(line)
+                            self.update_console(f"{prefix}{line}") # Schedule GUI update
+                        else:
+                            break # End of stream
+                except Exception as e:
+                     self.update_console(f"\nError reading stream ({prefix}): {e}\n")
+                finally:
                     try:
-                        process.kill()
+                        stream.close()
                     except OSError:
-                        pass # Ignore if already terminated
-                    # Indicate failure
-                    self.__installation_failed()
-                    self.update_console(f"✘ {self.lang.stdin_failed}\n")
-                    return None # Early exit
+                        pass # Ignore errors on close
 
-            # Real-time reading of stdout and stderr
-            while True:
-                output_line = ""
-                error_line = ""
-                process_finished = process.poll() is not None
+            # Use separate threads to read stdout and stderr concurrently
+            # This prevents blocking if one pipe fills up while waiting for the other
+            stdout_thread = None
+            stderr_thread = None
 
-                # Read stdout non-blockingly (or as non-blocking as readline gets)
-                if process.stdout:
-                    try:
-                        output_line = process.stdout.readline()
-                        if output_line:
-                            self.update_console(output_line)
-                    except Exception as e:
-                        self.update_console(f"\n{self.lang.error_reading_stdout} {e}\n")
+            if process.stdout:
+                stdout_thread = threading.Thread(target=read_stream, args=(process.stdout, stdout_lines))
+                stdout_thread.start()
 
-                # Read stderr non-blockingly
-                if process.stderr:
-                     try:
-                        error_line = process.stderr.readline()
-                        if error_line:
-                            self.update_console(f"{self.lang.stderr} {error_line}") # Mark stderr
-                     except Exception as e:
-                        self.update_console(f"\n{self.lang.error_reading_stderr} {e}\n")
+            if process.stderr:
+                stderr_thread = threading.Thread(target=read_stream, args=(process.stderr, stderr_lines, f"{self.lang.stderr} "))
+                stderr_thread.start()
 
-                # Force GUI update to show the output read so far
-                self.update() # Process Tkinter events
+            # Wait for reader threads to finish
+            if stdout_thread:
+                stdout_thread.join()
+            if stderr_thread:
+                stderr_thread.join()
 
-                # Break condition: process finished AND no more output in pipes
-                if process_finished and not output_line and not error_line:
-                    break
+            # Wait for the process to terminate and get the final return code
+            return_code = process.wait()
 
-                # Optional small sleep if CPU usage is high, but update() might suffice
-                # time.sleep(0.01)
-
-            # Wait for process to fully terminate and get final return code
-            return_code = process.wait() # Get final exit code
-
+            # Final status update
             if return_code == 0:
-                self.update_console(f"✔ {self.lang.command_success} {return_code})\n")
+                self.update_console(f"✔ {self.lang.command_success} (Code: {return_code})\n")
             else:
-                self.update_console(f"✘ {self.lang.command_failed} {return_code})\n")
+                self.update_console(f"✘ {self.lang.command_failed} (Code: {return_code})\n")
 
         except FileNotFoundError:
             self.update_console(f"✘ {self.lang.command_not_found} '{command[0]}'\n")
-            return_code = -1 # Indicate specific error
+            return_code = -1 # Specific error code
         except Exception as e:
-            self.update_console(f"✘ {self.lang.unexpected_error} {e}\n")
-            return_code = -2 # Indicate general error
+            # Catch other Popen errors or issues before stream reading
+            self.update_console(f"✘ {self.lang.unexpected_error} executing command: {e}\n")
+            return_code = -2 # General error code
         finally:
-            # Ensure streams are closed and process is cleaned up
-            if process:
-                if process.stdin:
-                    try: process.stdin.close()
-                    except OSError: pass
-                if process.stdout:
-                    try: process.stdout.close()
-                    except OSError: pass
-                if process.stderr:
-                    try: process.stderr.close()
-                    except OSError: pass
-                # Ensure process is terminated if something went wrong before wait()
-                if process.poll() is None:
-                    try:
-                        process.terminate()
-                        process.wait(timeout=1) # Brief wait for graceful exit
-                    except subprocess.TimeoutExpired:
-                        process.kill() # Force kill
-                    except Exception:
-                        pass # Ignore cleanup errors
-                    if return_code is None: return_code = -3 # Indicate killed process
+            # Ensure process is cleaned up if it's still running (e.g., due to early exit)
+             if process and process.poll() is None:
+                try:
+                    process.terminate()
+                    process.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                except Exception:
+                    pass # Ignore cleanup errors
+                if return_code == -1: # If not already set by error
+                    return_code = -3 # Indicate killed process
 
         return return_code
 
-    def _execute_function(self,
-                          func: Callable[..., Any],
-                          args: Tuple[Any, ...] = (),
-                          kwargs: Optional[Dict[str, Any]] = None) -> Any:
-        """
-        Executes a Python function immediately, captures its stdout/stderr and return value.
 
-        Args:
-            func: The Python function to execute.
-            args: Positional arguments for the function.
-            kwargs: Keyword arguments for the function.
-
-        Returns:
-            The return value of the function, or None if an exception occurred.
-        """
-        if kwargs is None:
-            kwargs = {}
-
+    def _run_function_in_worker(self, func: Callable[..., Any], args: Tuple[Any, ...], kwargs: Dict[str, Any]) -> Any:
+        """Executed by the worker thread to run a Python function."""
         func_name = getattr(func, '__name__', repr(func))
         self.update_console(f"\n▶ {self.lang.executing_function} {func_name}\n")
 
-        # Redirect stdout/stderr to capture function's print statements
         f_stdout = io.StringIO()
         f_stderr = io.StringIO()
         return_value = None
         success = False
 
         try:
-            # Use context managers to ensure redirection is properly handled
             with redirect_stdout(f_stdout), redirect_stderr(f_stderr):
-                # Execute the function
                 return_value = func(*args, **kwargs)
-            success = True
+            success = True # If no exception occurred during func call
 
         except Exception as e:
-            # Capture exception details
-            import traceback
-            self.update_console(f"✘ {self.lang.error_during_function_execution} {e}\n")
-            # Also print traceback to the console widget
-            self.update_console("-" * 10 + " Traceback " + "-" * 10 + "\n")
-            self.update_console(traceback.format_exc())
+            # Exception already captured by the main worker loop's try/except
+            # We just need to format the output here
+            self.update_console(f"✘ {self.lang.error_during_function_execution} {func_name}: {e}\n")
+            # Traceback is handled by the outer exception handler in _worker_loop
 
         finally:
             # Get captured output
@@ -1474,29 +1481,122 @@ class App(CTk):
             f_stdout.close()
             f_stderr.close()
 
-            # Display captured output
+            # Display captured output via the main thread
             if stdout_val:
                 self.update_console(stdout_val)
             if stderr_val:
-                self.update_console(stderr_val)
+                # Indicate it's stderr from the function itself
+                self.update_console(f"{self.lang.stderr_from_func} {func_name}:\n{stderr_val}")
 
+            # Final status update based on whether the function call itself succeeded
             if success:
-                self.update_console(f"✔ {self.lang.function} '{func_name}' {self.lang.succeed}.\n")
+                self.update_console(f"✔ {self.lang.function} '{func_name}' {self.lang.finished_successfully}\n")
                 # Display return value safely
                 try:
-                    # Limit length of displayed return value if it's very long
                     return_repr = repr(return_value)
-                    if len(return_repr) > 200:
-                        return_repr = return_repr[:200] + "..."
+                    limit = 250
+                    if len(return_repr) > limit:
+                        return_repr = return_repr[:limit] + "..."
                     self.update_console(f"  {self.lang.return_value} {return_repr}\n")
                 except Exception as repr_e:
-                     self.update_console(f"  {self.lang.couldnt_return_value} {repr_e})\n")
+                     self.update_console(f"  ({self.lang.couldnt_display_return_value}: {repr_e})\n")
             else:
-                self.update_console(f"✘ {self.lang.function} '{func_name}' {self.lang.failed}\n")
+                 # Error message already printed in except block or outer handler
+                 self.update_console(f"✘ {self.lang.function} '{func_name}' {self.lang.failed_or_exception}\n")
 
-        # Process GUI events after function execution
-        self.update()
+        # Return the value (or None if exception) to _worker_loop
         return return_value if success else None
+
+    def _execute(self,
+                 command: List[str],
+                 input_str: Optional[str] = None) -> Optional[int]:
+        """
+        Schedules a shell command for execution in the background worker thread.
+        Blocks *logically* until the command completes, while keeping the GUI responsive.
+        Outputs stdout/stderr to the console in real-time via the worker.
+
+        Args:
+            command: A list of strings representing the command and its arguments.
+            input_str: Optional string to be passed to the command's stdin.
+
+        Returns:
+            The exit code of the command (int) or None if task setup failed.
+            Returns specific negative codes on internal errors.
+        """
+        if not command:
+            self.update_console(f"{self.lang.empty_cli}\n")
+            return None # Or a specific error code like -10
+
+        completion_event = threading.Event()
+        task_data = (command, input_str)
+        task = ('execute', task_data, completion_event)
+
+        # Reset result/exception holders before submitting
+        self._current_task_result = None
+        self._current_task_exception = None
+
+        self.task_queue.put(task)
+
+        # Wait for the worker to signal completion, while processing GUI events
+        while not completion_event.is_set():
+            # self.update() processes pending Tkinter events, keeping UI alive
+            # Add a small sleep to prevent pegging CPU in this loop
+            self.update()
+
+        # Task is done, retrieve the result stored by the worker
+        # Check if an exception occurred in the worker *during* execution
+        if self._current_task_exception:
+             # Error messages should have been printed by worker
+             # Return the failure code set by the worker's exception handler
+             return self._current_task_result if isinstance(self._current_task_result, int) else -2
+
+        # Return the actual result (exit code)
+        return self._current_task_result
+
+
+    def _execute_function(self,
+                          func: Callable[..., Any],
+                          args: Tuple[Any, ...] = (),
+                          kwargs: Optional[Dict[str, Any]] = None) -> Any:
+        """
+        Schedules a Python function for execution in the background worker thread.
+        Captures its stdout/stderr and return value.
+        Blocks *logically* until the function completes, while keeping the GUI responsive.
+
+        Args:
+            func: The Python function to execute.
+            args: Positional arguments for the function.
+            kwargs: Keyword arguments for the function.
+
+        Returns:
+            The return value of the function, or None if an exception occurred
+            during its execution in the worker thread.
+        """
+        if kwargs is None:
+            kwargs = {}
+
+        completion_event = threading.Event()
+        task_data = (func, args, kwargs)
+        task = ('execute_function', task_data, completion_event)
+
+        # Reset result/exception holders
+        self._current_task_result = None
+        self._current_task_exception = None
+
+        self.task_queue.put(task)
+
+        # Wait for the worker to signal completion, keeping GUI responsive
+        while not completion_event.is_set():
+            self.update()
+
+        # Task is done, retrieve result
+        # If an exception was caught by the worker's main try/except for this task
+        if self._current_task_exception:
+             # Error messages printed by worker. Function effectively failed.
+             return None # Indicate failure by returning None
+
+        # Return the actual result stored by the worker
+        return self._current_task_result
 
 
     def on_closing(self):
@@ -1506,6 +1606,12 @@ class App(CTk):
     def begin_installation(self):
         self.commands = []
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.task_queue = queue.Queue()
+        self._current_task_result = None # To pass results back from worker
+        self._current_task_exception = None # To pass exceptions back
+        self.worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
+        self.worker_thread.start()
+
         
         # if not DEBUG_SHOW_COMMANDS:
         #     # Prepare partitions
@@ -2080,18 +2186,18 @@ class App(CTk):
         self._execute(["__INTERNAL_INSTALLATION_SUCCESS"])
 
 
-        # Execute commands
-        if not DEBUG_SHOW_COMMANDS:
-            self._execute_commands(self.commands)
-        else:
-            for i in self.commands:
-                if 'input' in i:
-                    print('#')
-                    print(i['command'], "# ВНИМАНИЕ. ТРЕБУЕТ ВВОДА ДАННЫХ ПОЛЬЗОВАТЕЛЕМ")
-                    print('#')
-                else:
-                    print(i['command'])
-                print()
+        # # Execute commands
+        # if not DEBUG_SHOW_COMMANDS:
+        #     self._execute_commands(self.commands)
+        # else:
+        #     for i in self.commands:
+        #         if 'input' in i:
+        #             print('#')
+        #             print(i['command'], "# ВНИМАНИЕ. ТРЕБУЕТ ВВОДА ДАННЫХ ПОЛЬЗОВАТЕЛЕМ")
+        #             print('#')
+        #         else:
+        #             print(i['command'])
+        #         print()
 
 
 if __name__ == "__main__":
