@@ -1412,7 +1412,7 @@ class App(CTk):
                 stdout_thread.start()
 
             if process.stderr:
-                stderr_thread = threading.Thread(target=read_stream, args=(process.stderr, stderr_lines, f"{self.lang.stderr} "))
+                stderr_thread = threading.Thread(target=read_stream, args=(process.stderr, stderr_lines))
                 stderr_thread.start()
 
             # Wait for reader threads to finish
@@ -1426,15 +1426,18 @@ class App(CTk):
 
             # Final status update
             if return_code == 0:
-                self.update_console(f"✔ {self.lang.command_success} (Code: {return_code})\n")
+                self.update_console(f"✔ {self.lang.command_success} {return_code})\n")
             else:
-                self.update_console(f"✘ {self.lang.command_failed} (Code: {return_code})\n")
+                self.__installation_failed()
+                self.update_console(f"✘ {self.lang.command_failed} {return_code})\n")
 
         except FileNotFoundError:
+            self.__installation_failed()
             self.update_console(f"✘ {self.lang.command_not_found} '{command[0]}'\n")
             return_code = -1 # Specific error code
         except Exception as e:
             # Catch other Popen errors or issues before stream reading
+            self.__installation_failed()
             self.update_console(f"✘ {self.lang.unexpected_error} executing command: {e}\n")
             return_code = -2 # General error code
         finally:
@@ -1471,6 +1474,7 @@ class App(CTk):
         except Exception as e:
             # Exception already captured by the main worker loop's try/except
             # We just need to format the output here
+            self.__installation_failed()
             self.update_console(f"✘ {self.lang.error_during_function_execution} {func_name}: {e}\n")
             # Traceback is handled by the outer exception handler in _worker_loop
 
@@ -1486,7 +1490,7 @@ class App(CTk):
                 self.update_console(stdout_val)
             if stderr_val:
                 # Indicate it's stderr from the function itself
-                self.update_console(f"{self.lang.stderr_from_func} {func_name}:\n{stderr_val}")
+                self.update_console(f"{func_name}:\n{stderr_val}")
 
             # Final status update based on whether the function call itself succeeded
             if success:
@@ -1502,6 +1506,7 @@ class App(CTk):
                      self.update_console(f"  ({self.lang.couldnt_display_return_value}: {repr_e})\n")
             else:
                  # Error message already printed in except block or outer handler
+                 self.__installation_failed()
                  self.update_console(f"✘ {self.lang.function} '{func_name}' {self.lang.failed_or_exception}\n")
 
         # Return the value (or None if exception) to _worker_loop
@@ -1822,7 +1827,7 @@ class App(CTk):
         self._execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/cmdline.d'])
         process = subprocess.run(["blkid", '-s', 'UUID', '-o', 'value', rootfs_partition], check=True, capture_output=True)
         uuid = process.stdout.strip().decode()
-        cmdline_content = f"rd.luks.name={uuid}=cryptlvm root={root_lv_path} rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality audit=1 lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
+        cmdline_content = f"rd.luks.name={uuid}=cryptlvm root={root_lv_path} rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
         self._execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{cmdline_content}" > /etc/cmdline.d/root.conf'])
         # self._execute(f"echo \"rd.luks.name=$(blkid -s UUID -o value {rootfs_partition})=cryptlvm root=/dev/volumegroup/root rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash\" > /mnt/etc/cmdline.d/root.conf")
 
@@ -2096,7 +2101,7 @@ class App(CTk):
              else:
                  # Копируем wheel файлы и устанавливаем локально
                  self._execute(['mkdir', '-p', f'{mount_point}/root/pip_cache'])
-                 self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/'])
+                 self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/', '-r'])
                  self._execute(['arch-chroot', mount_point, 'pip', 'install', 'customtkinter', '--no-index', f'--find-links=file:///root/pip_cache', '--break-system-packages'])
                  self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
 
@@ -2118,7 +2123,7 @@ class App(CTk):
                 self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--break-system-packages'])
             else:
                 self._execute(['mkdir', '-p', f'{mount_point}/root/pip_cache'])
-                self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/'])
+                self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/', '-r'])
                 self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--no-index', f'--find-links=file:///root/pip_cache', '--break-system-packages'])
                 self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
 
@@ -2182,11 +2187,6 @@ class App(CTk):
         self._execute(['arch-chroot', mount_point, 'flatpak', 'remote-modify', '--collection-id=org.flathub.Stable', 'flathub'])
 
 
-        # Final message in console
-        self._execute(['echo', "[Installation finished!]"])
-        self._execute(["echo", "[Now you can close this window and reboot into the system.]"])
-        self._execute(["echo", "[Установка завершена!]"])
-        self._execute(["echo", "[Теперь вы можете закрыть это окно и перезагрузиться в систему.]"])
         # self._execute("__INTERNAL_INSTALLATION_SUCCESS")
         self._execute(["__INTERNAL_INSTALLATION_SUCCESS"])
 
