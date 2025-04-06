@@ -1266,7 +1266,7 @@ class App(CTk):
         for widget in self.winfo_children():
             widget.destroy()
 
-        if self.setup_information["InstallationType"] == "LessSecure" and self.setup_information.get("MOK", False):
+        if self.setup_information["InstallationType"] == "LessSecure" and self.setup_information.get("MOK", True):
             self.mok_stage()
             return
         
