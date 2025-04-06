@@ -1253,9 +1253,10 @@ class App(CTk):
         next_btn = CTkButton(self, text="Продолжить установку", command=self.__mok_handler)
 
         title.pack(padx=15, pady=5)
-        self.mok_entry_1.pack(padx=15, pady=5)
-        self.mok_entry_2.pack(padx=15, pady=5)
-        next_btn.pack(padx=15, pady=5)
+        self.mok_entry_1.pack(padx=15, pady=5, fill='x')
+        self.mok_entry_2.pack(padx=15, pady=5, fill='x')
+        next_btn.pack(padx=15, pady=5, fill='x')
+        self.__resize()
 
 
     def __begin_installation_ui(self):
