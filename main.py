@@ -1259,18 +1259,18 @@ class App(CTk):
         self.__resize()
 
 
-    def __begin_installation_ui(self):
+    def __begin_installation_ui(self):        
         if DEBUG:
             Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
             return
-        
+
         for widget in self.winfo_children():
             widget.destroy()
 
-        if self.setup_information["InstallationType"] == "LessSecure" and self.setup_information.get("MOK", True):
+        if self.setup_information["InstallationType"] == "LessSecure" and not self.setup_information.get("MOK", False):
             self.mok_stage()
             return
-        
+
         self.geometry("600x400")
 
         img = Image.open(f"{WORKDIR}/images/calm.png")
