@@ -81,7 +81,7 @@ class Locale:
             self.package_source_status = "Current image"
             self.apps_label = "Software installation"
             self.secure_label = "Trust own Secure Boot keys. Custom Mode must be enabled"
-            self.less_secure_label = "Trust Microsoft keys. Use SHIM and own MOK (one time password - 123)"
+            self.less_secure_label = "Trust Microsoft keys. Use SHIM and own MOK"
             self.hardened_security = "hardened security"
             self.error = "Error"
             self.swapsize_error = "Invalid swap file size"
@@ -113,6 +113,13 @@ class Locale:
             self.function = "Function"
             self.failed = "failed."
             self.succeed = "finished successfully."
+            self.autopart = "Automatic disk partitioning"
+            self.sgdisk_error = "Failed to clear partition table"
+            self.sgdisk_part_error = "Failed to create partitions"
+            self.failed_to_find = "Could not find created partitions on"
+            self.failed_to_detect_parts = "Failed to detect partitions!"
+            self.pwd_length = "Error. Password is shorter than 3 characters."
+
 
         elif language == "ru":
             self.select_time_zone = "Выберите часовой пояс"
@@ -194,7 +201,7 @@ class Locale:
             self.package_source_status = "Текущий образ"
             self.apps_label = "Установка ПО"
             self.secure_label = "Доверие собственным ключам Secure Boot. Необходимо включить Custom Mode"
-            self.less_secure_label = "Доверие к ключам Microsoft. Использование SHIM и собственного MOK (одноразовый пароль - 123)"
+            self.less_secure_label = "Доверие к ключам Microsoft. Использование SHIM и собственного MOK"
             self.hardened_security = "усиленная безопасность"
             self.error = 'Ошибка'
             self.swapsize_error = "Неверно введен размер файла подкачки"
@@ -226,3 +233,10 @@ class Locale:
             self.function = "Функция"
             self.failed = "завершила свою работу с ошибкой."
             self.succeed = "завершила свою работу успешно."
+            self.autopart = "Автоматическая разметка диска"
+            self.sgdisk_error = "Не удалось очистить таблицу разделов"
+            self.sgdisk_part_error = "Не удалось создать разделы"
+            self.failed_to_find = "Не удалось найти созданные разделы на"
+            self.failed_to_detect_parts = "Не удалось определить разделы!"
+            self.pwd_length_mok = "Ошибка. Пароль короче 3 символов."
+

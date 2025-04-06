@@ -20,14 +20,12 @@ import queue
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
-VERSION = "0.3"
+VERSION = "0.3.1"
 DEBUG = False
 DEBUG_AUTOENTRY = False # Default: False
 DEBUG_AUTOENTRY_VALUES = ['asd', 'asdasdasd']
 
 MIN_PASSWORD_LENGTH = 8
-
-DISTRO_NAME="Secux Linux"
 
 REPO_URL = "https://kolbanidze.github.io/secux-repo/x86_64/"
 
@@ -62,7 +60,7 @@ class Notification(CTkToplevel):
 class App(CTk):
     def __init__(self):
         super().__init__()
-        self.title(DISTRO_NAME)
+        self.title("Secux Linux")
         self.language = "ru"
         self.setup_information = {}
         self.ui_scale = 1
@@ -79,7 +77,7 @@ class App(CTk):
         welcome_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), dark_image=Image.open(f'{WORKDIR}/images/waving_hand.png'), size=(80,80))
         welcome_image_label = CTkLabel(self.welcome_menu, text="", image=welcome_image)
         welcome_image_label.bind("<Button-1>", self.__clicks_handler)
-        welcome_entry_label = CTkLabel(self.welcome_menu, text=f"Добро пожаловать в установщик дистрибутива {DISTRO_NAME}\nWelcome to {DISTRO_NAME} distribution installer")        
+        welcome_entry_label = CTkLabel(self.welcome_menu, text=f"Добро пожаловать в установщик дистрибутива Secux Linux\nWelcome to Secux Linux distribution installer")        
         select_language_label = CTkLabel(self.welcome_menu, text="Выберите язык | Select language")
         languages_optionmenu = CTkOptionMenu(self.welcome_menu, values=["Русский", "English"], command=self.__language_callback)
         next_button = CTkButton(self.welcome_menu, text="Далее | Next", command=self.__draw_timezone_stage, fg_color="green")
@@ -138,7 +136,7 @@ class App(CTk):
             widget.destroy()
         update_image = CTkImage(light_image=Image.open(f'{WORKDIR}/images/update.png'), dark_image=Image.open(f'{WORKDIR}/images/update.png'), size=(80, 80))
         update_image_label = CTkLabel(self, text="", image=update_image)
-        updater_welcome = CTkLabel(self, text=f"{DISTRO_NAME} installer updater | Обновления установщика {DISTRO_NAME}")
+        updater_welcome = CTkLabel(self, text=f"Secux Linux installer updater | Обновления установщика Secux Linux")
         run_update = CTkButton(self, text="Update | Обновить", command=self.__update_repo)
         self.updater_textbox = CTkTextbox(self, state="disabled")
         after_update = CTkLabel(self, text="Для применения обновлений необходимо перезапустить программу.\nTo apply updates, you must restart the program.")
@@ -1146,6 +1144,7 @@ class App(CTk):
     ##### END FINAL STAGE #####
 
     ##### BEGIN INSTALLTION #####
+
     def __list_partitions(self, drive):
         result = subprocess.run(['lsblk', '-ln', '-o', 'NAME,TYPE'], stdout=subprocess.PIPE, text=True)
         partitions = []
@@ -1233,18 +1232,48 @@ class App(CTk):
             return False
         return True
 
+    def __mok_handler(self):
+        if self.mok_entry_1.get() != self.mok_entry_2.get():
+            Notification(title=self.lang.passwordmismatch, icon="warning.png", message=self.lang.passwordmsg, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        if len(self.mok_entry_1.get()) < 3:
+            Notification(title=self.lang.pwd_length_title, icon="warning.png", message=self.lang.pwd_length_mok, message_bold=True, exit_btn_msg=self.lang.exit)
+            return
+        if not self.__validate_english_keymap(self.mok_entry_1.get()):
+            Notification(title=self.lang.encryption_password_title, icon="warning.png", message=self.lang.encryption_password, message_bold=False, exit_btn_msg=self.lang.exit)
+            return
+        
+        self.setup_information["MOK"] = self.mok_entry_1.get()
+        self.__begin_installation_ui()
+
+    def mok_stage(self):
+        title = CTkLabel(self, text="Выберите одноразовый пароль MOK", font=(None, 16, "bold"))
+        self.mok_entry_1 = CTkEntry(self, show='*')
+        self.mok_entry_2 = CTkEntry(self, show='*')
+        next_btn = CTkButton(self, text="Продолжить установку", command=self.__mok_handler)
+
+        title.pack(padx=15, pady=5)
+        self.mok_entry_1.pack(padx=15, pady=5)
+        self.mok_entry_2.pack(padx=15, pady=5)
+        next_btn.pack(padx=15, pady=5)
+
 
     def __begin_installation_ui(self):
         if DEBUG:
             Notification(title=self.lang.debug_title, icon="redcross.png", message=self.lang.debug_mode, message_bold=True, exit_btn_msg=self.lang.exit)
             return
-
+        
         for widget in self.winfo_children():
             widget.destroy()
+
+        if self.setup_information["InstallationType"] == "LessSecure" and self.setup_information.get("MOK", False):
+            self.mok_stage()
+            return
         
         self.geometry("600x400")
 
-        calm_emoji = CTkImage(light_image=Image.open(f"{WORKDIR}/images/calm.png"), dark_image=Image.open(f"{WORKDIR}/images/calm.png"), size=(80, 80))
+        img = Image.open(f"{WORKDIR}/images/calm.png")
+        calm_emoji = CTkImage(light_image=img, dark_image=img, size=(80, 80))
         calm_emoji_label = CTkLabel(self, text="", image=calm_emoji)
         calm_emoji_label.pack(padx=10, pady=10)
         label = CTkLabel(self, text=self.lang.installing)
@@ -1617,8 +1646,8 @@ class App(CTk):
         self.commands = []
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.task_queue = queue.Queue()
-        self._current_task_result = None # To pass results back from worker
-        self._current_task_exception = None # To pass exceptions back
+        self._current_task_result = None
+        self._current_task_exception = None
         self.worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
         self.worker_thread.start()
 
@@ -1626,33 +1655,33 @@ class App(CTk):
         rootfs_partition = ""
         if self.setup_information["Partitioning"] == "Automatic":
             drive = self.setup_information["DriveToFormat"]
-            self.update_console(f"INFO: Автоматическая разметка диска {drive}\n")
+            self.update_console(f"INFO: {self.lang.autopart} {drive}\n")
             if self._execute(['sgdisk', '-Z', drive]) != 0:
-                self.update_console("ERROR: Не удалось очистить таблицу разделов!\n")
+                self.update_console(f"ERROR: {self.lang.sgdisk_error}!\n")
                 return
 
             if self._execute(['sgdisk', f'-n1:0:+1G', '-t1:ef00', '-c1:EFI', '-N2', '-t2:8304', drive]) != 0:
-                self.update_console("ERROR: Не удалось создать разделы!\n")
+                self.update_console(f"ERROR: {self.lang.sgdisk_part_error}!\n")
                 return
 
             partitions = self.__list_partitions(drive)
             if len(partitions) < 2:
-                self.update_console(f"ERROR: Не удалось найти созданные разделы на {drive}!\n")
+                self.update_console(f"ERROR: {self.lang.failed_to_find} {drive}!\n")
                 return
             
             efi_partition = partitions[0]
             rootfs_partition = partitions[1]
-            self.update_console(f"INFO: EFI раздел: {efi_partition}, Корневой раздел: {rootfs_partition}\n")
+            self.update_console(f"INFO: EFI: {efi_partition}, OS: {rootfs_partition}\n")
         else: # Manual Partitioning
             efi_partition = self.setup_information["EfiPartition"]
             rootfs_partition = self.setup_information["SystemPartition"]
-            self.update_console(f"INFO: Ручная разметка. EFI: {efi_partition}, System: {rootfs_partition}\n")
+            self.update_console(f"INFO: {self.lang.selfpart}. EFI: {efi_partition}, OS: {rootfs_partition}\n")
 
             efi_base_drive, efi_number = self.__split_device(efi_partition)
             self._execute(['sgdisk', f'--typecode={efi_number}:ef00', efi_base_drive])
 
         if not efi_partition or not rootfs_partition:
-             self.update_console("ERROR: Переменные efi_partition или rootfs_partition не установлены!\n")
+             self.update_console(f"ERROR: {self.lang.failed_to_detect_parts}\n")
              return
 
 
@@ -1664,7 +1693,6 @@ class App(CTk):
         self._execute(['pvcreate', '/dev/mapper/cryptlvm'])
         self._execute(['vgcreate', 'volumegroup', '/dev/mapper/cryptlvm'])
         
-        # Creating swap partition if needed
         self._execute(['lvcreate', '-l', '100%FREE', 'volumegroup', '-n', 'root']) 
         
         # Formatting root partition
@@ -1891,7 +1919,7 @@ class App(CTk):
                 self._execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', f'/efi/EFI/secux/secux-{kernel}.efi', f'/efi/EFI/secux/secux-{kernel}.efi'])
                 self._execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', f'/efi/EFI/secux/secux-{kernel}-fallback.efi', f'/efi/EFI/secux/secux-{kernel}-fallback.efi'])
 
-            mok_input = f"{MOK_PASSWORD}\n{MOK_PASSWORD}\n"
+            mok_input = f"{self.setup_information['MOK']}\n{self.setup_information['MOK']}\n"
             self._execute(['arch-chroot', mount_point, 'mokutil', '--import', '/etc/secureboot/sb.cer'], input_str=mok_input)
 
             self._execute(['cp', f'{installer_path}/scripts/92-shim-signed.hook', f'{mount_point}/usr/share/libalpm/hooks/'])
@@ -1920,9 +1948,8 @@ class App(CTk):
              if self.online_installation:
                  self._execute(['git', 'clone', 'https://github.com/kolbanidze/secux-apps', app_dir, '--depth=1'])
              else:
-                 self._execute(['cp', '-r', '/usr/local/share/secux-apps', apps_path]) # Путь к исходникам
+                 self._execute(['cp', '-r', '/usr/local/share/secux-apps', apps_path])
              self._execute(['cp', f'{installer_path}/scripts/org.freedesktop.policykit.securitymanager.policy', polkit_path])
-             self._execute(['touch', f'{app_dir}/production.conf']) # Файл-маркер
              self._execute(['cp', f'{installer_path}/scripts/securitymanager.desktop', desktop_path])
              self._execute(['chmod', '+x', f'{desktop_path}/securitymanager.desktop'])
              self._execute(['chmod', '+x', f'{app_dir}/manager.py'])
