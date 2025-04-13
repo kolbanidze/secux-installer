@@ -1,7 +1,7 @@
 # 🛡️ Установщик Secux Linux
 
 [![Лицензия: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Русский](https://img.shields.io/badge/README-на_русском-red.svg)](README.ru.md)
+[![English](https://img.shields.io/badge/README-in_English-blue.svg)](README.md)
 
 Добро пожаловать в установщик **Secux Linux**, дистрибутива, ориентированного на безопасность и основанного на надежном и гибком Arch Linux! 🐧🔒
 
