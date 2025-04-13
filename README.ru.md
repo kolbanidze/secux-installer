@@ -1,4 +1,4 @@
-# 🛡️ Установщик Secux Linux
+# 🛡️ Secux Linux Installer
 
 [![Лицензия: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![English](https://img.shields.io/badge/README-in_English-blue.svg)](README.md)
