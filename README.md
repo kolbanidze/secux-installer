@@ -93,3 +93,13 @@ For TPM-based disk unlocking (highly recommended), you need to install and confi
 ---
 
 #### ℹ️ Includes integration for [KIRTapp](https://github.com/KIRT-king/test_app) (developed by my [partner](https://github.com/KIRT-king)), although it's not installed by default in the Secux Linux for various reasons.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! If you find bugs or have suggestions, please open an issue on the GitHub repository. Pull requests are also appreciated.
+
+## 📜 License
+
+This project is licensed under the **MIT License**. See the LICENSE file for details.
