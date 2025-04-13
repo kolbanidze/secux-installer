@@ -940,7 +940,6 @@ class App(CTk):
         self.securitymanager = CTkCheckBox(secux_tab, text="Security Manager")
         self.KIRTapp = CTkCheckBox(secux_tab, text=f"KIRTapp")
         self.securitymanager.select()
-        self.KIRTapp.select()
 
         self.chromium = CTkCheckBox(pacman_tab, text="Chromium")
         self.firefox = CTkCheckBox(pacman_tab, text="Firefox")
@@ -1639,13 +1638,7 @@ class App(CTk):
         return self._current_task_result
 
 
-    def on_closing(self):
-        """Handles window closing."""
-        self.destroy()
-
     def begin_installation(self):
-        self.commands = []
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.task_queue = queue.Queue()
         self._current_task_result = None
         self._current_task_exception = None
@@ -1995,3 +1988,4 @@ class App(CTk):
 
 if __name__ == "__main__":
     App().mainloop()
+
