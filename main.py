@@ -1979,7 +1979,7 @@ class App(CTk):
         # Hardening
         self._execute(['cp', f'{installer_path}/scripts/hardening.conf', f'{mount_point}/etc/sysctl.d/'])
         self._execute(['arch-chroot', mount_point, 'ufw', 'default', 'deny'])
-        self._execute(['arch-chroot', mount_point, 'ufw', 'enable'])
+        # self._execute(['arch-chroot', mount_point, 'ufw', 'enable'])
         self._execute(['cp', f'{installer_path}/scripts/secux.rules', f'{mount_point}/etc/audit/rules.d/secux.rules'])
 
         # Flatpak offline installation support
