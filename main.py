@@ -20,7 +20,7 @@ import queue
 
 timezones = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
-VERSION = "0.3.3"
+VERSION = "0.4"
 DEBUG = False
 DEBUG_AUTOENTRY = False # Default: False
 DEBUG_AUTOENTRY_VALUES = ['asd', 'asdasdasd']
@@ -28,8 +28,6 @@ DEBUG_AUTOENTRY_VALUES = ['asd', 'asdasdasd']
 MIN_PASSWORD_LENGTH = 8
 
 REPO_URL = "https://kolbanidze.github.io/secux-repo/x86_64/"
-
-MOK_PASSWORD = "123"
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -939,7 +937,6 @@ class App(CTk):
         pacman_tab = tabview.tab("Pacman")
 
         self.securitymanager = CTkCheckBox(secux_tab, text="Security Manager")
-        self.KIRTapp = CTkCheckBox(secux_tab, text=f"KIRTapp")
         self.securitymanager.select()
 
         self.chromium = CTkCheckBox(pacman_tab, text="Chromium")
@@ -956,7 +953,6 @@ class App(CTk):
         label.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky='nsew')
         tabview.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
         self.securitymanager.pack(padx=10, pady=5, anchor='center')
-        self.KIRTapp.pack(padx=10, pady=5, anchor='center')
 
         self.chromium.pack(padx=10, pady=5, anchor='center')
         self.firefox.pack(padx=10, pady=5, anchor='center')
@@ -976,8 +972,6 @@ class App(CTk):
         # Secux tab
         if self.securitymanager.get():
             self.setup_information["Apps"].append("Security Manager")
-        if self.KIRTapp.get():
-            self.setup_information["Apps"].append("KIRTapp")
         
         # Pacman tab
         if self.chromium.get(): 
@@ -1736,8 +1730,6 @@ class App(CTk):
         
         if 'Security Manager' in self.setup_information["Apps"]:
             pacstrap_packages.extend(['tk', 'python-pexpect', 'python-pillow', 'python-darkdetect', 'python-packaging', 'libpam-google-authenticator', 'python-qrcode'])
-        if 'KIRTapp' in self.setup_information["Apps"]:
-            pacstrap_packages.extend(["tk", "v4l-utils", "python-pillow", "python-opencv", "python-numpy", "python-setuptools", "python-dotenv", "python-darkdetect", "python-packaging", "python-dlib", "python-sqlalchemy", "python-psycopg2"])
         
         if 'vlc' in self.setup_information["Apps"]:
             pacstrap_packages.append('vlc')
@@ -1844,10 +1836,13 @@ class App(CTk):
         # Prepare EFI Partition
         self._execute(['mkdir', '-p', f'{mount_point}/efi/EFI/secux'])
 
+        # Delete previous UKI if exists
+        self._execute(['bash', '-c', f'rm -rf {mount_point}/efi/EFI/secux/*'])
+
         # Change distro info and logo
-        installer_path = "/usr/local/share/secux-installer" # Пример пути к файлам инсталлятора
+        installer_path = "/usr/local/share/secux-installer"
         self._execute(['cp', f'{installer_path}/scripts/os-release', f'{mount_point}/etc/os-release'])
-        self._execute(['cp', f'{installer_path}/images/SecuxLinux.svg', f'{mount_point}/usr/share/icons/']) # Пример лого
+        self._execute(['cp', f'{installer_path}/images/SecuxLinux.svg', f'{mount_point}/usr/share/icons/'])
 
         self._execute(['rm', '-f', f'{mount_point}/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf'])
         self._execute(['rm', '-f', f'{mount_point}/etc/debuginfod/archlinux.urls'])
@@ -1868,7 +1863,14 @@ class App(CTk):
 
         if self.setup_information["DE"] == "GNOME":
             self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'gdm.service'])
-            self._execute(['arch-chroot', mount_point, 'sudo', '-u', 'gdm', 'dbus-launch', 'gsettings', 'set', 'org.gnome.login-screen', 'logo', '""'])
+            self._execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/profile'])
+            dconf = "user-db:user\nsystem-db:gdm\nfile-db:/usr/share/gdm/greeter-dconf-defaults"
+            logo = "[org/gnome/login-screen]\nlogo=''"
+            self._execute(['bash', '-c', f'echo -e "{dconf}" > {mount_point}/etc/dconf/profile/gdm'])
+            self._execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/db/gdm.d'])
+            self._execute(['bash', '-c', f'echo -e "{logo}" > {mount_point}/etc/dconf/db/gdm.d/01-logo'])
+            self._execute(['arch-chroot', mount_point, 'dconf', 'update'])
+
         elif self.setup_information["DE"] == "KDE":
             self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'sddm.service'])
             self._execute(['sed', '-i', '/^\\[Theme\\]/a Current=breeze', f'{mount_point}/usr/lib/sddm/sddm.conf.d/default.conf']) 
@@ -1887,6 +1889,9 @@ class App(CTk):
         loader_conf_content = f"timeout 3\ndefault {default_kernel_conf}\nconsole-mode keep\nreboot-for-bitlocker yes"
         self._execute(['bash', '-c', f'echo -e "{loader_conf_content}" > {mount_point}/efi/loader/loader.conf'])
         
+        # Deleting previous entries
+        self._execute(['bash', '-c', f'rm -rf {mount_point}/efi/loader/entries/secux-*'])
+
         for kernel in kernels_no_headers:
             entry_content = f"title Secux Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi\n"
             entry_fallback_content = f"title Secux Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi\n"
@@ -1955,26 +1960,6 @@ class App(CTk):
                  self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/', '-r'])
                  self._execute(['arch-chroot', mount_point, 'pip', 'install', 'customtkinter', '--no-index', f'--find-links=file:///root/pip_cache/python_packages', '--break-system-packages'])
                  self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
-
-        if 'KIRTapp' in self.setup_information["Apps"]:
-            app_dir = f"{apps_path}/KIRTapp"
-            self._execute(['mkdir', '-p', app_dir])
-            if self.online_installation:
-                 self._execute(['git', 'clone', 'https://github.com/kirt-king/test_app', app_dir, '--depth=1'])
-            else:
-                 self._execute(['cp', '-r', '/usr/local/share/KIRTapp', apps_path])
-            self._execute(['cp', f'{installer_path}/scripts/org.freedesktop.policykit.KIRTapp.policy', polkit_path])
-            self._execute(['cp', f'{installer_path}/scripts/KIRTapp.desktop', desktop_path])
-            self._execute(['chmod', '+x', f'{desktop_path}/KIRTapp.desktop'])
-            self._execute(['chmod', '+x', f'{app_dir}/app_script/app.py'])
-            pip_packages_kirt = ['customtkinter', 'face_recognition', 'face_recognition_models']
-            if self.online_installation:
-                self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--break-system-packages'])
-            else:
-                self._execute(['mkdir', '-p', f'{mount_point}/root/pip_cache'])
-                self._execute(['cp', f'{WORKDIR}/python_packages/', f'{mount_point}/root/pip_cache/', '-r'])
-                self._execute(['arch-chroot', mount_point, 'pip', 'install'] + pip_packages_kirt + ['--no-index', f'--find-links=file:///root/pip_cache/python_packages', '--break-system-packages'])
-                self._execute(['rm', '-rf', f'{mount_point}/root/pip_cache'])
 
         # Hardening
         self._execute(['cp', f'{installer_path}/scripts/hardening.conf', f'{mount_point}/etc/sysctl.d/'])
