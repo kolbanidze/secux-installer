@@ -119,7 +119,8 @@ class Locale:
             self.failed_to_find = "Could not find created partitions on"
             self.failed_to_detect_parts = "Failed to detect partitions!"
             self.pwd_length = "Error. Password is shorter than 3 characters."
-
+            self.mok_key = "Enter one-time MOK password"
+            self.continue_installation = "Continue installation"
 
         elif language == "ru":
             self.select_time_zone = "Выберите часовой пояс"
@@ -239,4 +240,6 @@ class Locale:
             self.failed_to_find = "Не удалось найти созданные разделы на"
             self.failed_to_detect_parts = "Не удалось определить разделы!"
             self.pwd_length_mok = "Ошибка. Пароль короче 3 символов."
+            self.mok_key = "Введите одноразовый пароль MOK"
+            self.continue_installation = "Продолжить установку"
 
