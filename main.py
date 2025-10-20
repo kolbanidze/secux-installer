@@ -980,7 +980,6 @@ class App(CTk):
             self.setup_information["Apps"].append("firefox")
         if self.vlc.get(): 
             self.setup_information["Apps"].append("vlc")
-            self.setup_information["Apps"].append("vlc-plugin-ffmpeg")
         if self.keepassxc.get(): 
             self.setup_information["Apps"].append("keepassxc")
         if self.libreoffice.get(): 
@@ -1736,6 +1735,7 @@ class App(CTk):
         
         if 'vlc' in self.setup_information["Apps"]:
             pacstrap_packages.append('vlc')
+            pacstrap_packages.append('vlc-plugin-ffmpeg')
         if 'firefox' in self.setup_information["Apps"]:
             pacstrap_packages.append('firefox')
         if 'chromium' in self.setup_information["Apps"]:
