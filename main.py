@@ -1239,6 +1239,7 @@ class App(CTk):
             return
         
         self.setup_information["MOK"] = self.mok_entry_1.get()
+        self.bind(("<Return>"), lambda event: None)
         self.__begin_installation_ui()
 
     def mok_stage(self):
@@ -1246,6 +1247,7 @@ class App(CTk):
         self.mok_entry_1 = CTkEntry(self, show='*')
         self.mok_entry_2 = CTkEntry(self, show='*')
         next_btn = CTkButton(self, text=self.lang.continue_installation, command=self.__mok_handler)
+        self.bind(("<Return>"), lambda event: self.__mok_handler())
 
         title.pack(padx=15, pady=5)
         self.mok_entry_1.pack(padx=15, pady=5, fill='x')
