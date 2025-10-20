@@ -1968,7 +1968,7 @@ class App(CTk):
         # Hardening
         self._execute(['cp', f'{installer_path}/scripts/hardening.conf', f'{mount_point}/etc/sysctl.d/'])
         self._execute(['arch-chroot', mount_point, 'ufw', 'default', 'deny'])
-        self._execute(['sed', '-i', "'s/ENABLED=no/ENABLED=yes/'", f"{mount_point}/etc/ufw/ufw.conf"])
+        self._execute(['sed', '-i', 's/ENABLED=no/ENABLED=yes/', f"{mount_point}/etc/ufw/ufw.conf"])
         # self._execute(['arch-chroot', mount_point, 'ufw', 'enable'])
         self._execute(['cp', f'{installer_path}/scripts/secux.rules', f'{mount_point}/etc/audit/rules.d/secux.rules'])
 
