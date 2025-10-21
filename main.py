@@ -1720,7 +1720,7 @@ class App(CTk):
             self._execute(['pacman-key', '--populate', 'archlinux'])
             self._execute(['pacman-key', '--populate', 'kolbanidze'])
 
-        pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools']
+        pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks']
         pacstrap_packages.extend(self.__get_ucode_package())
         kernels_no_headers = [k for k in self.setup_information["Kernel"] if 'headers' not in k]
         pacstrap_packages.extend(kernels_no_headers)
@@ -1845,6 +1845,8 @@ class App(CTk):
         # Change distro info and logo
         installer_path = "/usr/local/share/secux-installer"
         self._execute(['cp', f'{installer_path}/scripts/os-release', f'{mount_point}/etc/os-release'])
+        self._execute(['cp', f'{installer_path}/scripts/os-release', f'{mount_point}/etc/secux-release'])
+
         self._execute(['cp', f'{installer_path}/images/SecuxLinux.svg', f'{mount_point}/usr/share/icons/'])
 
         self._execute(['rm', '-f', f'{mount_point}/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf'])
