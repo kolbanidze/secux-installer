@@ -1844,8 +1844,6 @@ class App(CTk):
 
         # Change distro info and logo
         installer_path = "/usr/local/share/secux-installer"
-        self._execute(['cp', f'{installer_path}/scripts/os-release', f'{mount_point}/etc/os-release'])
-        self._execute(['cp', f'{installer_path}/scripts/os-release', f'{mount_point}/etc/secux-release'])
 
         self._execute(['cp', f'{installer_path}/images/SecuxLinux.svg', f'{mount_point}/usr/share/icons/'])
 
