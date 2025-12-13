@@ -1720,6 +1720,9 @@ class App(CTk):
             self._execute(['pacman-key', '--populate', 'archlinux'])
             self._execute(['pacman-key', '--populate', 'kolbanidze'])
 
+        # Deleting previous entries
+        self._execute(['bash', '-c', f'rm -rf {mount_point}/efi/loader/entries/secux-*'])
+
         pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks']
         pacstrap_packages.extend(self.__get_ucode_package())
         kernels_no_headers = [k for k in self.setup_information["Kernel"] if 'headers' not in k]
@@ -1867,13 +1870,13 @@ class App(CTk):
 
         if self.setup_information["DE"] == "GNOME":
             self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'gdm.service'])
-            self._execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/profile'])
-            dconf = "user-db:user\nsystem-db:gdm\nfile-db:/usr/share/gdm/greeter-dconf-defaults"
-            logo = "[org/gnome/login-screen]\nlogo=''"
-            self._execute(['bash', '-c', f'echo -e "{dconf}" > {mount_point}/etc/dconf/profile/gdm'])
-            self._execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/db/gdm.d'])
-            self._execute(['bash', '-c', f'echo -e "{logo}" > {mount_point}/etc/dconf/db/gdm.d/01-logo'])
-            self._execute(['arch-chroot', mount_point, 'dconf', 'update'])
+            # self._execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/profile'])
+            # dconf = "user-db:user\nsystem-db:gdm\nfile-db:/usr/share/gdm/greeter-dconf-defaults"
+            # logo = "[org/gnome/login-screen]\nlogo=''"
+            # self._execute(['bash', '-c', f'echo -e "{dconf}" > {mount_point}/etc/dconf/profile/gdm'])
+            # self._execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/db/gdm.d'])
+            # self._execute(['bash', '-c', f'echo -e "{logo}" > {mount_point}/etc/dconf/db/gdm.d/01-logo'])
+            # self._execute(['arch-chroot', mount_point, 'dconf', 'update'])
 
         elif self.setup_information["DE"] == "KDE":
             self._execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'sddm.service'])
@@ -1893,14 +1896,11 @@ class App(CTk):
         loader_conf_content = f"timeout 3\ndefault {default_kernel_conf}\nconsole-mode keep\nreboot-for-bitlocker yes"
         self._execute(['bash', '-c', f'echo -e "{loader_conf_content}" > {mount_point}/efi/loader/loader.conf'])
         
-        # Deleting previous entries
-        self._execute(['bash', '-c', f'rm -rf {mount_point}/efi/loader/entries/secux-*'])
-
-        for kernel in kernels_no_headers:
-            entry_content = f"title Secux Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi\n"
-            entry_fallback_content = f"title Secux Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi\n"
-            self._execute(['bash', '-c', f'echo -e "{entry_content}" > {mount_point}/efi/loader/entries/secux-{kernel}.conf'])
-            self._execute(['bash', '-c', f'echo -e "{entry_fallback_content}" > {mount_point}/efi/loader/entries/secux-{kernel}-fallback.conf'])
+        # for kernel in kernels_no_headers:
+        #     entry_content = f"title Secux Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi\n"
+        #     entry_fallback_content = f"title Secux Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi\n"
+        #     self._execute(['bash', '-c', f'echo -e "{entry_content}" > {mount_point}/efi/loader/entries/secux-{kernel}.conf'])
+        #     self._execute(['bash', '-c', f'echo -e "{entry_fallback_content}" > {mount_point}/efi/loader/entries/secux-{kernel}-fallback.conf'])
 
         # Generate sbctl keys
         if self.setup_information["InstallationType"] == "Secure":
