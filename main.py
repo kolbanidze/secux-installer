@@ -1910,7 +1910,7 @@ class App(CTk):
             self._execute(['arch-chroot', mount_point, 'sbctl', 'sign', '--save', '/efi/EFI/systemd/systemd-bootx64.efi'])
             for kernel in kernels_no_headers:
                  self._execute(['arch-chroot', mount_point, 'sbctl', 'sign', '--save', f'/efi/EFI/secux/secux-{kernel}.efi'])
-                 self._execute(['arch-chroot', mount_point, 'sbctl', 'sign', '--save', f'/efi/EFI/secux/secux-{kernel}-fallback.efi'])
+                #  self._execute(['arch-chroot', mount_point, 'sbctl', 'sign', '--save', f'/efi/EFI/secux/secux-{kernel}-fallback.efi'])
 
         elif self.setup_information["InstallationType"] == "LessSecure":
             self._execute(['cp', f'{mount_point}/usr/share/shim-signed/shimx64.efi', f'{mount_point}/efi/EFI/secux/shimx64.efi'])
