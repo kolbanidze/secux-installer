@@ -1807,23 +1807,23 @@ class App(CTk):
         self._execute(['arch-chroot', mount_point, 'ukify', 'genkey', '--config=/etc/kernel/uki.conf'])
 
         # Configure UKI generation
-        # for kernel in kernels_no_headers:
-        #     preset_file = f'{mount_point}/etc/mkinitcpio.d/{kernel}.preset'
+        for kernel in kernels_no_headers:
+            preset_file = f'{mount_point}/etc/mkinitcpio.d/{kernel}.preset'
 
-        #     self._execute(['sed', '-i', '/^default_config/s/^/#/', preset_file])
-        #     self._execute(['sed', '-i', '/^default_image/s/^/#/', preset_file])
-        #     self._execute(['sed', '-i', '/^#default_uki/s/^#//', preset_file])
-        #     self._execute(['sed', '-i', '/^#default_options/s/^#//', preset_file])
+            self._execute(['sed', '-i', '/^default_config/s/^/#/', preset_file])
+            self._execute(['sed', '-i', '/^default_image/s/^/#/', preset_file])
+            self._execute(['sed', '-i', '/^#default_uki/s/^#//', preset_file])
+            self._execute(['sed', '-i', '/^#default_options/s/^#//', preset_file])
 
-        #     self._execute(['sed', '-i', '/^fallback_config/s/^/#/', preset_file])
-        #     self._execute(['sed', '-i', '/^fallback_image/s/^/#/', preset_file])
-        #     self._execute(['sed', '-i', '/^#fallback_uki/s/^#//', preset_file])
-        #     self._execute(['sed', '-i', '/^#fallback_options/s/^#//', preset_file])
+            self._execute(['sed', '-i', '/^fallback_config/s/^/#/', preset_file])
+            self._execute(['sed', '-i', '/^fallback_image/s/^/#/', preset_file])
+            self._execute(['sed', '-i', '/^#fallback_uki/s/^#//', preset_file])
+            self._execute(['sed', '-i', '/^#fallback_options/s/^#//', preset_file])
 
-        #     self._execute(['sed', '-i', 's/arch-/secux-/g', preset_file])
-        #     self._execute(['sed', '-i', 's/Linux/secux/g', preset_file])
+            self._execute(['sed', '-i', 's/arch-/secux-/g', preset_file])
+            self._execute(['sed', '-i', 's/Linux/secux/g', preset_file])
 
-        #     self._execute(['sed', '-i', 's|--splash /usr/share/systemd/bootctl/splash-arch.bmp||', preset_file])
+            self._execute(['sed', '-i', 's|--splash /usr/share/systemd/bootctl/splash-arch.bmp||', preset_file])
 
         # Add languages support
         locale_to_gen = "ru_RU.UTF-8 UTF-8" if self.language == 'ru' else "en_US.UTF-8 UTF-8"
