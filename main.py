@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.0.3"
+VERSION = "0.0.4"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -157,7 +157,7 @@ class InstallPage(Adw.NavigationPage):
 
         try:
             process = subprocess.Popen(
-                cmd,
+                ["sudo"] + cmd,
                 stdin=subprocess.PIPE if input_str else None,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
