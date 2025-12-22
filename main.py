@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.0.4"
+VERSION = "0.0.5"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -176,7 +176,7 @@ class InstallPage(Adw.NavigationPage):
             process.wait()
             
             if process.returncode != 0:
-                self.log(_("ERROR: Command failed with code ") + process.returncode)
+                self.log("ERROR: Command failed with code " + process.returncode)
                 return process.returncode
             
             return 0
@@ -328,6 +328,11 @@ class InstallPage(Adw.NavigationPage):
             elif self.config['desktop'] == 'kde':
                 pacstrap_packages.extend(["xorg", "plasma", "networkmanager-openvpn", "kde-applications"])
             
+            if self.config['security'] == "secure_full":
+                pacstrap_packages.extend(['sbctl'])
+            elif self.config['security'] == "secure_compat":
+                pacstrap_packages.extend(['shim-signed'])
+            
             pacstrap_cmd = ['stdbuf', '-oL', 'pacstrap', '-K', mount_point] + pacstrap_packages
             self.execute(pacstrap_cmd)
             
@@ -410,7 +415,8 @@ class InstallPage(Adw.NavigationPage):
             # Change distro info and logo
             installer_path = "/usr/local/share/secux-installer"
 
-            self.execute(['cp', f'{installer_path}/images/SecuxLinux.svg', f'{mount_point}/usr/share/icons/'])
+            # Mitigated by secux-hooks
+            # self.execute(['cp', f'{installer_path}/images/SecuxLinux.svg', f'{mount_point}/usr/share/icons/'])
 
             self.execute(['rm', '-f', f'{mount_point}/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf'])
             self.execute(['rm', '-f', f'{mount_point}/etc/debuginfod/archlinux.urls'])
@@ -718,11 +724,11 @@ class UserPage(Adw.NavigationPage):
             self.error_stack.set_visible_child_name("empty")
             return
 
-        if not hostname.isascii():
+        if not hostname.isascii() or hostname[0].isdigit():
             self.error_stack.set_visible_child_name("ascii_host")
             return
             
-        if not username.isascii():
+        if not username.isascii() or username[0].isdigit():
             self.error_stack.set_visible_child_name("ascii_user")
             return
 
