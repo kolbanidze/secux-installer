@@ -156,28 +156,28 @@ class InstallPage(Adw.NavigationPage):
         self.log(f"> {cmd_str}")
 
         try:
-            # process = subprocess.Popen(
-            #     cmd,
-            #     stdin=subprocess.PIPE if input_str else None,
-            #     stdout=subprocess.PIPE,
-            #     stderr=subprocess.STDOUT,
-            #     text=True,
-            #     shell=shell
-            # )
+            process = subprocess.Popen(
+                cmd,
+                stdin=subprocess.PIPE if input_str else None,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                shell=shell
+            )
 
-            # if input_str:
-            #     stdout_data, _ = process.communicate(input=input_str + "\n")
-            #     if stdout_data:
-            #         self.update_console(stdout_data)
-            # else:
-            #     for line in process.stdout:
-            #         self.update_console(line)
+            if input_str:
+                stdout_data, _ = process.communicate(input=input_str + "\n")
+                if stdout_data:
+                    self.update_console(stdout_data)
+            else:
+                for line in process.stdout:
+                    self.update_console(line)
             
-            # process.wait()
+            process.wait()
             
-            # if process.returncode != 0:
-            #     self.log(_("ERROR: Command failed with code ") + process.returncode)
-            #     return process.returncode
+            if process.returncode != 0:
+                self.log(_("ERROR: Command failed with code ") + process.returncode)
+                return process.returncode
             
             return 0
 
