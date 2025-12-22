@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.0.5"
+VERSION = "0.0.6"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -371,6 +371,24 @@ class InstallPage(Adw.NavigationPage):
             # Creating mkinitcpio.conf
             mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt lvm2 filesystems fsck)\n"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
+
+            for kernel in self.config['kernels']:
+                preset_file = f'{mount_point}/etc/mkinitcpio.d/{kernel}.preset'
+
+                self._execute(['sed', '-i', '/^default_config/s/^/#/', preset_file])
+                self._execute(['sed', '-i', '/^default_image/s/^/#/', preset_file])
+                self._execute(['sed', '-i', '/^#default_uki/s/^#//', preset_file])
+                self._execute(['sed', '-i', '/^#default_options/s/^#//', preset_file])
+
+                self._execute(['sed', '-i', '/^fallback_config/s/^/#/', preset_file])
+                self._execute(['sed', '-i', '/^fallback_image/s/^/#/', preset_file])
+                self._execute(['sed', '-i', '/^#fallback_uki/s/^#//', preset_file])
+                self._execute(['sed', '-i', '/^#fallback_options/s/^#//', preset_file])
+
+                self._execute(['sed', '-i', 's/arch-/secux-/g', preset_file])
+                self._execute(['sed', '-i', 's/Linux/secux/g', preset_file])
+
+                self._execute(['sed', '-i', 's|--splash /usr/share/systemd/bootctl/splash-arch.bmp||', preset_file])
 
             # Creating cmdline
             self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/cmdline.d'])
