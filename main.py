@@ -120,6 +120,7 @@ class InstallPage(Adw.NavigationPage):
         thread.start()
 
     def update_console(self, text):
+        print(text)
         GLib.idle_add(self._append_text, text)
 
     def _append_text(self, text):
