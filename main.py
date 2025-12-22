@@ -394,6 +394,7 @@ class InstallPage(Adw.NavigationPage):
             self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/cmdline.d'])
             process = subprocess.run(["blkid", '-s', 'UUID', '-o', 'value', rootfs_partition], check=True, capture_output=True)
             uuid = process.stdout.strip().decode()
+            print(f"UUID HERE {uuid}")
             cmdline_content = f"rd.luks.name={uuid}=cryptlvm root={root_lv_path} rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot audit=1 quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{cmdline_content}" > /etc/cmdline.d/root.conf'])
 
