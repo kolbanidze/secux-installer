@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Encoding=UTF-8
-Name=KIRTapp
-Comment=KIRTapp
-Icon=/usr/local/bin/KIRTapp/app_script/resources/images/icon_dark.png
-Exec=/usr/bin/python /usr/local/bin/KIRTapp/app_script/app.py
-Terminal=false
-Categories=Kirt;Secux;Face;Recognition
