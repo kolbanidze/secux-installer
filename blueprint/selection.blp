@@ -1,0 +1,54 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $SelectionPage : Adw.NavigationPage {
+  title: _("Ручной выбор");
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Gtk.Box {
+      orientation: vertical;
+      spacing: 0; 
+
+      Adw.Clamp {
+        maximum-size: 400; 
+        tightening-threshold: 300;
+        
+        // Добавляем отступы прямо здесь
+        child: Gtk.Box {
+          margin-top: 12;
+          margin-bottom: 12;
+          margin-start: 12;
+          margin-end: 12;
+          
+          Gtk.SearchEntry search_entry {
+            placeholder-text: _("Поиск...");
+            hexpand: true; 
+          }
+        };
+      }
+
+      Adw.Clamp {
+        maximum-size: 400;
+        tightening-threshold: 300;
+        vexpand: true;
+
+        child: Gtk.ScrolledWindow {
+          vexpand: true; 
+          hscrollbar-policy: never;
+
+          child: Gtk.ListBox list_view {
+            selection-mode: none;
+            valign: start;
+            styles ["boxed-list"]            
+            margin-bottom: 12; 
+            margin-start: 12;
+            margin-end: 12;
+          };
+        };
+      }
+    };
+  };
+}

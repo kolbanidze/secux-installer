@@ -1,0 +1,54 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $WelcomePage : Adw.NavigationPage {
+  title: "Secux Linux";
+  tag: "welcome";
+  
+  can-pop: false; 
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+    
+    content: Adw.StatusPage status_page {
+      icon-name: "system-software-install-symbolic";
+      title: _("Добро пожаловать");
+      description: _("Secux Linux Installer 0.0.0");
+      
+      child: Adw.Clamp {
+        maximum-size: 300;
+        tightening-threshold: 100;
+
+        child: Gtk.Box {
+          orientation: vertical;
+          spacing: 24;
+          
+          Gtk.ListBox {
+            selection-mode: none;
+            styles ["boxed-list"]
+
+            Adw.ActionRow {
+              title: _("Язык");
+              activatable-widget: language_dropdown; 
+              
+              [suffix]
+              Gtk.DropDown language_dropdown {
+                valign: center;
+                model: Gtk.StringList {
+                  strings ["Русский", "English"]
+                };
+              }
+            }
+          }
+
+          Gtk.Button next_btn {
+            label: _("Далее");
+            styles ["suggested-action", "pill"]
+            action-name: "win.next_step";
+          }
+        };
+      };
+    };
+  };
+}

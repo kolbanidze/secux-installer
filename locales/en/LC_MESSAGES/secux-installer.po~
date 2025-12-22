@@ -1,0 +1,526 @@
+# English translations for secux-installer package.
+# Copyright (C) 2025 Secux Linux
+# This file is distributed under the same license as the secux-installer package.
+# Automatically generated, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: secux-installer 0.0.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-21 11:21+0300\n"
+"PO-Revision-Date: 2025-12-21 11:30+0300\n"
+"Last-Translator: AI Assistant\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: main.py:96
+msgid "INFO: Сбор данных завершен. Начало установки..."
+msgstr "INFO: Data collection complete. Starting installation..."
+
+#: main.py:158
+msgid "ERROR: Command failed with code "
+msgstr "ERROR: Command failed with code "
+
+#: main.py:164
+msgid "EXCEPTION: "
+msgstr "EXCEPTION: "
+
+#: main.py:178
+msgid "INFO: Автоматическая разметка диска "
+msgstr "INFO: Automatic partitioning of disk "
+
+#: main.py:183
+msgid "INFO: Создание разделов EFI и Root..."
+msgstr "INFO: Creating EFI and Root partitions..."
+
+#: main.py:189
+msgid "INFO: Используется ручная разметка."
+msgstr "INFO: Manual partitioning used."
+
+#: main.py:194
+msgid "INFO: Монтирование файловых систем..."
+msgstr "INFO: Mounting filesystems..."
+
+#: main.py:199
+msgid "INFO: Установка пакетов (pacstrap)..."
+msgstr "INFO: Installing packages (pacstrap)..."
+
+#: main.py:241
+msgid "Установка завершена"
+msgstr "Installation complete"
+
+#: main.py:242
+msgid "Система готова к работе. Извлеките установочный носитель."
+msgstr "System is ready. Please remove the installation media."
+
+#: main.py:245
+msgid "Ошибка установки"
+msgstr "Installation failed"
+
+#: main.py:246
+msgid "Произошла критическая ошибка. Смотрите логи ниже."
+msgstr "A critical error occurred. See logs below."
+
+#: main.py:995
+msgid "Текущий язык: русский"
+msgstr "Current language: English"
+
+#: ui/desktop.ui:10 ui/summary.ui:147
+msgid "Окружение"
+msgstr "Desktop Environment"
+
+#: ui/desktop.ui:25
+msgid "Выберите окружение рабочего стола"
+msgstr "Select Desktop Environment"
+
+#: ui/desktop.ui:26
+msgid "Вы можете выбрать графическую оболочку или текстовый режим"
+msgstr "You can choose a graphical interface or text mode"
+
+#: ui/desktop.ui:51
+msgid "Консольный"
+msgstr "Console (Text-only)"
+
+#: ui/desktop.ui:82 ui/encryption.ui:121 ui/kernel.ui:96 ui/partition.ui:215
+#: ui/security.ui:85 ui/software.ui:154 ui/source.ui:115 ui/timezone.ui:75
+#: ui/user.ui:191 ui/welcome.ui:60
+msgid "Далее"
+msgstr "Next"
+
+#: ui/encryption.ui:10 ui/summary.ui:330
+msgid "Шифрование"
+msgstr "Encryption"
+
+#: ui/encryption.ui:31
+msgid "Шифрование диска"
+msgstr "Disk Encryption"
+
+#: ui/encryption.ui:32
+msgid ""
+"Защитите ваши данные паролем.\n"
+"Используйте только латинские символы."
+msgstr ""
+"Protect your data with a password.\n"
+"Use Latin characters only."
+
+#: ui/encryption.ui:36 ui/user.ui:50
+msgid "Пароль"
+msgstr "Password"
+
+#: ui/encryption.ui:41
+msgid "Повторите пароль"
+msgstr "Repeat password"
+
+#: ui/encryption.ui:62
+msgid "Пароль не может быть пустым"
+msgstr "Password cannot be empty"
+
+#: ui/encryption.ui:76 ui/user.ui:160
+msgid "Пароли не совпадают"
+msgstr "Passwords do not match"
+
+#: ui/encryption.ui:90
+msgid "Используйте только английские буквы и цифры"
+msgstr "Use only English letters and numbers"
+
+#: ui/install.ui:10
+msgid "Установка"
+msgstr "Installation"
+
+#: ui/install.ui:23
+msgid "Установка системы"
+msgstr "System Installation"
+
+#: ui/install.ui:24
+msgid "Пожалуйста, не выключайте компьютер."
+msgstr "Please do not turn off the computer."
+
+#: ui/install.ui:49
+msgid "Технические подробности"
+msgstr "Technical Details"
+
+#: ui/install.ui:78
+msgid "Перезагрузить систему"
+msgstr "Reboot System"
+
+#: ui/kernel.ui:10
+msgid "Ядро"
+msgstr "Kernel"
+
+#: ui/kernel.ui:28
+msgid "Выберите виды ядра Linux"
+msgstr "Select Linux Kernels"
+
+#: ui/kernel.ui:29
+msgid "Ядра, которые будут установлены в систему."
+msgstr "Kernels to be installed on the system."
+
+#: ui/kernel.ui:32
+msgid "Linux Hardened"
+msgstr "Linux Hardened"
+
+#: ui/kernel.ui:65
+msgid ""
+"Linux Hardened - повышенная безопасность\n"
+"Linux LTS - надежность\n"
+"Linux - последние обновления"
+msgstr ""
+"Linux Hardened - enhanced security\n"
+"Linux LTS - reliability\n"
+"Linux - latest updates"
+
+#: ui/partition.ui:10
+msgid "Разметка диска"
+msgstr "Disk Partitioning"
+
+#: ui/partition.ui:38
+msgid "Выберите вариант разметки диска"
+msgstr "Select partitioning method"
+
+#: ui/partition.ui:41 ui/summary.ui:227
+msgid "Автоматически"
+msgstr "Automatic"
+
+#: ui/partition.ui:42
+msgid "Стереть диск и установить систему"
+msgstr "Erase disk and install system"
+
+#: ui/partition.ui:53
+msgid "Вручную"
+msgstr "Manual"
+
+#: ui/partition.ui:54
+msgid "Самостоятельная разметка"
+msgstr "Custom partitioning"
+
+#: ui/partition.ui:74 ui/summary.ui:256
+msgid "Целевой диск"
+msgstr "Target Drive"
+
+#: ui/partition.ui:75
+msgid "Внимание! Все данные на выбранном диске будут уничтожены."
+msgstr "Warning! All data on the selected drive will be destroyed."
+
+#: ui/partition.ui:78
+msgid "Выберите диск"
+msgstr "Select Disk"
+
+#: ui/partition.ui:105
+msgid "Запустить Gnome Disks"
+msgstr "Launch Gnome Disks"
+
+#: ui/partition.ui:115
+msgid "Обновить диски"
+msgstr "Refresh Disks"
+
+#: ui/partition.ui:126
+msgid "Назначение разделов"
+msgstr "Partition Assignment"
+
+#: ui/partition.ui:129
+msgid "EFI раздел"
+msgstr "EFI Partition"
+
+#: ui/partition.ui:130
+msgid "FAT32, >200 MiB"
+msgstr "FAT32, >200 MiB"
+
+#: ui/partition.ui:142
+msgid "Корневой раздел"
+msgstr "Root Partition"
+
+#: ui/partition.ui:143
+msgid "Основной раздел системы"
+msgstr "Main system partition"
+
+#: ui/partition.ui:157 ui/summary.ui:293
+msgid "Файл подкачки"
+msgstr "Swap File"
+
+#: ui/partition.ui:160
+msgid "Использовать файл подкачки"
+msgstr "Use Swap File"
+
+#: ui/partition.ui:166
+msgid "Размер (ГиБ)"
+msgstr "Size (GiB)"
+
+#: ui/security.ui:10 ui/summary.ui:94
+msgid "Безопасность"
+msgstr "Security"
+
+#: ui/security.ui:25
+msgid "Выберите вариант установки"
+msgstr "Select Installation Mode"
+
+#: ui/security.ui:26
+msgid "Настройка механизмов защиты операционной системы"
+msgstr "OS security mechanism configuration"
+
+#: ui/security.ui:29
+msgid "Применение всех механизмов защиты"
+msgstr "Apply all security mechanisms"
+
+#: ui/security.ui:30
+msgid "Доверие собственным ключам Secure Boot. Требует включения Custom Mode."
+msgstr "Trust own Secure Boot keys. Requires Custom Mode enabled."
+
+#: ui/security.ui:41
+msgid "Совместимая защита"
+msgstr "Compatible Security"
+
+#: ui/security.ui:42
+msgid "Доверие ключам Microsoft. Менее безопасно, но выше совместимость."
+msgstr "Trust Microsoft keys. Less secure, but higher compatibility."
+
+#: ui/security.ui:53
+msgid "Без механизмов защиты"
+msgstr "No Security Mechanisms"
+
+#: ui/security.ui:54
+msgid "Наименее безопасно."
+msgstr "Least secure."
+
+#: ui/selection.ui:10
+msgid "Ручной выбор"
+msgstr "Manual Selection"
+
+#: ui/selection.ui:32
+msgid "Поиск..."
+msgstr "Search..."
+
+#: ui/software.ui:10
+msgid "Программное обеспечение"
+msgstr "Software"
+
+#: ui/software.ui:32
+msgid "Выбор приложений"
+msgstr "Application Selection"
+
+#: ui/software.ui:33
+msgid "Отметьте программы, которые необходимо установить"
+msgstr "Select programs to install"
+
+#: ui/software.ui:53
+msgid "Центр управления безопасностью Secux Linux"
+msgstr "Secux Linux Security Center"
+
+#: ui/software.ui:76
+msgid "Браузер с открытым исходным кодом"
+msgstr "Open-source web browser"
+
+#: ui/software.ui:87
+msgid "Свободный и бесплатный браузер"
+msgstr "Free and open-source browser"
+
+#: ui/software.ui:98
+msgid "Универсальный медиаплеер"
+msgstr "Universal media player"
+
+#: ui/software.ui:109
+msgid "Офисный пакет"
+msgstr "Office suite"
+
+#: ui/software.ui:120
+msgid "Менеджер паролей"
+msgstr "Password manager"
+
+#: ui/source.ui:10 ui/summary.ui:56
+msgid "Источник"
+msgstr "Source"
+
+#: ui/source.ui:31
+msgid "Источник пакетов"
+msgstr "Package Source"
+
+#: ui/source.ui:32
+msgid "Выберите, откуда установщик будет загружать файлы системы."
+msgstr "Choose where the installer will download system files from."
+
+#: ui/source.ui:35
+msgid "Онлайн (Рекомендуется)"
+msgstr "Online (Recommended)"
+
+#: ui/source.ui:36
+msgid "Загрузка самых новых версий пакетов из интернета."
+msgstr "Download latest package versions from the internet."
+
+#: ui/source.ui:48 ui/summary.ui:65
+msgid "Офлайн"
+msgstr "Offline"
+
+#: ui/source.ui:49
+msgid "Установка пакетов из текущего образа (быстрее)."
+msgstr "Install packages from current image (faster)."
+
+#: ui/source.ui:68
+msgid "Текущий образ: <b>Онлайн</b>"
+msgstr "Current image: <b>Online</b>"
+
+#: ui/source.ui:83
+msgid "Текущий образ: <b>Офлайн</b>"
+msgstr "Current image: <b>Offline</b>"
+
+#: ui/summary.ui:10
+msgid "Итого"
+msgstr "Summary"
+
+#: ui/summary.ui:36
+msgid "Всё готово"
+msgstr "All Ready"
+
+#: ui/summary.ui:44
+msgid "Проверьте параметры перед началом установки"
+msgstr "Review settings before starting installation"
+
+#: ui/summary.ui:53
+msgid "Система"
+msgstr "System"
+
+#: ui/summary.ui:79
+msgid "Онлайн"
+msgstr "Online"
+
+#: ui/summary.ui:103
+msgid "Максимальная"
+msgstr "Maximum"
+
+#: ui/summary.ui:117
+msgid "Совместимая"
+msgstr "Compatible"
+
+#: ui/summary.ui:131
+msgid "Отключена"
+msgstr "Disabled"
+
+#: ui/summary.ui:184
+msgid "Консоль"
+msgstr "Console"
+
+#: ui/summary.ui:199 ui/timezone.ui:10 ui/timezone.ui:29
+msgid "Часовой пояс"
+msgstr "Timezone"
+
+#: ui/summary.ui:215
+msgid "Накопитель"
+msgstr "Storage"
+
+#: ui/summary.ui:218
+msgid "Режим разметки"
+msgstr "Partitioning Mode"
+
+#: ui/summary.ui:241
+msgid "Ручная разметка"
+msgstr "Manual Partitioning"
+
+#: ui/summary.ui:265
+msgid "Настроено вручную"
+msgstr "Configured Manually"
+
+#: ui/summary.ui:302
+msgid "Нет"
+msgstr "No"
+
+#: ui/summary.ui:333
+msgid "Включено (LUKS2)"
+msgstr "Enabled (LUKS2)"
+
+#: ui/summary.ui:346
+msgid "Учетная запись"
+msgstr "Account"
+
+#: ui/summary.ui:349 ui/user.ui:10
+msgid "Пользователь"
+msgstr "User"
+
+#: ui/summary.ui:362
+msgid "Имя устройства"
+msgstr "Device Name"
+
+#: ui/summary.ui:397
+msgid "Начать установку"
+msgstr "Start Installation"
+
+#: ui/timezone.ui:25
+msgid "Настройка времени"
+msgstr "Time Settings"
+
+#: ui/timezone.ui:26
+msgid "Настройка часового пояса для корректного отображения времени"
+msgstr "Configure timezone for correct time display"
+
+#: ui/timezone.ui:41
+msgid "Текущее время"
+msgstr "Current Time"
+
+#: ui/timezone.ui:48
+msgid "Автосинхронизация"
+msgstr "Auto-sync"
+
+#: ui/timezone.ui:49
+msgid "Необходимо подключение к интернету"
+msgstr "Internet connection required"
+
+#: ui/user.ui:31
+msgid "Создание администратора"
+msgstr "Create Administrator"
+
+#: ui/user.ui:32
+msgid "Заполните данные для входа в систему"
+msgstr "Fill in login details"
+
+#: ui/user.ui:35
+msgid "Полное имя"
+msgstr "Full Name"
+
+#: ui/user.ui:40
+msgid "Название устройства"
+msgstr "Device Name"
+
+#: ui/user.ui:45
+msgid "Имя пользователя"
+msgstr "Username"
+
+#: ui/user.ui:55
+msgid "Пароль (повтор)"
+msgstr "Password (repeat)"
+
+#: ui/user.ui:76
+msgid "Все поля должны быть заполнены"
+msgstr "All fields must be filled"
+
+#: ui/user.ui:90
+msgid "Имя устройства должно содержать только латинские буквы"
+msgstr "Device name must contain only Latin letters"
+
+#: ui/user.ui:104
+msgid "Имя пользователя должно быть на английском"
+msgstr "Username must be in English"
+
+#: ui/user.ui:118
+msgid "Пароль должен содержать только латинские символы и цифры"
+msgstr "Password must contain only Latin characters and numbers"
+
+#: ui/user.ui:132
+msgid "Имя пользователя не должно содержать пробелов"
+msgstr "Username must not contain spaces"
+
+#: ui/user.ui:146
+msgid "Имя устройства не должно содержать пробелов"
+msgstr "Device name must not contain spaces"
+
+#: ui/welcome.ui:21
+msgid "Добро пожаловать"
+msgstr "Welcome"
+
+#: ui/welcome.ui:22
+msgid "Secux Linux Installer 0.0.0"
+msgstr "Secux Linux Installer 0.0.0"
+
+#: ui/welcome.ui:39
+msgid "Язык"
+msgstr "Language"

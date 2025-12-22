@@ -1,0 +1,105 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $EncryptionPage: Adw.NavigationPage {
+  title: _("Шифрование");
+  tag: "encryption";
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Adw.Clamp {
+      maximum-size: 500;
+      tightening-threshold: 100;
+
+      child: Gtk.Box {
+        orientation: vertical;
+        spacing: 24;
+        margin-top: 24;
+        margin-bottom: 24;
+        margin-start: 12;
+        margin-end: 12;
+        Adw.PreferencesGroup {
+          title: _("Шифрование диска");
+          description: _("Защитите ваши данные паролем.\nИспользуйте только латинские символы.");
+          Adw.PasswordEntryRow password_entry {
+            title: _("Пароль");
+          }
+
+          Adw.PasswordEntryRow confirm_entry {
+            title: _("Повторите пароль");
+          }
+        }
+
+        Gtk.Stack error_stack {
+          transition-type: crossfade;
+          Gtk.StackPage {
+            name: "none";
+            child: Box {};
+          }
+
+          Gtk.StackPage {
+            name: "empty";
+
+            child: Gtk.Label {
+              label: _("Пароль не может быть пустым");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+
+          Gtk.StackPage {
+            name: "mismatch";
+
+            child: Gtk.Label {
+              label: _("Пароли не совпадают");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+
+          Gtk.StackPage {
+            name: "ascii";
+
+            child: Gtk.Label {
+              label: _("Используйте только английские буквы и цифры");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+        }
+      };
+    };
+
+    [bottom]
+    Gtk.ActionBar {
+      [end]
+      Gtk.Button {
+        margin-bottom: 10;
+        margin-end: 10;
+        margin-top: 10;
+        margin-start: 10;
+
+        styles ["suggested-action", "pill"]
+        action-name: "encryption.validate";
+        child: Adw.ButtonContent {
+          icon-name: "go-next-symbolic";
+          label: _("Далее");
+        };
+      }
+    }
+  };
+}

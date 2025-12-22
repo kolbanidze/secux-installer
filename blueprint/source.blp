@@ -1,0 +1,93 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $SourcePage : Adw.NavigationPage {
+  title: _("Источник");
+  tag: "source";
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Adw.Clamp {
+      maximum-size: 500;
+      tightening-threshold: 100;
+
+      child: Gtk.Box {
+        orientation: vertical;
+        spacing: 24;
+        margin-top: 24;
+        margin-bottom: 24;
+        margin-start: 12;
+        margin-end: 12;
+
+        Adw.PreferencesGroup {
+          title: _("Источник пакетов");
+          description: _("Выберите, откуда установщик будет загружать файлы системы.");
+
+          Adw.ActionRow {
+            title: _("Онлайн (Рекомендуется)");
+            subtitle: _("Загрузка самых новых версий пакетов из интернета.");
+            icon-name: "radiowaves-1-symbolic";
+            activatable-widget: btn_online;
+
+            [prefix]
+            Gtk.CheckButton btn_online {
+              active: true;
+            }
+          }
+
+          Adw.ActionRow {
+            title: _("Офлайн");
+            subtitle: _("Установка пакетов из текущего образа (быстрее).");
+            icon-name: "media-optical-symbolic";
+            activatable-widget: btn_offline;
+
+            [prefix]
+            Gtk.CheckButton btn_offline {
+              group: btn_online;
+            }
+          }
+        }
+
+        Gtk.Stack status_stack {
+          Gtk.StackPage {
+            name: "online";
+            child: Gtk.Label {
+              label: _("Текущий образ: <b>Онлайн</b>");
+              use-markup: true;
+              styles ["dim-label", "caption"]
+            };
+          }
+
+          Gtk.StackPage {
+            name: "offline";
+            child: Gtk.Label {
+              label: _("Текущий образ: <b>Офлайн</b>");
+              use-markup: true;
+              styles ["dim-label", "caption"]
+            };
+          }
+        }
+      };
+    };
+
+    [bottom]
+    Gtk.ActionBar {
+      [end]
+      Gtk.Button {
+        margin-bottom: 10;
+        margin-end: 10;
+        margin-top: 10;
+        margin-start: 10;
+
+        styles ["suggested-action", "pill"]
+        action-name: "win.next_step";
+        child: Adw.ButtonContent {
+          icon-name: "go-next-symbolic";
+          label: _("Далее");
+        };
+      }
+    }
+  };
+}

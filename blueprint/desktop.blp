@@ -1,0 +1,72 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $DesktopPage : Adw.NavigationPage {
+  title: _("Окружение");
+  tag: "desktop";
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Adw.Clamp {
+      maximum-size: 500;
+      tightening-threshold: 100;
+    
+      child: Adw.PreferencesPage {
+        Adw.PreferencesGroup {
+          title: _("Выберите окружение рабочего стола");
+          description: _("Вы можете выбрать графическую оболочку или текстовый режим"); 
+
+          Adw.ActionRow {
+            title: "GNOME";
+            activatable-widget: btn_gnome;
+
+            [prefix]
+            Gtk.CheckButton btn_gnome {
+              active: true; // Выбрано по умолчанию
+            }
+          }
+
+          Adw.ActionRow {
+            title: "KDE";
+            activatable-widget: btn_kde;
+
+            [prefix]
+            Gtk.CheckButton btn_kde {
+              group: btn_gnome; // Привязка к группе
+            }
+          }
+
+          Adw.ActionRow {
+            title: _("Консольный");
+            activatable-widget: btn_console;
+
+            [prefix]
+            Gtk.CheckButton btn_console {
+              group: btn_gnome; // Привязка к группе
+            }
+          }
+        }
+      };
+    };
+
+    [bottom]
+    Gtk.ActionBar {
+      [end]
+      Gtk.Button {
+        margin-bottom: 10;
+        margin-end: 10;
+        margin-top: 10;
+        margin-start: 10;
+
+        styles ["suggested-action", "pill"]
+        action-name: "win.next_step";
+        child: Adw.ButtonContent {
+          icon-name: "go-next-symbolic";
+          label: _("Далее");
+        };
+      }
+    }
+  };
+}

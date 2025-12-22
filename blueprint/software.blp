@@ -1,0 +1,137 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $SoftwarePage : Adw.NavigationPage {
+  title: _("Программное обеспечение");
+  tag: "software";
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Adw.Clamp {
+        maximum-size: 500;
+        tightening-threshold: 100;
+        margin-bottom: 20;
+
+        child: Gtk.Box {
+          orientation: vertical;
+          spacing: 12;
+          margin-top: 24;
+          margin-bottom: 24;
+          margin-start: 24;
+          margin-end: 24;
+
+          Adw.PreferencesGroup {
+            title: _("Выбор приложений");
+            description: _("Отметьте программы, которые необходимо установить");
+          }
+
+          // Переключатель вкладок
+          Gtk.StackSwitcher {
+            stack: software_stack;
+            halign: center;
+          }
+
+          // Стек с содержимым вкладок
+          Gtk.Stack software_stack {
+
+            // --- Вкладка SECUX ---
+            Gtk.StackPage {
+              name: "secux";
+              title: "Secux"; 
+              
+              child: Adw.PreferencesGroup {
+                Adw.ActionRow {
+                  title: "Security Manager";
+                  subtitle: _("Центр управления безопасностью Secux Linux");
+                  icon-name: "security-high-symbolic";
+                  activatable-widget: chk_sec_manager;
+
+                  [prefix]
+                  Gtk.CheckButton chk_sec_manager {
+                    active: true;
+                  }
+                }
+              };
+            }
+
+            // --- Вкладка PACMAN ---
+            Gtk.StackPage {
+              name: "pacman";
+              title: "Pacman"; 
+
+              child: Adw.PreferencesGroup {
+                
+                // Интернет
+                Adw.ActionRow {
+                  title: "Chromium";
+                  subtitle: _("Браузер с открытым исходным кодом");
+                  icon-name: "chrome-bold-symbolic";
+                  activatable-widget: chk_chromium;
+                  [prefix] 
+                  Gtk.CheckButton chk_chromium {}
+                }
+
+                Adw.ActionRow {
+                  title: "Firefox";
+                  subtitle: _("Свободный и бесплатный браузер");
+                  icon-name: "browser-firefox-symbolic";
+                  activatable-widget: chk_firefox;
+                  [prefix] 
+                  Gtk.CheckButton chk_firefox {}
+                }
+
+                // Мультимедиа
+                Adw.ActionRow {
+                  title: "VLC Media Player";
+                  subtitle: _("Универсальный медиаплеер");
+                  icon-name: "vlc-logo-symbolic";
+                  activatable-widget: chk_vlc;
+                  [prefix] 
+                  Gtk.CheckButton chk_vlc {}
+                }
+
+                // Офис и инструменты
+                Adw.ActionRow {
+                  title: "LibreOffice";
+                  subtitle: _("Офисный пакет");
+                  icon-name: "x-office-document-symbolic";
+                  activatable-widget: chk_libreoffice;
+                  [prefix] 
+                  Gtk.CheckButton chk_libreoffice {}
+                }
+
+                Adw.ActionRow {
+                  title: "KeePassXC";
+                  subtitle: _("Менеджер паролей");
+                  icon-name: "keepassxc-logo-symbolic";
+                  activatable-widget: chk_keepassxc;
+                  [prefix] 
+                  Gtk.CheckButton chk_keepassxc {}
+                }
+              };
+            }
+        }
+      };
+    };
+
+    [bottom]
+    Gtk.ActionBar {
+      [end]
+      Gtk.Button {
+        margin-bottom: 10;
+        margin-end: 10;
+        margin-top: 10;
+        margin-start: 10;
+
+        styles ["suggested-action", "pill"]
+        action-name: "win.next_step";
+        child: Adw.ButtonContent {
+          icon-name: "go-next-symbolic";
+          label: _("Далее");
+        };
+      }
+    }
+  };
+}

@@ -1,0 +1,65 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $TimezonePage : Adw.NavigationPage {
+  title: _("Часовой пояс");
+  tag: "timezone";
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Adw.Clamp {
+      maximum-size: 500;
+      tightening-threshold: 100;
+      
+      child: Adw.PreferencesPage {
+        Adw.PreferencesGroup {
+          title: _("Настройка времени");
+          description: _("Настройка часового пояса для корректного отображения времени");
+
+          Adw.ActionRow timezone_row {
+            title: _("Часовой пояс");
+            subtitle: "Europe/Minsk";
+            activatable: true;
+            
+            [suffix]
+            Gtk.Image {
+              icon-name: "go-next-symbolic";
+            }
+          }
+
+          Adw.ActionRow current_time_row {
+            title: _("Текущее время");
+            subtitle: "--:--";
+            icon-name: "clock-alt-symbolic";
+          }
+
+          Adw.SwitchRow auto_sync_row {
+            title: _("Автосинхронизация");
+            subtitle: _("Необходимо подключение к интернету");
+            active: true;
+          }
+        }
+      };
+    };
+
+    [bottom]
+    Gtk.ActionBar {
+      [end]
+      Gtk.Button {
+        margin-bottom: 10;
+        margin-end: 10;
+        margin-top: 10;
+        margin-start: 10;
+
+        styles ["suggested-action", "pill"]
+        action-name: "win.next_step";
+        child: Adw.ButtonContent {
+          icon-name: "go-next-symbolic";
+          label: _("Далее");
+        };
+      }
+    }
+  };
+}

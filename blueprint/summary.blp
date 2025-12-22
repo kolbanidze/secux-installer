@@ -1,0 +1,173 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $SummaryPage : Adw.NavigationPage {
+  title: _("Итого");
+  tag: "summary";
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Gtk.ScrolledWindow {
+      hscrollbar-policy: never;
+      vexpand: true;
+
+      child: Adw.Clamp {
+        maximum-size: 500;
+        tightening-threshold: 100;
+        margin-bottom: 20;
+
+        child: Gtk.Box {
+          orientation: vertical;
+          spacing: 12;
+          margin-top: 24;
+          margin-bottom: 24;
+          margin-start: 24;
+          margin-end: 24;
+
+          Gtk.Label {
+            label: _("Всё готово");
+            styles ["title-2"]
+          }
+          
+          Gtk.Label {
+            label: _("Проверьте параметры перед началом установки");
+            styles ["title-5", "dim-label"]
+          }
+
+          Adw.PreferencesGroup {
+            title: _("Система");
+
+            Adw.ActionRow {
+              title: _("Источник");
+              [suffix]
+              Gtk.Stack source_stack {
+                transition-type: crossfade;
+                Gtk.StackPage { name: "offline"; child: Gtk.Label { label: _("Офлайн"); halign: end; styles ["dim-label"] }; }
+                Gtk.StackPage { name: "online"; child: Gtk.Label { label: _("Онлайн"); halign: end; styles ["dim-label"] }; }
+              }
+            }
+
+            Adw.ActionRow {
+              title: _("Безопасность");
+              [suffix]
+              Gtk.Stack security_stack {
+                transition-type: crossfade;
+                Gtk.StackPage { name: "secure_full"; child: Gtk.Label { label: _("Максимальная"); halign: end; styles ["dim-label"] }; }
+                Gtk.StackPage { name: "secure_compat"; child: Gtk.Label { label: _("Совместимая"); halign: end; styles ["dim-label"] }; }
+                Gtk.StackPage { name: "insecure"; child: Gtk.Label { label: _("Отключена"); halign: end; styles ["error", "dim-label"] }; }
+              }
+            }
+
+            Adw.ActionRow {
+              title: _("Окружение");
+              [suffix]
+              Gtk.Stack desktop_stack {
+                transition-type: crossfade;
+                Gtk.StackPage { name: "gnome"; child: Gtk.Label { label: "GNOME"; halign: end; styles ["dim-label"] }; }
+                Gtk.StackPage { name: "kde"; child: Gtk.Label { label: "KDE Plasma"; halign: end; styles ["dim-label"] }; }
+                Gtk.StackPage { name: "console"; child: Gtk.Label { label: _("Консоль"); halign: end; styles ["dim-label"] }; }
+              }
+            }
+            
+            Adw.ActionRow {
+              title: _("Часовой пояс");
+              [suffix]
+              Gtk.Label timezone_label {
+                label: "Europe/Minsk"; 
+                styles ["dim-label"]
+                halign: end;
+              }
+            }
+          }
+
+          Adw.PreferencesGroup {
+            title: _("Накопитель");
+
+            Adw.ActionRow {
+              title: _("Режим разметки");
+              [suffix]
+              Gtk.Stack disk_mode_stack {
+                transition-type: crossfade;
+                Gtk.StackPage { name: "auto"; child: Gtk.Label { label: _("Автоматически"); halign: end; styles ["dim-label"] }; }
+                Gtk.StackPage { name: "manual"; child: Gtk.Label { label: _("Ручная разметка"); halign: end; styles ["dim-label"] }; }
+              }
+            }
+            
+            Adw.ActionRow {
+              title: _("Целевой диск");
+              [suffix]
+              Gtk.Stack disk_conf {
+                transition-type: crossfade;
+                Gtk.StackPage { name: "disk_manual"; child: Gtk.Label { label: _("Настроено вручную"); halign: end; styles ["dim-label"] }; }
+                Gtk.StackPage { name: "disk_auto"; child: Gtk.Label disk_auto_label { halign: end; styles ["dim-label"] }; }
+              }
+            }
+            
+            Adw.ActionRow {
+              title: _("Файл подкачки");
+              [suffix]
+              Gtk.Stack swap_stack {
+                transition-type: crossfade;
+                Gtk.StackPage { name: "swap_no"; child: Gtk.Label { label: _("Нет"); halign: end; styles ["dim-label"] }; }
+                Gtk.StackPage { name: "swap_yes"; child: Gtk.Label swap_yes_label { halign: end; styles ["dim-label"] }; }
+              }
+            }
+            
+            Adw.ActionRow {
+              title: _("Шифрование");
+              [suffix]
+              Gtk.Label encryption_label {
+                label: _("Включено (LUKS2)");
+                styles ["dim-label"]
+                halign: end;
+              }
+
+            }
+          }
+
+          Adw.PreferencesGroup {
+            title: _("Учетная запись");
+            
+            Adw.ActionRow {
+              title: _("Пользователь");
+              [suffix]
+              Gtk.Label user_label {
+                styles ["dim-label"]
+                halign: end;
+              }
+            }
+            
+            Adw.ActionRow {
+              title: _("Имя устройства");
+              [suffix]
+              Gtk.Label hostname_label {
+                styles ["dim-label"]
+                halign: end;
+              }
+            }
+          }
+        };
+      };
+    };
+
+    [bottom]
+    Gtk.ActionBar {
+      [end]
+      Gtk.Button {
+        margin-bottom: 10;
+        margin-end: 10;
+        margin-top: 10;
+        margin-start: 10;
+
+        styles ["suggested-action", "pill"]
+        action-name: "win.next_step";
+        child: Adw.ButtonContent {
+          icon-name: "go-next-symbolic";
+          label: _("Начать установку");
+        };
+      }
+    }
+  };
+}

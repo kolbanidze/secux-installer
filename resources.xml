@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/secux/installer/icons">
+    <file alias="scalable/actions/clock-alt-symbolic.svg">icons/clock-alt-symbolic.svg</file>
+    <file alias="scalable/actions/radiowaves-1-symbolic.svg">icons/radiowaves-1-symbolic.svg</file>
+    <file alias="scalable/actions/chrome-symbolic.svg">icons/chrome-symbolic.svg</file>
+    <file alias="scalable/actions/chrome-bold-symbolic.svg">icons/chrome-bold-symbolic.svg</file>
+    <file alias="scalable/actions/browser-firefox-symbolic.svg">icons/browser-firefox-symbolic.svg</file>
+    <file alias="scalable/actions/vlc-logo-symbolic.svg">icons/vlc-logo-symbolic.svg</file>
+    <file alias="scalable/actions/keepassxc-logo-symbolic.svg">icons/keepassxc-logo-symbolic.svg</file>
+  </gresource>
+</gresources>

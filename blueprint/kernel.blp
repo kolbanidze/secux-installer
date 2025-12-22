@@ -1,0 +1,79 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $KernelPage : Adw.NavigationPage {
+  title: _("Ядро");
+  tag: "kernel";
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Adw.Clamp {
+      maximum-size: 500;
+      tightening-threshold: 100;
+      
+      child: Gtk.Box {
+        orientation: vertical;
+        
+        Adw.PreferencesPage {
+          Adw.PreferencesGroup {
+            title: _("Выберите виды ядра Linux");
+            description: _("Ядра, которые будут установлены в систему.");
+
+            Adw.ActionRow {
+              title: _("Linux Hardened");
+              activatable-widget: btn_hardened; 
+
+              [prefix]
+              Gtk.CheckButton btn_hardened {
+                active: true; 
+              }
+            }
+
+            Adw.ActionRow {
+              title: "Linux LTS";
+              activatable-widget: btn_lts;
+
+              [prefix]
+              Gtk.CheckButton btn_lts {}
+            }
+
+            Adw.ActionRow {
+              title: "Linux";
+              activatable-widget: btn_linux;
+
+              [prefix]
+              Gtk.CheckButton btn_linux {}
+            }
+          }
+        }
+        
+        Gtk.Label {
+          label: _("Linux Hardened - повышенная безопасность\nLinux LTS - надежность\nLinux - последние обновления");
+          justify: center;
+          wrap: true;
+          styles ["dim-label", "caption"]
+        }
+      };
+    };
+
+    [bottom]
+    Gtk.ActionBar {
+      [end]
+      Gtk.Button {
+        margin-bottom: 10;
+        margin-end: 10;
+        margin-top: 10;
+        margin-start: 10;
+
+        styles ["suggested-action", "pill"]
+        action-name: "win.next_step";
+        child: Adw.ButtonContent {
+          icon-name: "go-next-symbolic";
+          label: _("Далее");
+        };
+      }
+    }
+  };
+}

@@ -1,0 +1,78 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $InstallPage : Adw.NavigationPage {
+  title: _("Установка");
+  tag: "install";
+
+  can-pop: false;
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {
+      show-back-button: false;
+      show-end-title-buttons: false;
+    }
+
+    content: Adw.StatusPage status_page {
+      title: _("Установка системы");
+      description: _("Пожалуйста, не выключайте компьютер.");
+      icon-name: "system-software-install-symbolic";
+
+      child: Adw.Clamp {
+        maximum-size: 800;
+        tightening-threshold: 100;
+
+        child: Gtk.Box {
+          orientation: vertical;
+          spacing: 12;
+
+          Gtk.Spinner spinner {
+            spinning: true;
+            width-request: 36;
+            height-request: 36;
+            halign: center;
+          }
+          
+          Gtk.ProgressBar progress_bar {
+            fraction: 0.0;
+          }
+
+          Gtk.Expander {
+            label: _("Технические подробности");
+            expanded: false;
+
+            child: Gtk.ScrolledWindow {
+              height-request: 250;
+              min-content-height: 250;
+              hscrollbar-policy: never;
+              propagate-natural-height: true;
+              
+              child: Gtk.TextView console_view {
+                editable: false;
+                cursor-visible: false;
+                monospace: true;
+                wrap-mode: char;
+                bottom-margin: 10;
+                top-margin: 10;
+                left-margin: 10;
+                right-margin: 10;
+                
+                styles ["card"]
+              };
+            };
+          }
+
+          // Кнопка завершения (изначально скрыта)
+          Gtk.Button btn_finish {
+            label: _("Перезагрузить систему");
+            styles ["suggested-action", "pill"]
+            action-name: "app.quit";
+            visible: false;
+            halign: center;
+          }
+        };
+      };
+    };
+  };
+}

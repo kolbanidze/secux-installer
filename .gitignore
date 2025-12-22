@@ -2,3 +2,4 @@ __pycache__/
 debug.conf
 test.py
 python_packages/*
+todo.md

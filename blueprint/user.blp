@@ -1,0 +1,176 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $UserPage: Adw.NavigationPage {
+  title: _("Пользователь");
+  tag: "user";
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Adw.Clamp {
+      maximum-size: 500;
+      tightening-threshold: 100;
+
+      child: Gtk.Box {
+        orientation: vertical;
+        spacing: 24;
+        margin-top: 24;
+        margin-bottom: 24;
+        margin-start: 12;
+        margin-end: 12;
+
+        Adw.PreferencesGroup {
+          title: _("Создание администратора");
+          description: _("Заполните данные для входа в систему");
+
+          Adw.EntryRow entry_fullname {
+            title: _("Полное имя");
+          }
+
+          Adw.EntryRow entry_hostname {
+            title: _("Название устройства");
+          }
+
+          Adw.EntryRow entry_username {
+            title: _("Имя пользователя");
+          }
+
+          Adw.PasswordEntryRow entry_password {
+            title: _("Пароль");
+          }
+
+          Adw.PasswordEntryRow entry_confirm {
+            title: _("Пароль (повтор)");
+          }
+        }
+
+        Gtk.Stack error_stack {
+          transition-type: crossfade;
+
+          Gtk.StackPage {
+            name: "none";
+
+            child: Gtk.Box {};
+          }
+
+          Gtk.StackPage {
+            name: "empty";
+
+            child: Gtk.Label {
+              label: _("Все поля должны быть заполнены");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+
+          Gtk.StackPage {
+            name: "ascii_host";
+
+            child: Gtk.Label {
+              label: _("Имя устройства должно содержать только латинские буквы");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+
+          Gtk.StackPage {
+            name: "ascii_user";
+
+            child: Gtk.Label {
+              label: _("Имя пользователя должно быть на английском");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+
+          Gtk.StackPage {
+            name: "ascii_pwd";
+
+            child: Gtk.Label {
+              label: _("Пароль должен содержать только латинские символы и цифры");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+
+          Gtk.StackPage {
+            name: "space_user";
+
+            child: Gtk.Label {
+              label: _("Имя пользователя не должно содержать пробелов");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+
+          Gtk.StackPage {
+            name: "space_host";
+
+            child: Gtk.Label {
+              label: _("Имя устройства не должно содержать пробелов");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+
+          Gtk.StackPage {
+            name: "mismatch";
+
+            child: Gtk.Label {
+              label: _("Пароли не совпадают");
+
+              styles [
+                "error",
+              ]
+
+              wrap: true;
+            };
+          }
+        }
+      };
+    };
+
+    [bottom]
+    Gtk.ActionBar {
+      [end]
+      Gtk.Button {
+        margin-bottom: 10;
+        margin-end: 10;
+        margin-top: 10;
+        margin-start: 10;
+        styles ["suggested-action", "pill"]
+        action-name: "user.validate";
+        child: Adw.ButtonContent {
+          icon-name: "go-next-symbolic";
+          label: _("Далее");
+        };
+      }
+    }
+  };
+}

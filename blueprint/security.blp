@@ -1,0 +1,75 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $SecurityPage : Adw.NavigationPage {
+  title: _("Безопасность");
+  tag: "security";
+
+  child: Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar {}
+
+    content: Adw.Clamp { 
+    maximum-size: 500;
+    tightening-threshold: 100;
+    
+    child: Adw.PreferencesPage {
+        Adw.PreferencesGroup {
+          title: _("Выберите вариант установки");
+          description: _("Настройка механизмов защиты операционной системы");
+
+          Adw.ActionRow {
+            title: _("Применение всех механизмов защиты");
+            subtitle: _("Доверие собственным ключам Secure Boot. Требует включения Custom Mode.");
+            activatable-widget: btn_secure; // Клик по строке переключает кнопку
+
+            [prefix]
+            Gtk.CheckButton btn_secure {
+              active: true;
+            }
+          }
+
+          Adw.ActionRow {
+            title: _("Совместимая защита");
+            subtitle: _("Доверие ключам Microsoft. Менее безопасно, но выше совместимость.");
+            activatable-widget: btn_compat;
+
+            [prefix]
+            Gtk.CheckButton btn_compat {
+              group: btn_secure;
+            }
+          }
+
+          Adw.ActionRow {
+            title: _("Без механизмов защиты");
+            subtitle: _("Наименее безопасно.");
+            activatable-widget: btn_none;
+
+            [prefix]
+            Gtk.CheckButton btn_none {
+              group: btn_secure;
+            }
+          }
+        }
+      };
+    };
+    
+    [bottom]
+    Gtk.ActionBar {
+      [end]
+      Gtk.Button {
+        margin-bottom: 10;
+        margin-end: 10;
+        margin-top: 10;
+        margin-start: 10;
+
+        styles ["suggested-action", "pill"]
+        action-name: "win.next_step";
+        child: Adw.ButtonContent {
+          icon-name: "go-next-symbolic";
+          label: _("Далее");
+        };
+      }
+    }
+  };
+}
