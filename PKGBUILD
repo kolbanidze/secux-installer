@@ -17,4 +17,5 @@ package() {
   cp -a "$srcdir/secux-installer" "$pkgdir/usr/local/bin/"
 
   install -Dm644 "$srcdir/secux-installer/scripts/secux-installer.desktop" "$pkgdir/etc/xdg/autostart/secux-installer.desktop"
+  install -Dm644 "$srcdir/secux-installer/scripts/secux-installer.desktop" "$pkgdir/usr/share/applications/secux-installer.desktop"
 }
