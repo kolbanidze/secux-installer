@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Secux Linux Installer
+Comment=Secux Linux distribution installer
+Icon=system-software-install-symbolic
+Path=/usr/local/share/secux-installer
+Exec=/usr/bin/python /usr/local/share/secux-installer/main.py
+Terminal=false
+Categories=Setup;Install;Secux;Linux;Installer

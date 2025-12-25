@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.0.6"
+VERSION = "0.0.7"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -35,7 +35,7 @@ def get_ui_path(filename):
     return os.path.join(os.path.join(BASE_DIR, "ui"), filename)
 
 def load_resources():    
-    res = Gio.Resource.load("resources.gresource")
+    res = Gio.Resource.load(os.path.join(BASE_DIR, "resources.gresource"))
     
     Gio.resources_register(res)
 

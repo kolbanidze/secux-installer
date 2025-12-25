@@ -1,5 +1,5 @@
-__pycache__/
-debug.conf
-test.py
-python_packages/*
-todo.md
+src/
+pkg/
+secux-installer.tar.gz
+secux-installer-*
+secux-installer/offline_installation.conf
