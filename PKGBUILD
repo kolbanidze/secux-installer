@@ -8,7 +8,7 @@ license=('MIT')
 depends=(python3 python-gobject gtk4 libadwaita)
 makedepends=()
 source=("secux-installer.tar.gz")
-sha256sums=('5811cb08fa6566ed0213e25890b1fc7092cde74147b53673315e90392d8f6f68')
+sha256sums=('8cccffad0b899f8a85b2d4d050304f6021d3322b6f39707be256b946e82d4efb')
 
 package() {
   mkdir -p "$pkgdir/usr/local/bin/"
