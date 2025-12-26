@@ -7,4 +7,5 @@ Icon=system-software-install-symbolic
 Path=/usr/local/bin/secux-installer
 Exec=/usr/bin/python /usr/local/bin/secux-installer/main.py
 Terminal=false
+X-GNOME-Autostart-enabled=true
 Categories=Setup;Install;Secux;Linux;Installer
