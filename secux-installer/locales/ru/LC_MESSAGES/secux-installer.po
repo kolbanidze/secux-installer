@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 17:05+0300\n"
+"POT-Creation-Date: 2025-12-26 20:45+0300\n"
 "PO-Revision-Date: 2025-12-21 11:21+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -86,23 +86,56 @@ msgstr ""
 msgid "INFO: Настройка доверенной загрузки"
 msgstr ""
 
-#: main.py:569
+#: main.py:568
 msgid "Установка завершена"
 msgstr ""
 
-#: main.py:570
+#: main.py:569
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr ""
 
-#: main.py:573
+#: main.py:572
 msgid "Ошибка установки"
 msgstr ""
 
-#: main.py:574
+#: main.py:573
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr ""
 
-#: main.py:1374
+#: main.py:1331
+msgid "Внимание"
+msgstr ""
+
+#: main.py:1331
+msgid ""
+"Для работы системы необходима поддержка UEFI.\n"
+"Установка системы невозможна."
+msgstr ""
+
+#: main.py:1365
+msgid "ОШИБКА: отсутствует подключение к интернету!"
+msgstr ""
+
+#: main.py:1366 main.py:1372
+msgid "Ошибка"
+msgstr ""
+
+#: main.py:1366
+msgid "Отсутствует подключение к интернету"
+msgstr ""
+
+#: main.py:1371
+msgid ""
+"ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты "
+"необходимо включить Setup Mode."
+msgstr ""
+
+#: main.py:1372
+msgid ""
+"Setup Mode отключен, что необходимо для применения всех механизмов защиты."
+msgstr ""
+
+#: main.py:1423
 msgid "Текущий язык: русский"
 msgstr ""
 
@@ -122,7 +155,7 @@ msgstr ""
 msgid "Консольный"
 msgstr ""
 
-#: ui/desktop.ui:82 ui/encryption.ui:139 ui/kernel.ui:96 ui/partition.ui:215
+#: ui/desktop.ui:82 ui/encryption.ui:138 ui/kernel.ui:96 ui/partition.ui:215
 #: ui/security.ui:85 ui/software.ui:154 ui/source.ui:115 ui/timezone.ui:75
 #: ui/user.ui:191 ui/welcome.ui:60
 msgid "Далее"
@@ -155,28 +188,26 @@ msgid "Machine Owner Key"
 msgstr ""
 
 #: ui/encryption.ui:50
-msgid ""
-"Одноразовый пароль для управления ключами безопасности.\n"
-"Он потребуется только при первой перезагрузке."
+msgid "Одноразовый пароль для управления ключами безопасности."
 msgstr ""
 
-#: ui/encryption.ui:54
+#: ui/encryption.ui:53
 msgid "Одноразовый пароль"
 msgstr ""
 
-#: ui/encryption.ui:59
+#: ui/encryption.ui:58
 msgid "Повторите одноразовый пароль"
 msgstr ""
 
-#: ui/encryption.ui:80
+#: ui/encryption.ui:79
 msgid "Пароль не может быть пустым"
 msgstr ""
 
-#: ui/encryption.ui:94 ui/user.ui:160
+#: ui/encryption.ui:93 ui/user.ui:160
 msgid "Пароли не совпадают"
 msgstr ""
 
-#: ui/encryption.ui:108
+#: ui/encryption.ui:107
 msgid "Используйте только английские буквы и цифры"
 msgstr ""
 

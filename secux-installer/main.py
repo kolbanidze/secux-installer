@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -512,7 +512,6 @@ class InstallPage(Adw.NavigationPage):
                     self.execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', f'/efi/EFI/secux/secux-{kernel}.efi', f'/efi/EFI/secux/secux-{kernel}.efi'])
                     self.execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', f'/efi/EFI/secux/secux-{kernel}-fallback.efi', f'/efi/EFI/secux/secux-{kernel}-fallback.efi'])
 
-                # TODO: MOK page on encryption page
                 mok_input = f"{self.config['MOK']}\n{self.config['MOK']}\n"
                 self.execute(['arch-chroot', mount_point, 'mokutil', '--import', '/etc/secureboot/sb.cer'], input_str=mok_input)
 
@@ -1326,6 +1325,12 @@ class InstallerWindow(Adw.ApplicationWindow):
         self.current_step_index = 0
 
         self.nav_view.push(self.steps[0])
+
+        uefi_support = self.check_secure_boot_and_setup_mode()[0]
+        if not uefi_support:
+            self.show_error_dialog(_("Внимание"), _("Для работы системы необходима поддержка UEFI.\nУстановка системы невозможна."))
+            return
+
         self.setup_actions()
         self.nav_view.connect("popped", self.on_page_popped)
 
@@ -1333,6 +1338,13 @@ class InstallerWindow(Adw.ApplicationWindow):
         action = Gio.SimpleAction.new("next_step", None)
         action.connect("activate", self.on_next_step)
         self.add_action(action)
+
+    def check_connectivity(self) -> bool:
+        try:
+            response = urlopen("https://gstatic.com/generate_204", timeout=5)
+        except URLError:
+            return False
+        return response.getcode() == 204
 
     def on_next_step(self, action, param):
         next_index = self.current_step_index + 1
@@ -1347,12 +1359,49 @@ class InstallerWindow(Adw.ApplicationWindow):
                 page_to_open.update_visibility(sec_mode)
             
             if isinstance(page_to_open, InstallPage):
+                if self.source_page.get_source_mode() == 'online':
+                    is_online = self.check_connectivity()
+                    if not is_online:
+                        print(_("ОШИБКА: отсутствует подключение к интернету!"))
+                        self.show_error_dialog(_("Ошибка"), _("Отсутствует подключение к интернету"))
+                        return
+                if self.security_page.get_selected_mode() == 'secure_full':
+                    is_setup_mode_on = self.check_secure_boot_and_setup_mode()[2]
+                    if not is_setup_mode_on:
+                        print(_("ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты необходимо включить Setup Mode."))
+                        self.show_error_dialog(_("Ошибка"), _("Setup Mode отключен, что необходимо для применения всех механизмов защиты."))
+                        return
                 page_to_open.start_installation(self)
 
             self.current_step_index = next_index
             self.nav_view.push(page_to_open)
         else:
             self.close()
+
+    @staticmethod
+    def check_secure_boot_and_setup_mode() -> list:
+        uefi_support = True
+        secure_boot = False
+        setup_mode = False
+
+        process = subprocess.run(["/usr/bin/mokutil", "--sb-state"], capture_output=True)
+        mokutil_output = process.stdout
+        if b"not supported" in process.stderr or len(mokutil_output) == 0:
+            uefi_support = False
+        if b"enabled" in mokutil_output:
+            secure_boot = True
+        if b"Setup Mode" in mokutil_output:
+            setup_mode = True
+
+        return [uefi_support, secure_boot, setup_mode]
+
+    def show_error_dialog(self, title, message):
+        dialog = Adw.AlertDialog(
+            heading=title,
+            body=message
+        )
+        dialog.add_response("close", "OK")
+        dialog.present(self)
 
     def on_page_popped(self, nav_view, page):
         if page in self.steps:

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: secux-installer 0.0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 17:05+0300\n"
+"POT-Creation-Date: 2025-12-26 20:45+0300\n"
 "PO-Revision-Date: 2025-12-21 11:30+0300\n"
 "Last-Translator: AI Assistant\n"
 "Language-Team: English\n"
@@ -92,23 +92,60 @@ msgstr "INFO: Setting up secux-repo"
 msgid "INFO: Настройка доверенной загрузки"
 msgstr "INFO: Setting up trusted boot"
 
-#: main.py:569
+#: main.py:568
 msgid "Установка завершена"
 msgstr "Installation complete"
 
-#: main.py:570
+#: main.py:569
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr "System is ready. Please remove the installation media."
 
-#: main.py:573
+#: main.py:572
 msgid "Ошибка установки"
 msgstr "Installation failed"
 
-#: main.py:574
+#: main.py:573
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr "A critical error occurred. See logs below."
 
-#: main.py:1374
+#: main.py:1331
+#, fuzzy
+msgid "Внимание"
+msgstr "Warning"
+
+#: main.py:1331
+msgid ""
+"Для работы системы необходима поддержка UEFI.\n"
+"Установка системы невозможна."
+msgstr "The system requires UEFI support.\nSystem installation is not possible"
+
+#: main.py:1365
+#, fuzzy
+msgid "ОШИБКА: отсутствует подключение к интернету!"
+msgstr "ERROR: no internet connection"
+
+#: main.py:1366 main.py:1372
+msgid "Ошибка"
+msgstr "Error"
+
+#: main.py:1366
+#, fuzzy
+msgid "Отсутствует подключение к интернету"
+msgstr "Internet connection required"
+
+#: main.py:1371
+msgid ""
+"ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты "
+"необходимо включить Setup Mode."
+msgstr "ERROR: Secure Boot Setup Mode is OFF. For the highest level of protection you need to turn on Setup Mode."
+
+#: main.py:1372
+#, fuzzy
+msgid ""
+"Setup Mode отключен, что необходимо для применения всех механизмов защиты."
+msgstr "Setup Mode is OFF, which is required to apply all security mechanisms"
+
+#: main.py:1423
 msgid "Текущий язык: русский"
 msgstr "Current language: English"
 
@@ -128,7 +165,7 @@ msgstr "You can choose a graphical interface or text mode"
 msgid "Консольный"
 msgstr "Console (Text-only)"
 
-#: ui/desktop.ui:82 ui/encryption.ui:139 ui/kernel.ui:96 ui/partition.ui:215
+#: ui/desktop.ui:82 ui/encryption.ui:138 ui/kernel.ui:96 ui/partition.ui:215
 #: ui/security.ui:85 ui/software.ui:154 ui/source.ui:115 ui/timezone.ui:75
 #: ui/user.ui:191 ui/welcome.ui:60
 msgid "Далее"
@@ -163,30 +200,26 @@ msgid "Machine Owner Key"
 msgstr ""
 
 #: ui/encryption.ui:50
-msgid ""
-"Одноразовый пароль для управления ключами безопасности.\n"
-"Он потребуется только при первой перезагрузке."
-msgstr "One-time password is required for managing security keys.\nIt will only be required on the first reboot."
+msgid "Одноразовый пароль для управления ключами безопасности."
+msgstr "One-time password is required for managing security keys."
 
-#: ui/encryption.ui:54
-#, fuzzy
+#: ui/encryption.ui:53
 msgid "Одноразовый пароль"
-msgstr "Repeat one-time password"
+msgstr "One-time password"
 
-#: ui/encryption.ui:59
-#, fuzzy
+#: ui/encryption.ui:58
 msgid "Повторите одноразовый пароль"
 msgstr "Repeat one-time password"
 
-#: ui/encryption.ui:80
+#: ui/encryption.ui:79
 msgid "Пароль не может быть пустым"
 msgstr "Password cannot be empty"
 
-#: ui/encryption.ui:94 ui/user.ui:160
+#: ui/encryption.ui:93 ui/user.ui:160
 msgid "Пароли не совпадают"
 msgstr "Passwords do not match"
 
-#: ui/encryption.ui:108
+#: ui/encryption.ui:107
 msgid "Используйте только английские буквы и цифры"
 msgstr "Use only English letters and numbers"
 

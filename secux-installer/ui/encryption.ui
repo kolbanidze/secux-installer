@@ -47,8 +47,7 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                   <object class="AdwPreferencesGroup" id="mok_group">
                     <property name="visible">false</property>
                     <property name="title" translatable="yes">Machine Owner Key</property>
-                    <property name="description" translatable="yes">Одноразовый пароль для управления ключами безопасности.
-Он потребуется только при первой перезагрузке.</property>
+                    <property name="description" translatable="yes">Одноразовый пароль для управления ключами безопасности.</property>
                     <child>
                       <object class="AdwPasswordEntryRow" id="mok_entry">
                         <property name="title" translatable="yes">Одноразовый пароль</property>
