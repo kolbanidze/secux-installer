@@ -20,6 +20,7 @@ template $EncryptionPage: Adw.NavigationPage {
         margin-bottom: 24;
         margin-start: 12;
         margin-end: 12;
+        
         Adw.PreferencesGroup {
           title: _("Шифрование диска");
           description: _("Защитите ваши данные паролем.\nИспользуйте только латинские символы.");
@@ -29,6 +30,20 @@ template $EncryptionPage: Adw.NavigationPage {
 
           Adw.PasswordEntryRow confirm_entry {
             title: _("Повторите пароль");
+          }
+        }
+
+        Adw.PreferencesGroup mok_group {
+          visible: false;
+          title: _("Machine Owner Key");
+          description: _("Одноразовый пароль для управления ключами безопасности.\nОн потребуется только при первой перезагрузке.");
+          
+          Adw.PasswordEntryRow mok_entry {
+            title: _("Одноразовый пароль");
+          }
+
+          Adw.PasswordEntryRow mok_confirm_entry {
+            title: _("Повторите одноразовый пароль");
           }
         }
 

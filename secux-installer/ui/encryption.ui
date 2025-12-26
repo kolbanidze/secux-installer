@@ -44,6 +44,24 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                   </object>
                 </child>
                 <child>
+                  <object class="AdwPreferencesGroup" id="mok_group">
+                    <property name="visible">false</property>
+                    <property name="title" translatable="yes">Machine Owner Key</property>
+                    <property name="description" translatable="yes">Одноразовый пароль для управления ключами безопасности.
+Он потребуется только при первой перезагрузке.</property>
+                    <child>
+                      <object class="AdwPasswordEntryRow" id="mok_entry">
+                        <property name="title" translatable="yes">Одноразовый пароль</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwPasswordEntryRow" id="mok_confirm_entry">
+                        <property name="title" translatable="yes">Повторите одноразовый пароль</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
                   <object class="GtkStack" id="error_stack">
                     <property name="transition-type">1</property>
                     <child>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-21 11:48+0300\n"
+"POT-Creation-Date: 2025-12-26 17:05+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,55 +17,91 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.py:113
+#: main.py:118
 msgid "INFO: Сбор данных завершен. Начало установки..."
 msgstr ""
 
-#: main.py:175
-msgid "ERROR: Command failed with code "
-msgstr ""
-
-#: main.py:181
-msgid "EXCEPTION: "
-msgstr ""
-
-#: main.py:195
+#: main.py:232
 msgid "INFO: Автоматическая разметка диска "
 msgstr ""
 
-#: main.py:200
-msgid "INFO: Создание разделов EFI и Root..."
+#: main.py:235
+msgid "ОШИБКА: не удалось форматировать диск"
 msgstr ""
 
-#: main.py:206
+#: main.py:240
+msgid "ОШИБКА: не удалось создать разделы"
+msgstr ""
+
+#: main.py:246
+msgid "ОШИБКА: не удалось найти разделы"
+msgstr ""
+
+#: main.py:254
 msgid "INFO: Используется ручная разметка."
 msgstr ""
 
-#: main.py:211
+#: main.py:263
+msgid "ОШИБКА: не удалось определить разделы"
+msgstr ""
+
+#: main.py:268
+msgid "INFO: Размер файла подкаки: "
+msgstr ""
+
+#: main.py:272
+msgid "INFO: Настройка шифрования LUKS2"
+msgstr ""
+
+#: main.py:300
 msgid "INFO: Монтирование файловых систем..."
 msgstr ""
 
-#: main.py:216
-msgid "INFO: Установка пакетов (pacstrap)..."
+#: main.py:315
+msgid "INFO: Установка пакетов операционной системы"
 msgstr ""
 
-#: main.py:258
+#: main.py:339
+msgid "> Настройка максимального уровня защищённости"
+msgstr ""
+
+#: main.py:342
+msgid "> Настройка защиты с обратной совместимостью"
+msgstr ""
+
+#: main.py:345
+msgid "> Отсутствие защиты"
+msgstr ""
+
+#: main.py:352
+msgid "INFO: Настройка операционной системы"
+msgstr ""
+
+#: main.py:355
+msgid "INFO: Настройка собственного репозитория ПО"
+msgstr ""
+
+#: main.py:383
+msgid "INFO: Настройка доверенной загрузки"
+msgstr ""
+
+#: main.py:569
 msgid "Установка завершена"
 msgstr ""
 
-#: main.py:259
+#: main.py:570
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr ""
 
-#: main.py:262
+#: main.py:573
 msgid "Ошибка установки"
 msgstr ""
 
-#: main.py:263
+#: main.py:574
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr ""
 
-#: main.py:1019
+#: main.py:1374
 msgid "Текущий язык: русский"
 msgstr ""
 
@@ -85,7 +121,7 @@ msgstr ""
 msgid "Консольный"
 msgstr ""
 
-#: ui/desktop.ui:82 ui/encryption.ui:121 ui/kernel.ui:96 ui/partition.ui:215
+#: ui/desktop.ui:82 ui/encryption.ui:139 ui/kernel.ui:96 ui/partition.ui:215
 #: ui/security.ui:85 ui/software.ui:154 ui/source.ui:115 ui/timezone.ui:75
 #: ui/user.ui:191 ui/welcome.ui:60
 msgid "Далее"
@@ -113,15 +149,33 @@ msgstr ""
 msgid "Повторите пароль"
 msgstr ""
 
-#: ui/encryption.ui:62
+#: ui/encryption.ui:49
+msgid "Machine Owner Key"
+msgstr ""
+
+#: ui/encryption.ui:50
+msgid ""
+"Одноразовый пароль для управления ключами безопасности.\n"
+"Он потребуется только при первой перезагрузке."
+msgstr ""
+
+#: ui/encryption.ui:54
+msgid "Одноразовый пароль"
+msgstr ""
+
+#: ui/encryption.ui:59
+msgid "Повторите одноразовый пароль"
+msgstr ""
+
+#: ui/encryption.ui:80
 msgid "Пароль не может быть пустым"
 msgstr ""
 
-#: ui/encryption.ui:76 ui/user.ui:160
+#: ui/encryption.ui:94 ui/user.ui:160
 msgid "Пароли не совпадают"
 msgstr ""
 
-#: ui/encryption.ui:90
+#: ui/encryption.ui:108
 msgid "Используйте только английские буквы и цифры"
 msgstr ""
 

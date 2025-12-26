@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -111,7 +111,8 @@ class InstallPage(Adw.NavigationPage):
             "timezone": main_window.timezone_page.get_timezone(),
             "encryption_pwd": main_window.encryption_page.get_password(),
             "kernels": main_window.kernel_page.get_selected_kernels(),
-            "packages": main_window.software_page.get_selected_packages()
+            "packages": main_window.software_page.get_selected_packages(),
+            "MOK": main_window.encryption_page.get_mok_password()
         }
 
         self.log(_("INFO: Сбор данных завершен. Начало установки..."))
@@ -799,6 +800,12 @@ class EncryptionPage(Adw.NavigationPage):
     
     password_entry = Gtk.Template.Child()
     confirm_entry = Gtk.Template.Child()
+    
+    # Новые виджеты
+    mok_group = Gtk.Template.Child()
+    mok_entry = Gtk.Template.Child()
+    mok_confirm_entry = Gtk.Template.Child()
+    
     error_stack = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
@@ -807,6 +814,9 @@ class EncryptionPage(Adw.NavigationPage):
         
         self.password_entry.connect("notify::text", self.on_text_changed)
         self.confirm_entry.connect("notify::text", self.on_text_changed)
+        # Подключаем очистку ошибок для новых полей
+        self.mok_entry.connect("notify::text", self.on_text_changed)
+        self.mok_confirm_entry.connect("notify::text", self.on_text_changed)
 
     def setup_actions(self):
         action_group = Gio.SimpleActionGroup()
@@ -816,15 +826,22 @@ class EncryptionPage(Adw.NavigationPage):
         action.connect("activate", self.on_validate_and_next)
         action_group.add_action(action)
 
+    def update_visibility(self, security_mode):
+        """Показывает поле MOK только если выбран режим secure_compat"""
+        is_compat = (security_mode == "secure_compat")
+        self.mok_group.set_visible(is_compat)
+
     def on_text_changed(self, *args):
         if self.error_stack.get_visible_child_name() != "none":
             self.error_stack.set_visible_child_name("none")
 
     def show_error(self, message):
-        self.error_label.set_label(message)
-        self.error_label.set_visible(True)
+        # Этот метод не использовался в оригинале, но если есть label, то ок. 
+        # В оригинале error_stack, поэтому оставляем логику ниже.
+        pass 
 
     def on_validate_and_next(self, action, param):
+        # 1. Валидация основного пароля диска
         pwd = self.password_entry.get_text()
         confirm = self.confirm_entry.get_text()
 
@@ -840,13 +857,34 @@ class EncryptionPage(Adw.NavigationPage):
             self.error_stack.set_visible_child_name("ascii")
             return
         
+        # 2. Валидация MOK пароля (если поле видимо)
+        if self.mok_group.get_visible():
+            mok = self.mok_entry.get_text()
+            mok_confirm = self.mok_confirm_entry.get_text()
+
+            if not mok:
+                self.error_stack.set_visible_child_name("empty")
+                return
+            
+            if mok != mok_confirm:
+                self.error_stack.set_visible_child_name("mismatch")
+                return
+            
+            if not mok.isascii():
+                self.error_stack.set_visible_child_name("ascii")
+                return
+
         win = self.get_native()
         if win:
             win.activate_action("win.next_step", None)
 
-
     def get_password(self):
         return self.password_entry.get_text()
+
+    def get_mok_password(self):
+        if self.mok_group.get_visible():
+            return self.mok_entry.get_text()
+        return ""
 
 
 @Gtk.Template(filename=get_ui_path("partition.ui"))
@@ -1303,6 +1341,10 @@ class InstallerWindow(Adw.ApplicationWindow):
             
             if isinstance(page_to_open, SummaryPage):
                 page_to_open.populate_data(self)
+            
+            if isinstance(page_to_open, EncryptionPage):
+                sec_mode = self.security_page.get_selected_mode()
+                page_to_open.update_visibility(sec_mode)
             
             if isinstance(page_to_open, InstallPage):
                 page_to_open.start_installation(self)

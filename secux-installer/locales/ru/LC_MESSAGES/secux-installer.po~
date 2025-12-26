@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-21 11:21+0300\n"
+"POT-Creation-Date: 2025-12-21 11:48+0300\n"
 "PO-Revision-Date: 2025-12-21 11:21+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -18,55 +18,55 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: main.py:96
+#: main.py:113
 msgid "INFO: Сбор данных завершен. Начало установки..."
 msgstr ""
 
-#: main.py:158
+#: main.py:175
 msgid "ERROR: Command failed with code "
 msgstr "ОШИБКА: команда завершилась с кодом "
 
-#: main.py:164
+#: main.py:181
 msgid "EXCEPTION: "
 msgstr "ОШИБКА "
 
-#: main.py:178
+#: main.py:195
 msgid "INFO: Автоматическая разметка диска "
 msgstr ""
 
-#: main.py:183
+#: main.py:200
 msgid "INFO: Создание разделов EFI и Root..."
 msgstr ""
 
-#: main.py:189
+#: main.py:206
 msgid "INFO: Используется ручная разметка."
 msgstr ""
 
-#: main.py:194
+#: main.py:211
 msgid "INFO: Монтирование файловых систем..."
 msgstr ""
 
-#: main.py:199
+#: main.py:216
 msgid "INFO: Установка пакетов (pacstrap)..."
 msgstr ""
 
-#: main.py:241
+#: main.py:258
 msgid "Установка завершена"
 msgstr ""
 
-#: main.py:242
+#: main.py:259
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr ""
 
-#: main.py:245
+#: main.py:262
 msgid "Ошибка установки"
 msgstr ""
 
-#: main.py:246
+#: main.py:263
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr ""
 
-#: main.py:995
+#: main.py:1019
 msgid "Текущий язык: русский"
 msgstr ""
 
