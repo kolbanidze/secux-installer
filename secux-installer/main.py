@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.0.7"
+VERSION = "0.0.8"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -264,10 +264,11 @@ class InstallPage(Adw.NavigationPage):
                 return
             
             swap_size = part_conf["swap_size"]
-            self.log(_("Размер файла подкаки: ") + str(swap_size))
+            self.log(_("INFO: Размер файла подкаки: ") + str(swap_size))
 
             # === ЭТАП 2: LUKS, LVM ===
             self.set_progress(0.2)
+            self.log(_("INFO: Настройка шифрования LUKS2"))
             self.execute(['cryptsetup', 'luksFormat', rootfs_partition], input_str=self.config["encryption_pwd"]) 
             self.execute(['cryptsetup', 'luksOpen', rootfs_partition, 'cryptlvm'], input_str=self.config["encryption_pwd"])
             
@@ -325,14 +326,22 @@ class InstallPage(Adw.NavigationPage):
             pacstrap_packages.extend(user_packages)
 
             if self.config['desktop'] == 'gnome':
+                self.log("> DE: GNOME")
                 pacstrap_packages.extend(["xorg", "gnome", "networkmanager-openvpn", "gnome-tweaks", "gdm"])
             elif self.config['desktop'] == 'kde':
+                self.log("> DE: KDE")
                 pacstrap_packages.extend(["xorg", "plasma", "networkmanager-openvpn", "kde-applications"])
+            else:
+                self.log("> DE: Console")
             
             if self.config['security'] == "secure_full":
+                self.log(_("> Настройка максимального уровня защищённости"))
                 pacstrap_packages.extend(['sbctl'])
             elif self.config['security'] == "secure_compat":
+                self.log(_("> Настройка защиты с обратной совместимостью"))
                 pacstrap_packages.extend(['shim-signed'])
+            else:
+                self.log(_("> Отсутствие защиты"))
             
             pacstrap_cmd = ['stdbuf', '-oL', 'pacstrap', '-K', mount_point] + pacstrap_packages
             self.execute(pacstrap_cmd)
@@ -342,6 +351,7 @@ class InstallPage(Adw.NavigationPage):
             self.log(_("INFO: Настройка операционной системы"))
 
             # Adding custom repo
+            self.log(_("INFO: Настройка собственного репозитория ПО"))
             repo_conf_line = f'\n[kolbanidze]\nServer = {REPO_URL}\n'
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{repo_conf_line}" >> /etc/pacman.conf'])
             self.execute(['cp', '/usr/share/pacman/keyrings/kolbanidze.gpg', f'{mount_point}/usr/share/pacman/keyrings/'])
@@ -369,26 +379,27 @@ class InstallPage(Adw.NavigationPage):
 
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
+            self.log(_("INFO: Настройка доверенной загрузки"))
             mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt lvm2 filesystems fsck)\n"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
 
             for kernel in self.config['kernels']:
                 preset_file = f'{mount_point}/etc/mkinitcpio.d/{kernel}.preset'
 
-                self._execute(['sed', '-i', '/^default_config/s/^/#/', preset_file])
-                self._execute(['sed', '-i', '/^default_image/s/^/#/', preset_file])
-                self._execute(['sed', '-i', '/^#default_uki/s/^#//', preset_file])
-                self._execute(['sed', '-i', '/^#default_options/s/^#//', preset_file])
+                self.execute(['sed', '-i', '/^default_config/s/^/#/', preset_file])
+                self.execute(['sed', '-i', '/^default_image/s/^/#/', preset_file])
+                self.execute(['sed', '-i', '/^#default_uki/s/^#//', preset_file])
+                self.execute(['sed', '-i', '/^#default_options/s/^#//', preset_file])
 
-                self._execute(['sed', '-i', '/^fallback_config/s/^/#/', preset_file])
-                self._execute(['sed', '-i', '/^fallback_image/s/^/#/', preset_file])
-                self._execute(['sed', '-i', '/^#fallback_uki/s/^#//', preset_file])
-                self._execute(['sed', '-i', '/^#fallback_options/s/^#//', preset_file])
+                self.execute(['sed', '-i', '/^fallback_config/s/^/#/', preset_file])
+                self.execute(['sed', '-i', '/^fallback_image/s/^/#/', preset_file])
+                self.execute(['sed', '-i', '/^#fallback_uki/s/^#//', preset_file])
+                self.execute(['sed', '-i', '/^#fallback_options/s/^#//', preset_file])
 
-                self._execute(['sed', '-i', 's/arch-/secux-/g', preset_file])
-                self._execute(['sed', '-i', 's/Linux/secux/g', preset_file])
+                self.execute(['sed', '-i', 's/arch-/secux-/g', preset_file])
+                self.execute(['sed', '-i', 's/Linux/secux/g', preset_file])
 
-                self._execute(['sed', '-i', 's|--splash /usr/share/systemd/bootctl/splash-arch.bmp||', preset_file])
+                self.execute(['sed', '-i', 's|--splash /usr/share/systemd/bootctl/splash-arch.bmp||', preset_file])
 
             # Creating cmdline
             self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/cmdline.d'])
