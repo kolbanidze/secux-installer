@@ -1,5 +1,5 @@
 pkgname=secux-installer
-pkgver=0.0.8
+pkgver=0.0.9
 pkgrel=1
 pkgdesc="Secux Linux Installer"
 arch=('x86_64')
@@ -8,7 +8,7 @@ license=('MIT')
 depends=(python3 python-gobject gtk4 libadwaita)
 makedepends=()
 source=("secux-installer.tar.gz")
-sha256sums=('68039f8cf6045796c17c8af2f371b1da3a7403a91a100d2ac94dc35c68916055')
+sha256sums=('b3978a2c674f2469266730a7f777eec10025977d2756df9af739ddace3465bb9')
 
 package() {
   mkdir -p "$pkgdir/usr/local/bin/"

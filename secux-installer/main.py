@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.0.8"
+VERSION = "0.0.9"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -187,7 +187,7 @@ class InstallPage(Adw.NavigationPage):
             return 1
 
     def __list_partitions(self, drive):
-        result = subprocess.run(['lsblk', '-ln', '-o', 'NAME,TYPE'], stdout=subprocess.PIPE, text=True)
+        result = subprocess.run(['sudo', 'lsblk', '-ln', '-o', 'NAME,TYPE'], stdout=subprocess.PIPE, text=True)
         partitions = []
         for line in result.stdout.splitlines():
             name, type_ = line.split()
@@ -403,9 +403,9 @@ class InstallPage(Adw.NavigationPage):
 
             # Creating cmdline
             self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/cmdline.d'])
-            process = subprocess.run(["blkid", '-s', 'UUID', '-o', 'value', rootfs_partition], check=True, capture_output=True)
+            process = subprocess.run(["sudo", "blkid", '-s', 'UUID', '-o', 'value', rootfs_partition], check=True, capture_output=True)
             uuid = process.stdout.strip().decode()
-            print(f"UUID HERE {uuid}")
+            self.log(f"UUID: {uuid}")
             cmdline_content = f"rd.luks.name={uuid}=cryptlvm root={root_lv_path} rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot audit=1 quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{cmdline_content}" > /etc/cmdline.d/root.conf'])
 
@@ -443,8 +443,7 @@ class InstallPage(Adw.NavigationPage):
             # Delete previous UKI if exists
             self.execute(['bash', '-c', f'rm -rf {mount_point}/efi/EFI/secux/*'])
 
-            # Change distro info and logo
-            installer_path = "/usr/local/share/secux-installer"
+            installer_path = "/usr/local/bin/secux-installer"
 
             # Mitigated by secux-hooks
             # self.execute(['cp', f'{installer_path}/images/SecuxLinux.svg', f'{mount_point}/usr/share/icons/'])
