@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.0.9"
+VERSION = "0.1.0"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -318,12 +318,12 @@ class InstallPage(Adw.NavigationPage):
             # Логика выбора пакетов
             kernels = self.config["kernels"]
             user_packages = self.config["packages"]
-            kernels.extend([i+'-headers' for i in kernels])
 
             pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks']
             pacstrap_packages.extend(self._get_ucode_package())
             pacstrap_packages.extend(kernels)
             pacstrap_packages.extend(user_packages)
+            pacstrap_packages.extend([i+'-headers' for i in kernels])
 
             if self.config['desktop'] == 'gnome':
                 self.log("> DE: GNOME")
@@ -463,10 +463,10 @@ class InstallPage(Adw.NavigationPage):
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'apparmor.service'])
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'ufw.service'])
 
-            if self.config["desktop"] == "GNOME":
+            if self.config["desktop"] == "gnome":
                 self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'gdm.service'])
 
-            elif self.config["desktop"] == "KDE":
+            elif self.config["desktop"] == "kde":
                 self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'sddm.service'])
                 self.execute(['sed', '-i', 's/^Current=.*/Current=breeze/', f'{mount_point}/usr/lib/sddm/sddm.conf.d/default.conf'])
 
