@@ -80,7 +80,7 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                           <class name="suggested-action"/>
                           <class name="pill"/>
                         </style>
-                        <property name="action-name">app.quit</property>
+                        <property name="action-name">install.reboot_system</property>
                         <property name="visible">false</property>
                         <property name="halign">3</property>
                       </object>

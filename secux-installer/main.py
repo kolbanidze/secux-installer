@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -93,8 +93,23 @@ class InstallPage(Adw.NavigationPage):
         self.text_buffer = self.console_view.get_buffer()
         self.config = {}
 
+        # self._add_action("reboot_system", self.on_quit)
+        action_group = Gio.SimpleActionGroup()
+        self.insert_action_group("install", action_group)
+
+        action = Gio.SimpleAction.new("reboot_system", None)
+        action.connect("activate", self.on_quit)
+        action_group.add_action(action)
+
+
         with open(LOG_FILE, "w", encoding="utf-8") as f:
             f.write(f"--- Log started at {datetime.datetime.now()} ---\n")
+
+    def on_quit(self, a, b):
+        app = Gio.Application.get_default()
+        if app:
+            app.quit()
+        subprocess.run(['systemctl', 'reboot'])
 
     def start_installation(self, main_window):
         """
@@ -1278,7 +1293,7 @@ class WelcomePage(Adw.NavigationPage):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        current_lang = os.environ.get("LANG", "en_US.UTF-8")
+        current_lang = os.environ.get("LANG", "ru_RU.UTF-8")
         if "ru" in current_lang.lower():
             initial_index = 0
         else:
