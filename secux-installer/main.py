@@ -374,6 +374,8 @@ class InstallPage(Adw.NavigationPage):
             self.execute(['cp', '/usr/share/pacman/keyrings/kolbanidze-trusted', f'{mount_point}/usr/share/pacman/keyrings/'])
             self.execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'kolbanidze'])
 
+            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{self.config['security']}" > /etc/secux-security-config'])
+
             self.set_progress(0.62)
             self.execute(['bash', '-c', 'genfstab -U /mnt >> /mnt/etc/fstab']) 
 
@@ -668,9 +670,7 @@ class SoftwarePage(Adw.NavigationPage):
         
         # Secux
         if self.chk_sec_manager.get_active():
-            # TODO: create secux-security-manager package in kolbanidze repo
-            # packages.append("secux-security-manager")
-            pass
+            packages.append("secux-security-manager")
             
         # Pacman
         if self.chk_chromium.get_active():
