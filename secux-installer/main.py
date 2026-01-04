@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.1.9"
+VERSION = "0.2.1"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -396,20 +396,28 @@ class InstallPage(Adw.NavigationPage):
             self.execute(['arch-chroot', mount_point, 'usermod', '-aG', 'wheel', user['username']])
 
             # Copy Wi-Fi for OS
+            # Я сейчас задумался, а это вообще странно выглядит, когда
+            # часть комментариев на русском, а часть на английском? 
             src_dir = '/etc/NetworkManager/system-connections'
             dst_dir = f'{mount_point}/etc/NetworkManager/system-connections'
             if not os.path.exists(dst_dir):
-                os.makedirs(dst_dir)
+                self.execute(['mkdir', '-r', dst_dir])
             
             self.execute(['cp', '-a', f'{src_dir}/.', dst_dir])
-            for filename in os.listdir(dst_dir):
-                filepath = os.path.join(dst_dir, filename)
-                
-                # Удаляет адрес интерфейса из конфига
-                # В ISO образе сетевой адаптер может отличаться
-                self.execute(['sed', '-i', '/^interface-name=/d', filepath])
-                
-                os.chmod(filepath, 0o600)
+            ls_proc = subprocess.run(['sudo', 'ls', dst_dir], capture_output=True, text=True)
+            
+            if ls_proc.returncode == 0:
+                files = ls_proc.stdout.splitlines()
+                for filename in files:
+                    if not filename.strip(): continue
+                    
+                    filepath = os.path.join(dst_dir, filename)
+                    
+                    # Удаляет адрес интерфейса из конфига
+                    # В ISO образе сетевой адаптер может отличаться
+                    self.execute(['sed', '-i', '/^interface-name=/d', filepath])
+                    
+                    self.execute(['chmod', '600', filepath])
             
             # Keymap
             current_lang = os.environ.get("LANG", "en_US.UTF-8").lower()
@@ -423,8 +431,8 @@ class InstallPage(Adw.NavigationPage):
                 f"sources={sources}\n"+\
                 "xkb-options=['grp:alt_shift_toggle']"
 
-                with open(f"{mount_point}/usr/share/glib-2.0/schemas/90_keyboard.gschema.override", 'w') as file:
-                    file.write(gnome_override)
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{gnome_override}" >> {mount_point}/usr/share/glib-2.0/schemas/90_keyboard.gschema.override'])
+
                 self.execute(['arch-chroot', mount_point, 'glib-compile-schemas', '/usr/share/glib-2.0/schemas'])
 
             elif self.config['desktop'] == 'kde':
@@ -434,9 +442,9 @@ class InstallPage(Adw.NavigationPage):
                     layout = 'us'
                 kde_config = "[Layout]\n" + "DisplayNames=,\n" + f"LayoutList={layout}\n" +\
                 "Options=grp:alt_shift_toggle\n" + "Use=true\n"
-                os.makedirs(f"{mount_point}/etc/xdg", exist_ok=True)
-                with open(f"{mount_point}/etc/xdg/kxkbrc", 'w') as file:
-                    file.write(kde_config)
+                self.execute(['mkdir', '-p', f"{mount_point}/etc/xdg"])
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{kde_config}" >> {mount_point}/etc/xdg/kxkbrc'])
+
             
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
