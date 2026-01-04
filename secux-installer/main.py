@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.1.8"
+VERSION = "0.1.9"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -395,6 +395,49 @@ class InstallPage(Adw.NavigationPage):
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo {sudoers_line} >> /etc/sudoers']) 
             self.execute(['arch-chroot', mount_point, 'usermod', '-aG', 'wheel', user['username']])
 
+            # Copy Wi-Fi for OS
+            src_dir = '/etc/NetworkManager/system-connections'
+            dst_dir = f'{mount_point}/etc/NetworkManager/system-connections'
+            if not os.path.exists(dst_dir):
+                os.makedirs(dst_dir)
+            
+            self.execute(['cp', '-a', f'{src_dir}/.', dst_dir])
+            for filename in os.listdir(dst_dir):
+                filepath = os.path.join(dst_dir, filename)
+                
+                # Удаляет адрес интерфейса из конфига
+                # В ISO образе сетевой адаптер может отличаться
+                self.execute(['sed', '-i', '/^interface-name=/d', filepath])
+                
+                os.chmod(filepath, 0o600)
+            
+            # Keymap
+            current_lang = os.environ.get("LANG", "en_US.UTF-8").lower()
+            if self.config['desktop'] == 'gnome':
+                if 'ru' in current_lang:
+                    sources = "[('xkb', 'us'), ('xkb', 'ru')]"
+                else:
+                    sources = "[('xkb', 'us')]"
+                
+                gnome_override = "[org.gnome.desktop.input-sources]\n" +\
+                f"sources={sources}\n"+\
+                "xkb-options=['grp:alt_shift_toggle']"
+
+                with open(f"{mount_point}/usr/share/glib-2.0/schemas/90_keyboard.gschema.override", 'w') as file:
+                    file.write(gnome_override)
+                self.execute(['arch-chroot', mount_point, 'glib-compile-schemas', '/usr/share/glib-2.0/schemas'])
+
+            elif self.config['desktop'] == 'kde':
+                if 'ru' in current_lang:
+                    layout = 'us,ru'
+                else:
+                    layout = 'us'
+                kde_config = "[Layout]\n" + "DisplayNames=,\n" + f"LayoutList={layout}\n" +\
+                "Options=grp:alt_shift_toggle\n" + "Use=true\n"
+                os.makedirs(f"{mount_point}/etc/xdg", exist_ok=True)
+                with open(f"{mount_point}/etc/xdg/kxkbrc", 'w') as file:
+                    file.write(kde_config)
+            
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
             self.log(_("INFO: Настройка доверенной загрузки"))
@@ -448,7 +491,8 @@ class InstallPage(Adw.NavigationPage):
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "ru_RU.UTF-8 UTF-8" >> /etc/locale.gen'])
             
             self.execute(['arch-chroot', mount_point, 'locale-gen'])
-            self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "FONT=cyr-sun16" >> /etc/vconsole.conf'])
+            self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "KEYMAP=us" >> /etc/vconsole.conf'])
+            self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "FONT=eurlatgr" >> /etc/vconsole.conf'])
 
             # Set plymouth theme
             self.execute(['rm', '-rf', f'{mount_point}/usr/share/plymouth/themes'])
