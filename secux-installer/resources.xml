@@ -8,6 +8,5 @@
     <file alias="scalable/actions/browser-firefox-symbolic.svg">icons/browser-firefox-symbolic.svg</file>
     <file alias="scalable/actions/vlc-logo-symbolic.svg">icons/vlc-logo-symbolic.svg</file>
     <file alias="scalable/actions/keepassxc-logo-symbolic.svg">icons/keepassxc-logo-symbolic.svg</file>
-    <file alias="icons/app-icon">icons/org.secux.installer.svg</file>
   </gresource>
 </gresources>
