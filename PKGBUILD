@@ -1,5 +1,5 @@
 pkgname=secux-installer
-pkgver=0.1.4
+pkgver=0.1.6
 pkgrel=1
 pkgdesc="Secux Linux Installer"
 arch=('x86_64')
@@ -8,7 +8,7 @@ license=('MIT')
 depends=(python3 python-gobject gtk4 libadwaita)
 makedepends=()
 source=("secux-installer.tar.gz")
-sha256sums=('1cf8a398d3fb126e37fd26deb7b0f5d4b113dec1923e64c75366e5cf5215b113')
+sha256sums=('3b37f793094b6b00f14b4ec7f405af47fe0e3712df5fae463f0c6f1f1febd5cc')
 
 package() {
   mkdir -p "$pkgdir/usr/local/bin/"
@@ -16,6 +16,7 @@ package() {
 
   cp -a "$srcdir/secux-installer" "$pkgdir/usr/local/bin/"
 
+  install -Dm644 "$srcdir/secux-installer/icons/org.secux.installer.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/org.secux.installer.svg"
   install -Dm644 "$srcdir/secux-installer/scripts/secux-installer.desktop" "$pkgdir/etc/xdg/autostart/secux-installer.desktop"
   install -Dm644 "$srcdir/secux-installer/scripts/secux-installer.desktop" "$pkgdir/usr/share/applications/secux-installer.desktop"
 }
