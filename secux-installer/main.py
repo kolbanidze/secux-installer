@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -496,8 +496,12 @@ class InstallPage(Adw.NavigationPage):
             
             if setup_english:
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen'])
+                self.execute('rm', f"{mount_point}/etc/locale.conf")
+                self.execute(['tee', f"{mount_point}/etc/locale.conf"], input_str='LANG="en_US.UTF-8"')
             if setup_russian:
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "ru_RU.UTF-8 UTF-8" >> /etc/locale.gen'])
+                self.execute('rm', f"{mount_point}/etc/locale.conf")
+                self.execute(['tee', f"{mount_point}/etc/locale.conf"], input_str='LANG="ru_RU.UTF-8"')
             
             self.execute(['arch-chroot', mount_point, 'locale-gen'])
             self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "KEYMAP=us" >> /etc/vconsole.conf'])
