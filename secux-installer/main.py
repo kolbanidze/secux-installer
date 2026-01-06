@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.2.3"
+VERSION = "0.2.5"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -343,7 +343,7 @@ class InstallPage(Adw.NavigationPage):
 
             if self.config['desktop'] == 'gnome':
                 self.log("> DE: GNOME")
-                pacstrap_packages.extend(["xorg", "gnome", "networkmanager-openvpn", "gnome-tweaks", "gdm"])
+                pacstrap_packages.extend(["xorg", "gnome", "networkmanager-openvpn", "gnome-tweaks", "gdm", 'gnome-shell-extension-appindicator', 'gnome-shell-extension-desktop-icons-ng'])
             elif self.config['desktop'] == 'kde':
                 self.log("> DE: KDE")
                 pacstrap_packages.extend(["xorg", "plasma", "networkmanager-openvpn", "kde-applications"])
@@ -419,7 +419,7 @@ class InstallPage(Adw.NavigationPage):
                     
                     self.execute(['chmod', '600', filepath])
             
-            # Keymap
+            # Keymap and extensions
             current_lang = os.environ.get("LANG", "en_US.UTF-8").lower()
             if self.config['desktop'] == 'gnome':
                 if 'ru' in current_lang:
@@ -434,6 +434,43 @@ class InstallPage(Adw.NavigationPage):
                 target_file = os.path.join(mount_point, 'usr/share/glib-2.0/schemas/90_keyboard.gschema.override')
                 self.execute(['tee', target_file], input_str=gnome_override)
 
+                # Configure dock pinned apps
+                favorite_apps = ['org.gnome.Nautilus.desktop', 'org.gnome.Console.desktop', 'org.gnome.Software.desktop', 'org.gnome.Settings.desktop']
+                if 'firefox' in self.config["packages"]:
+                    favorite_apps.insert(0, 'firefox.desktop')
+                if 'chromium' in self.config['packages']:
+                    favorite_apps.insert(0, 'chromium.desktop')
+                if 'keepassxc' in self.config['packages']:
+                    favorite_apps.append('org.keepassxc.KeePassXC.desktop')
+
+                extensions_override = f"""
+[org.gnome.shell]
+enabled-extensions=['appindicatorsupport@rgcjonas.gmail.com', 'ding@rastersoft.com']
+favorite-apps={str(favorite_apps)}
+"""
+                target_file = os.path.join(mount_point, 'usr/share/glib-2.0/schemas/91_ui.gschema.override')
+                self.execute(['tee', target_file], input_str=extensions_override)
+
+                dconf_override = """
+[org/gnome/desktop/app-folders]
+folder-children=['System', 'Utilities']
+
+[org/gnome/desktop/app-folders/folders/System]
+name='X-GNOME-Shell-System.directory'
+apps=['org.gnome.baobab.desktop', 'org.gnome.DiskUtility.desktop', 'org.gnome.Logs.desktop', 'org.freedesktop.MalcontentControl.desktop', 'org.gnome.SystemMonitor.desktop', 'org.gnome.tweaks.desktop', 'org.gnome.Epiphany.desktop', 'qv4l2.desktop', 'qvidcap.desktop', 'bvnc.desktop', 'avahi-discover.desktop', 'org.gnome.Yelp.desktop', 'bssh.desktop', 'org.gnome.Tour.desktop']
+
+[org/gnome/desktop/app-folders/folders/Utilities]
+name='X-GNOME-Shell-Utilities.directory'
+apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.Papers.desktop', 'org.gnome.font-viewer.desktop', 'org.gnome.Loupe.desktop', 'org.gnome.Characters.desktop', 'org.gnome.Weather.desktop', 'org.gnome.Contacts.desktop', 'org.gnome.Maps.desktop', 'org.gnome.Music.desktop', 'org.gnome.Showtime.desktop', 'org.gnome.SimpleScan.desktop', 'org.gnome.Evince.desktop', 'vim.desktop']"
+"""
+                self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/profile'])
+                self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/db/local.d'])
+                profile_content = "user-db:user\nsystem-db:local\n"
+                self.execute(['bash', '-c', f'echo -e "{profile_content}" > {mount_point}/etc/dconf/profile/user'])
+                target_file = os.path.join(mount_point, 'etc/dconf/db/local.d/01-secux-custom')
+                self.execute(['tee', target_file], input_str=dconf_override)
+
+                self.execute(['arch-chroot', mount_point, 'dconf', 'update'])
                 self.execute(['arch-chroot', mount_point, 'glib-compile-schemas', '/usr/share/glib-2.0/schemas'])
 
             elif self.config['desktop'] == 'kde':
