@@ -431,7 +431,8 @@ class InstallPage(Adw.NavigationPage):
                 f"sources={sources}\n"+\
                 "xkb-options=['grp:alt_shift_toggle']"
 
-                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{gnome_override}" > {mount_point}/usr/share/glib-2.0/schemas/90_keyboard.gschema.override'])
+                target_file = os.path.join(mount_point, 'usr/share/glib-2.0/schemas/90_keyboard.gschema.override')
+                self.execute(['tee', target_file], input_str=gnome_override)
 
                 self.execute(['arch-chroot', mount_point, 'glib-compile-schemas', '/usr/share/glib-2.0/schemas'])
 
