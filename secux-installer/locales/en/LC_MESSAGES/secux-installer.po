@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: secux-installer 0.0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 20:45+0300\n"
+"POT-Creation-Date: 2026-01-07 18:03+0300\n"
 "PO-Revision-Date: 2025-12-21 11:30+0300\n"
 "Last-Translator: AI Assistant\n"
 "Language-Team: English\n"
@@ -17,135 +17,139 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: main.py:118
+#: main.py:133
 msgid "INFO: Сбор данных завершен. Начало установки..."
 msgstr "INFO: Data collection complete. Starting installation..."
 
-#: main.py:232
+#: main.py:248
 msgid "INFO: Автоматическая разметка диска "
 msgstr "INFO: Automatic partitioning of disk "
 
-#: main.py:235
+#: main.py:251
 msgid "ОШИБКА: не удалось форматировать диск"
 msgstr "ERROR: failed to format drive"
 
-#: main.py:240
+#: main.py:255
 msgid "ОШИБКА: не удалось создать разделы"
 msgstr "ERROR: failed to create partitions"
 
-#: main.py:246
+#: main.py:260
 msgid "ОШИБКА: не удалось найти разделы"
 msgstr "ERROR: failed to find partitions"
 
-#: main.py:254
+#: main.py:268
 msgid "INFO: Используется ручная разметка."
 msgstr "INFO: Manual partitioning used."
 
-#: main.py:263
+#: main.py:277
 msgid "ОШИБКА: не удалось определить разделы"
 msgstr "ERROR: failed to detect partitions"
 
-#: main.py:268
+#: main.py:282
 #, fuzzy
 msgid "INFO: Размер файла подкаки: "
-msgstr "INFO: swapfile size"
+msgstr "INFO: swapfile size: "
 
-#: main.py:272
+#: main.py:286
 #, fuzzy
 msgid "INFO: Настройка шифрования LUKS2"
 msgstr "INFO: configuring LUKS2"
 
-#: main.py:300
+#: main.py:314
 msgid "INFO: Монтирование файловых систем..."
 msgstr "INFO: Mounting filesystems..."
 
-#: main.py:315
+#: main.py:329
 #, fuzzy
 msgid "INFO: Установка пакетов операционной системы"
 msgstr "INFO: installing OS packages"
 
-#: main.py:339
+#: main.py:353
 #, fuzzy
 msgid "> Настройка максимального уровня защищённости"
 msgstr "> Configuring OS security mechanisms"
 
-#: main.py:342
+#: main.py:356
 #, fuzzy
 msgid "> Настройка защиты с обратной совместимостью"
 msgstr "> Configuring OS security mechanisms"
 
-#: main.py:345
+#: main.py:359
 msgid "> Отсутствие защиты"
 msgstr "> No protection"
 
-#: main.py:352
+#: main.py:366
 #, fuzzy
 msgid "INFO: Настройка операционной системы"
 msgstr "INFO: Configuring OS security mechanisms"
 
-#: main.py:355
+#: main.py:369
 msgid "INFO: Настройка собственного репозитория ПО"
 msgstr "INFO: Setting up secux-repo"
 
-#: main.py:383
+#: main.py:488
 #, fuzzy
 msgid "INFO: Настройка доверенной загрузки"
 msgstr "INFO: Setting up trusted boot"
 
-#: main.py:568
+#: main.py:678
 msgid "Установка завершена"
 msgstr "Installation complete"
 
-#: main.py:569
+#: main.py:679
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr "System is ready. Please remove the installation media."
 
-#: main.py:572
+#: main.py:682
 msgid "Ошибка установки"
 msgstr "Installation failed"
 
-#: main.py:573
+#: main.py:683
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr "A critical error occurred. See logs below."
 
-#: main.py:1331
+#: main.py:1439
 #, fuzzy
 msgid "Внимание"
 msgstr "Warning"
 
-#: main.py:1331
+#: main.py:1439
 msgid ""
 "Для работы системы необходима поддержка UEFI.\n"
 "Установка системы невозможна."
-msgstr "The system requires UEFI support.\nSystem installation is not possible"
+msgstr ""
+"The system requires UEFI support.\n"
+"System installation is not possible"
 
-#: main.py:1365
+#: main.py:1473
 #, fuzzy
 msgid "ОШИБКА: отсутствует подключение к интернету!"
 msgstr "ERROR: no internet connection"
 
-#: main.py:1366 main.py:1372
+#: main.py:1474 main.py:1480
 msgid "Ошибка"
 msgstr "Error"
 
-#: main.py:1366
+#: main.py:1474
 #, fuzzy
 msgid "Отсутствует подключение к интернету"
 msgstr "Internet connection required"
 
-#: main.py:1371
+#: main.py:1479
 msgid ""
 "ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты "
 "необходимо включить Setup Mode."
-msgstr "ERROR: Secure Boot Setup Mode is OFF. For the highest level of protection you need to turn on Setup Mode."
+msgstr ""
+"ERROR: Secure Boot Setup Mode is OFF. For the highest level of protection "
+"you need to turn on Setup Mode."
 
-#: main.py:1372
+#: main.py:1480
 #, fuzzy
 msgid ""
 "Setup Mode отключен, что необходимо для применения всех механизмов защиты."
 msgstr "Setup Mode is OFF, which is required to apply all security mechanisms"
 
-#: main.py:1423
+#: main.py:1531
 msgid "Текущий язык: русский"
 msgstr "Current language: English"
 

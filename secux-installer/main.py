@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.2.7"
+VERSION = "0.3.0"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -193,8 +193,9 @@ class InstallPage(Adw.NavigationPage):
             process.wait()
             
             if process.returncode != 0:
-                self.log("ERROR: Command failed with code " + process.returncode)
-                return process.returncode
+                self.log("ERROR: Command failed with code " + str(process.returncode))
+                self.an_error_occurred()
+                raise Exception
             
             return 0
 
@@ -248,12 +249,10 @@ class InstallPage(Adw.NavigationPage):
 
                 if self.execute(['sgdisk', '-Z', drive]) != 0:
                     self.log(_("ОШИБКА: не удалось форматировать диск"))
-                    self.an_error_occurred()
                     return
 
                 if self.execute(['sgdisk', f'-n1:0:+1G', '-t1:ef00', '-c1:EFI', '-N2', '-t2:8304', drive]) != 0:
                     self.log(_("ОШИБКА: не удалось создать разделы"))
-                    self.an_error_occurred()
                     return
                 
                 partitions = self.__list_partitions(drive)
@@ -321,9 +320,9 @@ class InstallPage(Adw.NavigationPage):
                 self.execute(['cp', '/etc/pacman_online.conf', '/etc/pacman.conf'])
             else:
                 self.execute(['cp', '/etc/pacman_offline.conf', '/etc/pacman.conf'])
-                self.execute(['pacman-key', '--init'])
-                self.execute(['pacman-key', '--populate', 'archlinux'])
-                self.execute(['pacman-key', '--populate', 'kolbanidze'])
+            self.execute(['pacman-key', '--init'])
+            self.execute(['pacman-key', '--populate', 'archlinux'])
+            self.execute(['pacman-key', '--populate', 'kolbanidze'])
 
             # === ЭТАП 5: Установка системы ===
             self.set_progress(0.4)
@@ -360,7 +359,7 @@ class InstallPage(Adw.NavigationPage):
                 self.log(_("> Отсутствие защиты"))
             
             pacstrap_cmd = ['stdbuf', '-oL', 'pacstrap', '-K', mount_point] + pacstrap_packages
-            self.execute(pacstrap_cmd)
+            self.execute(pacstrap_cmd)            
             
             # === ЭТАП 6: Настройка системы ===
             self.set_progress(0.6)
@@ -378,8 +377,6 @@ class InstallPage(Adw.NavigationPage):
 
             self.set_progress(0.62)
             self.execute(['bash', '-c', 'genfstab -U /mnt >> /mnt/etc/fstab']) 
-
-            self.execute(['arch-chroot', mount_point, 'useradd', '-m', self.config['user']['username'], '-c', self.config['user']['fullname']])
             
             # Configuring timezone
             timezone = self.config["timezone"]
