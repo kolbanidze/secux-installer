@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.2.5"
+VERSION = "0.2.7"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -457,11 +457,13 @@ folder-children=['System', 'Utilities']
 
 [org/gnome/desktop/app-folders/folders/System]
 name='X-GNOME-Shell-System.directory'
+translate=true
 apps=['org.gnome.baobab.desktop', 'org.gnome.DiskUtility.desktop', 'org.gnome.Logs.desktop', 'org.freedesktop.MalcontentControl.desktop', 'org.gnome.SystemMonitor.desktop', 'org.gnome.tweaks.desktop', 'org.gnome.Epiphany.desktop', 'qv4l2.desktop', 'qvidcap.desktop', 'bvnc.desktop', 'avahi-discover.desktop', 'org.gnome.Yelp.desktop', 'bssh.desktop', 'org.gnome.Tour.desktop']
 
 [org/gnome/desktop/app-folders/folders/Utilities]
 name='X-GNOME-Shell-Utilities.directory'
-apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.Papers.desktop', 'org.gnome.font-viewer.desktop', 'org.gnome.Loupe.desktop', 'org.gnome.Characters.desktop', 'org.gnome.Weather.desktop', 'org.gnome.Contacts.desktop', 'org.gnome.Maps.desktop', 'org.gnome.Music.desktop', 'org.gnome.Showtime.desktop', 'org.gnome.SimpleScan.desktop', 'org.gnome.Evince.desktop', 'vim.desktop']"
+translate=true
+apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.Papers.desktop', 'org.gnome.font-viewer.desktop', 'org.gnome.Loupe.desktop', 'org.gnome.Characters.desktop', 'org.gnome.Weather.desktop', 'org.gnome.Contacts.desktop', 'org.gnome.Maps.desktop', 'org.gnome.Music.desktop', 'org.gnome.Showtime.desktop', 'org.gnome.SimpleScan.desktop', 'org.gnome.Evince.desktop', 'vim.desktop']
 """
                 self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/profile'])
                 self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/db/local.d'])
@@ -795,7 +797,7 @@ class SourcePage(Adw.NavigationPage):
         self.update_image_status()
 
     def check_is_netinstall(self):
-        if os.path.isfile(os.path.join(BASE_DIR, "offline_installation.conf")):
+        if os.path.isfile("/etc/offline_installation.conf"):
             return False
         else:
             return True
