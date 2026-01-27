@@ -2,7 +2,9 @@
 
 В этом репозитории находятся исходники графического установщика Secux Linux.
 
-<img src="https://raw.githubusercontent.com/kolbanidze/secux-installer/refs/heads/main/welcome.png" width=256>
+<p align="center">
+    <img src="https://raw.githubusercontent.com/kolbanidze/secux-installer/refs/heads/main/welcome.png" width=256>
+</p>
 
 ## Запуск
 
