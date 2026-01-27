@@ -2,7 +2,7 @@
 
 В этом репозитории находятся исходники графического установщика Secux Linux.
 
-![Первоначальный экран Secux Linux Installer](https://github.com/kolbanidze/secux-installer/raw/master/welcome.png)
+![Первоначальный экран Secux Linux Installer](https://raw.githubusercontent.com/kolbanidze/secux-installer/refs/heads/main/welcome.png)
 
 ## Запуск
 
