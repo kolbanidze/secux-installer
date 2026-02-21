@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.3.1"
+VERSION = "0.3.2"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -334,7 +334,7 @@ class InstallPage(Adw.NavigationPage):
             kernels = self.config["kernels"]
             user_packages = self.config["packages"]
 
-            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks']
+            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks', 'bluez', 'bluez-utils']
             pacstrap_packages.extend(self._get_ucode_package())
             pacstrap_packages.extend(kernels)
             pacstrap_packages.extend(user_packages)
@@ -573,6 +573,7 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'auditd.service'])
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'apparmor.service'])
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'ufw.service'])
+            self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'bluetooth.service'])
 
             if self.config["desktop"] == "gnome":
                 self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'gdm.service'])
