@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.3.2"
+VERSION = "0.4.0"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -322,7 +322,7 @@ class InstallPage(Adw.NavigationPage):
                 self.execute(['cp', '/etc/pacman_offline.conf', '/etc/pacman.conf'])
             self.execute(['pacman-key', '--init'])
             self.execute(['pacman-key', '--populate', 'archlinux'])
-            self.execute(['pacman-key', '--populate', 'kolbanidze'])
+            self.execute(['pacman-key', '--populate', 'secux-repo'])
 
             # === ЭТАП 5: Установка системы ===
             self.set_progress(0.4)
@@ -367,13 +367,14 @@ class InstallPage(Adw.NavigationPage):
 
             # Adding custom repo
             self.log(_("INFO: Настройка собственного репозитория ПО"))
-            repo_conf_line = f'\n[kolbanidze]\nServer = {REPO_URL}\n'
+            repo_conf_line = f'\n[secux-repo]\nServer = {REPO_URL}\n'
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{repo_conf_line}" >> /etc/pacman.conf'])
-            self.execute(['cp', '/usr/share/pacman/keyrings/kolbanidze.gpg', f'{mount_point}/usr/share/pacman/keyrings/'])
-            self.execute(['cp', '/usr/share/pacman/keyrings/kolbanidze-trusted', f'{mount_point}/usr/share/pacman/keyrings/'])
-            self.execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'kolbanidze'])
+            self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo.gpg', f'{mount_point}/usr/share/pacman/keyrings/'])
+            self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo-trusted', f'{mount_point}/usr/share/pacman/keyrings/'])
+            self.execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'secux-repo'])
 
-            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{self.config['security']}" > /etc/secux-security-config'])
+            sed_command = "sed -i 's|Include = /etc/pacman.d/mirrorlist|Server = https://secux.tonightisthenight.site/$repo/os/$arch|g' /etc/pacman.conf"
+            self.execute(['arch-chroot', mount_point, 'bash', '-c', sed_command])
 
             self.set_progress(0.62)
             self.execute(['bash', '-c', 'genfstab -U /mnt >> /mnt/etc/fstab']) 
