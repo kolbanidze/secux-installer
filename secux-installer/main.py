@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.4.1"
+VERSION = "0.4.2"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -373,7 +373,7 @@ class InstallPage(Adw.NavigationPage):
             self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo-trusted', f'{mount_point}/usr/share/pacman/keyrings/'])
             self.execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'secux-repo'])
 
-            sed_command = "sed -i 's|Include = /etc/pacman.d/mirrorlist|Server = https://secux.tonightisthenight.site/$repo/os/$arch|g' /etc/pacman.conf"
+            sed_command = "sed -i 's|Include = /etc/pacman.d/mirrorlist|Server = https://secuxlinuxrepo.loophole.site/$repo/os/$arch|g' /etc/pacman.conf"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', sed_command])
 
             self.set_progress(0.62)
