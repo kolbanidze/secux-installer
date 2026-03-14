@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.4.3"
+VERSION = "0.4.4"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -119,6 +119,7 @@ class InstallPage(Adw.NavigationPage):
 
         self.config = {
             "source": main_window.source_page.get_source_mode(),
+            "repo_source": main_window.source_page.get_repo_source(),
             "user": main_window.user_page.get_user(),
             "partition": main_window.partition_page.get_config(),
             "security": main_window.security_page.get_selected_mode(),
@@ -129,7 +130,6 @@ class InstallPage(Adw.NavigationPage):
             "packages": main_window.software_page.get_selected_packages(),
             "MOK": main_window.encryption_page.get_mok_password()
         }
-
         self.log(_("INFO: Сбор данных завершен. Начало установки..."))
         
         thread = threading.Thread(target=self._installation_sequence, daemon=True)
@@ -373,9 +373,10 @@ class InstallPage(Adw.NavigationPage):
             self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo-trusted', f'{mount_point}/usr/share/pacman/keyrings/'])
             self.execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'secux-repo'])
 
-            sed_command = "sed -i 's|Include = /etc/pacman.d/mirrorlist|Server = https://secux.tonightisthenight.site/$repo/os/$arch|g' /etc/pacman.conf"
-            self.execute(['arch-chroot', mount_point, 'bash', '-c', sed_command])
-
+            if self.config['repo_source'] == 'secux':
+                sed_command = "sed -i 's|Include = /etc/pacman.d/mirrorlist|Server = https://secux.tonightisthenight.site/$repo/os/$arch|g' /etc/pacman.conf"
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', sed_command])
+            
             self.set_progress(0.62)
             self.execute(['bash', '-c', 'genfstab -U /mnt >> /mnt/etc/fstab']) 
             
@@ -513,7 +514,7 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             process = subprocess.run(["sudo", "blkid", '-s', 'UUID', '-o', 'value', rootfs_partition], check=True, capture_output=True)
             uuid = process.stdout.strip().decode()
             self.log(f"UUID: {uuid}")
-            cmdline_content = f"rd.luks.name={uuid}=cryptlvm root={root_lv_path} rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot audit=1 quiet oops=panic init_on_alloc=1 init_on_free=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
+            cmdline_content = f"rd.luks.name={uuid}=cryptlvm root={root_lv_path} rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot audit=1 quiet slab_nomerge iommu=force iommu.strict=1 iommu.passthrough=0 randomize_kstack_offset=1 vsyscall=none debugfs=off oops=panic init_on_alloc=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{cmdline_content}" > /etc/cmdline.d/root.conf'])
 
             self.set_progress(0.8)
@@ -540,7 +541,7 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             
             self.execute(['arch-chroot', mount_point, 'locale-gen'])
             self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "KEYMAP=us" >> /etc/vconsole.conf'])
-            self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "FONT=eurlatgr" >> /etc/vconsole.conf'])
+            # self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "FONT=eurlatgr" >> /etc/vconsole.conf'])
 
             # Set plymouth theme
             self.execute(['rm', '-rf', f'{mount_point}/usr/share/plymouth/themes'])
@@ -645,6 +646,11 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
 
             # Hardening
             self.execute(['cp', f'{installer_path}/scripts/hardening.conf', f'{mount_point}/etc/sysctl.d/'])
+            if self.config['desktop'] == 'console':
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -c "user.max_user_namespaces=0" >> {mount_point}/etc/sysctl.d/hardening.conf'])
+            else:
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -c "kernel.unprivileged_userns_clone=1" >> {mount_point}/etc/sysctl.d/hardening.conf'])
+
             self.execute(['arch-chroot', mount_point, 'ufw', 'default', 'deny'])
             self.execute(['sed', '-i', 's/ENABLED=no/ENABLED=yes/', f"{mount_point}/etc/ufw/ufw.conf"])
             # self.execute(['arch-chroot', mount_point, 'ufw', 'enable'])
@@ -788,6 +794,7 @@ class SourcePage(Adw.NavigationPage):
     btn_online = Gtk.Template.Child()
     btn_offline = Gtk.Template.Child()
     status_stack = Gtk.Template.Child()
+    repo_switch = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -814,6 +821,12 @@ class SourcePage(Adw.NavigationPage):
         if self.btn_online.get_active():
             return "online"
         return "offline"
+
+    def get_repo_source(self):
+        if self.repo_switch.get_active():
+            return "secux"
+        else:
+            return "arch"
 
 
 @Gtk.Template(filename=get_ui_path("user.ui"))

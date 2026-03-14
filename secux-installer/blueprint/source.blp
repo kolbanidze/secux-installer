@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $SourcePage : Adw.NavigationPage {
+template $SourcePage: Adw.NavigationPage {
   title: _("Источник");
   tag: "source";
 
@@ -24,6 +24,19 @@ template $SourcePage : Adw.NavigationPage {
         Adw.PreferencesGroup {
           title: _("Источник пакетов");
           description: _("Выберите, откуда установщик будет загружать файлы системы.");
+
+          Adw.ActionRow {
+            title: _("Собственные репозитории Secux");
+            subtitle: _("При отключении будут использованы официальные зеркала Arch Linux");
+            icon-name: "network-server-symbolic";
+            activatable-widget: repo_switch;
+
+            [suffix]
+            Gtk.Switch repo_switch {
+              active: true;
+              valign: center;
+            }
+          }
 
           Adw.ActionRow {
             title: _("Онлайн (Рекомендуется)");
@@ -53,19 +66,29 @@ template $SourcePage : Adw.NavigationPage {
         Gtk.Stack status_stack {
           Gtk.StackPage {
             name: "online";
+
             child: Gtk.Label {
               label: _("Текущий образ: <b>Онлайн</b>");
               use-markup: true;
-              styles ["dim-label", "caption"]
+
+              styles [
+                "dim-label",
+                "caption",
+              ]
             };
           }
 
           Gtk.StackPage {
             name: "offline";
+
             child: Gtk.Label {
               label: _("Текущий образ: <b>Офлайн</b>");
               use-markup: true;
-              styles ["dim-label", "caption"]
+
+              styles [
+                "dim-label",
+                "caption",
+              ]
             };
           }
         }
@@ -81,8 +104,13 @@ template $SourcePage : Adw.NavigationPage {
         margin-top: 10;
         margin-start: 10;
 
-        styles ["suggested-action", "pill"]
+        styles [
+          "suggested-action",
+          "pill",
+        ]
+
         action-name: "win.next_step";
+
         child: Adw.ButtonContent {
           icon-name: "go-next-symbolic";
           label: _("Далее");

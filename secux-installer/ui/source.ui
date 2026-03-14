@@ -32,6 +32,20 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                     <property name="description" translatable="yes">Выберите, откуда установщик будет загружать файлы системы.</property>
                     <child>
                       <object class="AdwActionRow">
+                        <property name="title" translatable="yes">Собственные репозитории Secux</property>
+                        <property name="subtitle" translatable="yes">При отключении будут использованы официальные зеркала Arch Linux</property>
+                        <property name="icon-name">network-server-symbolic</property>
+                        <property name="activatable-widget">repo_switch</property>
+                        <child type="suffix">
+                          <object class="GtkSwitch" id="repo_switch">
+                            <property name="active">true</property>
+                            <property name="valign">3</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwActionRow">
                         <property name="title" translatable="yes">Онлайн (Рекомендуется)</property>
                         <property name="subtitle" translatable="yes">Загрузка самых новых версий пакетов из интернета.</property>
                         <property name="icon-name">radiowaves-1-symbolic</property>
