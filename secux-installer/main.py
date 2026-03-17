@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.4.5"
+VERSION = "0.4.6"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -647,9 +647,9 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             # Hardening
             self.execute(['cp', f'{installer_path}/scripts/hardening.conf', f'{mount_point}/etc/sysctl.d/'])
             if self.config['desktop'] == 'console':
-                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -c "user.max_user_namespaces=0" >> {mount_point}/etc/sysctl.d/hardening.conf'])
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -c "user.max_user_namespaces=0" >> /etc/sysctl.d/hardening.conf'])
             else:
-                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -c "kernel.unprivileged_userns_clone=1" >> {mount_point}/etc/sysctl.d/hardening.conf'])
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -c "kernel.unprivileged_userns_clone=1" >> /etc/sysctl.d/hardening.conf'])
 
             self.execute(['arch-chroot', mount_point, 'ufw', 'default', 'deny'])
             self.execute(['sed', '-i', 's/ENABLED=no/ENABLED=yes/', f"{mount_point}/etc/ufw/ufw.conf"])
