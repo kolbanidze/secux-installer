@@ -22,14 +22,15 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.4.6"
+VERSION = "0.4.7"
 
 LOG_FILE = "/tmp/secux-install.log"
 
 APP_ID = "secux-installer"
 LOCALES_DIR = os.path.join(BASE_DIR, "locales")
 
-REPO_URL = "https://kolbanidze.github.io/secux-repo/x86_64/"
+REPO_URL_MAIN = "https://secux.tonightisthenight.site/secux-repo/"
+REPO_URL_MIRROR = "https://kolbanidze-secux-repo.hf.space"
 
 def get_ui_path(filename):
     return os.path.join(os.path.join(BASE_DIR, "ui"), filename)
@@ -367,7 +368,7 @@ class InstallPage(Adw.NavigationPage):
 
             # Adding custom repo
             self.log(_("INFO: Настройка собственного репозитория ПО"))
-            repo_conf_line = f'\n[secux-repo]\nServer = {REPO_URL}\n'
+            repo_conf_line = f'\n[secux-repo]\nServer = {REPO_URL_MAIN}\nServer = {REPO_URL_MIRROR}\n'
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{repo_conf_line}" >> /etc/pacman.conf'])
             self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo.gpg', f'{mount_point}/usr/share/pacman/keyrings/'])
             self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo-trusted', f'{mount_point}/usr/share/pacman/keyrings/'])
