@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.4.4"
+VERSION = "0.4.5"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -239,7 +239,7 @@ class InstallPage(Adw.NavigationPage):
         Основная логика установки. Выполняется последовательно.
         """
         try:
-            # === ЭТАП 1: Подготовка диска ===
+            # Подготовка диска
             self.set_progress(0.1)
             part_conf = self.config["partition"]
             
@@ -281,7 +281,7 @@ class InstallPage(Adw.NavigationPage):
             swap_size = part_conf["swap_size"]
             self.log(_("INFO: Размер файла подкаки: ") + str(swap_size))
 
-            # === ЭТАП 2: LUKS, LVM ===
+            # LUKS, LVM
             self.set_progress(0.2)
             self.log(_("INFO: Настройка шифрования LUKS2"))
             self.execute(['cryptsetup', 'luksFormat', rootfs_partition], input_str=self.config["encryption_pwd"]) 
@@ -309,12 +309,12 @@ class InstallPage(Adw.NavigationPage):
                 self.execute(['mkswap', swap_path])
                 self.execute(['swapon', swap_path])
                 
-            # === ЭТАП 3: Монтирование ===
+            # Монтирование
             self.set_progress(0.3)
             self.log(_("INFO: Монтирование файловых систем..."))
             self.execute(['mount', '--mkdir', '-o', 'uid=0,gid=0,fmask=0077,dmask=0077', efi_partition, efi_mount_point])
 
-            # === ЭТАП 4: Настройка репозиториев ===
+            # Настройка репозиториев
             self.set_progress(0.35)
             if self.config['source'] == "online":   
                 self.execute(['cp', '/etc/pacman_online.conf', '/etc/pacman.conf'])
@@ -324,7 +324,7 @@ class InstallPage(Adw.NavigationPage):
             self.execute(['pacman-key', '--populate', 'archlinux'])
             self.execute(['pacman-key', '--populate', 'secux-repo'])
 
-            # === ЭТАП 5: Установка системы ===
+            # Установка системы
             self.set_progress(0.4)
             self.log(_("INFO: Установка пакетов операционной системы"))
             
@@ -334,7 +334,7 @@ class InstallPage(Adw.NavigationPage):
             kernels = self.config["kernels"]
             user_packages = self.config["packages"]
 
-            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks', 'bluez', 'bluez-utils']
+            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks', 'bluez', 'bluez-utils', 'clang', 'lld']
             pacstrap_packages.extend(self._get_ucode_package())
             pacstrap_packages.extend(kernels)
             pacstrap_packages.extend(user_packages)
@@ -361,7 +361,7 @@ class InstallPage(Adw.NavigationPage):
             pacstrap_cmd = ['stdbuf', '-oL', 'pacstrap', '-K', mount_point] + pacstrap_packages
             self.execute(pacstrap_cmd)            
             
-            # === ЭТАП 6: Настройка системы ===
+            # Настройка системы
             self.set_progress(0.6)
             self.log(_("INFO: Настройка операционной системы"))
 
@@ -589,7 +589,7 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             self.execute(['arch-chroot', mount_point, 'bootctl', 'install', '--esp-path=/efi']) 
 
             default_kernel_conf = ""
-            if 'linux-hardened' in self.config['kernels']: default_kernel_conf = "secux-linux-hardened.conf"
+            if 'linux-secux' in self.config['kernels']: default_kernel_conf = "secux-linux-secux.conf"
             elif 'linux-lts' in self.config['kernels']: default_kernel_conf = "secux-linux-lts.conf"
             elif 'linux' in self.config['kernels']: default_kernel_conf = "secux-linux.conf"
 
@@ -659,7 +659,7 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             # Flatpak offline installation support
             self.execute(['arch-chroot', mount_point, 'flatpak', 'remote-modify', '--collection-id=org.flathub.Stable', 'flathub'])
 
-            # === ФИНАЛ ===
+            # ФИНАЛ
             self.set_progress(1.0)
             self.log("INFO: Установка успешно завершена!")
             
@@ -1132,7 +1132,7 @@ class KernelPage(Adw.NavigationPage):
     def get_selected_kernels(self) -> list:
         kernels = []
         if self.btn_hardened.get_active():
-            kernels.append("linux-hardened")
+            kernels.append("linux-secux")
         if self.btn_lts.get_active():
             kernels.append("linux-lts")
         if self.btn_linux.get_active():
