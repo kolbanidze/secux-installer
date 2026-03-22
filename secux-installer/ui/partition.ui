@@ -150,14 +150,41 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                                         </child>
                                       </object>
                                     </child>
+                                    <child>
+                                      <object class="AdwActionRow">
+                                        <property name="title" translatable="yes">Файловая система</property>
+                                        <property name="subtitle" translatable="yes">Основного раздела системы</property>
+                                        <child type="suffix">
+                                          <object class="GtkDropDown" id="combo_fs">
+                                            <property name="valign">3</property>
+                                            <property name="width-request">180</property>
+                                            <property name="hexpand">true</property>
+                                            <property name="model">
+                                              <object class="GtkStringList">
+                                                <property name="strings">btrfs
+ext4</property>
+                                              </object>
+                                            </property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
                                 <child>
                                   <object class="AdwPreferencesGroup">
-                                    <property name="title" translatable="yes">Файл подкачки</property>
+                                    <property name="title" translatable="yes">Виртуальная память</property>
+                                    <child>
+                                      <object class="AdwSwitchRow" id="switch_zram">
+                                        <property name="title" translatable="yes">Использовать zRAM</property>
+                                        <property name="subtitle" translatable="yes">Сжатие данных в ОЗУ</property>
+                                        <property name="active">true</property>
+                                      </object>
+                                    </child>
                                     <child>
                                       <object class="AdwSwitchRow" id="switch_swap">
                                         <property name="title" translatable="yes">Использовать файл подкачки</property>
+                                        <property name="subtitle" translatable="yes">Резерв на случай нехватки ОЗУ</property>
                                         <property name="active">true</property>
                                       </object>
                                     </child>

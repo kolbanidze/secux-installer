@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $PartitionPage : Adw.NavigationPage {
+template $PartitionPage: Adw.NavigationPage {
   title: _("Разметка диска");
   tag: "partition";
 
@@ -13,8 +13,7 @@ template $PartitionPage : Adw.NavigationPage {
       hscrollbar-policy: never;
       vscrollbar-policy: automatic;
       vexpand: true;
-      
-      min-content-height: 350; 
+      min-content-height: 350;
       propagate-natural-height: true;
 
       child: Adw.Clamp {
@@ -24,7 +23,6 @@ template $PartitionPage : Adw.NavigationPage {
         child: Gtk.Box {
           orientation: vertical;
           spacing: 20;
-          
           margin-top: 20;
           margin-bottom: 20;
           margin-start: 24;
@@ -37,31 +35,39 @@ template $PartitionPage : Adw.NavigationPage {
               title: _("Автоматически");
               subtitle: _("Стереть диск и установить систему");
               activatable-widget: btn_auto;
+
               [prefix]
-              Gtk.CheckButton btn_auto { active: true; }
+              Gtk.CheckButton btn_auto {
+                active: true;
+              }
             }
+
             Adw.ActionRow {
               title: _("Вручную");
               subtitle: _("Самостоятельная разметка");
               activatable-widget: btn_manual;
+
               [prefix]
-              Gtk.CheckButton btn_manual { group: btn_auto; }
+              Gtk.CheckButton btn_manual {
+                group: btn_auto;
+              }
             }
           }
 
           Gtk.Stack content_stack {
             transition-type: crossfade;
             interpolate-size: true;
-            
+
             Gtk.StackPage {
               name: "page_auto";
+
               child: Adw.PreferencesGroup {
                 title: _("Целевой диск");
                 description: _("Внимание! Все данные на выбранном диске будут уничтожены.");
-                
+
                 Adw.ActionRow {
                   title: _("Выберите диск");
-                  
+
                   [suffix]
                   Gtk.DropDown disk_combo_auto {
                     valign: center;
@@ -74,34 +80,42 @@ template $PartitionPage : Adw.NavigationPage {
 
             Gtk.StackPage {
               name: "page_manual";
+
               child: Gtk.Box {
                 orientation: vertical;
                 spacing: 20;
 
                 Gtk.Box {
                   spacing: 10;
-                  homogeneous: true; 
+                  homogeneous: true;
 
                   Gtk.Button btn_gnome_disks {
                     label: _("Запустить Gnome Disks");
                     icon-name: "drive-harddisk-symbolic";
-                    action-name: "partition.open_gnome_disks"; 
-                    styles ["pill"] 
+                    action-name: "partition.open_gnome_disks";
+
+                    styles [
+                      "pill",
+                    ]
                   }
 
                   Gtk.Button btn_refresh {
                     label: _("Обновить диски");
                     icon-name: "view-refresh-symbolic";
-                    styles ["pill"]
+
+                    styles [
+                      "pill",
+                    ]
                   }
                 }
 
                 Adw.PreferencesGroup {
                   title: _("Назначение разделов");
-                  
+
                   Adw.ActionRow {
                     title: _("EFI раздел");
                     subtitle: _("FAT32, >200 MiB");
+
                     [suffix]
                     Gtk.DropDown combo_efi {
                       valign: center;
@@ -113,6 +127,7 @@ template $PartitionPage : Adw.NavigationPage {
                   Adw.ActionRow {
                     title: _("Корневой раздел");
                     subtitle: _("Основной раздел системы");
+
                     [suffix]
                     Gtk.DropDown combo_root {
                       valign: center;
@@ -120,27 +135,57 @@ template $PartitionPage : Adw.NavigationPage {
                       hexpand: true;
                     }
                   }
+
+                  Adw.ActionRow {
+                    title: _("Файловая система");
+                    subtitle: _("Основного раздела системы");
+
+                    [suffix]
+                    Gtk.DropDown combo_fs {
+                      valign: center;
+                      width-request: 180;
+                      hexpand: true;
+
+                      model: Gtk.StringList {
+                        strings: [
+                          'btrfs',
+                          'ext4',
+                        ];
+                      };
+                    }
+                  }
                 }
 
                 Adw.PreferencesGroup {
-                  title: _("Файл подкачки");
+                  title: _("Виртуальная память");
+
+                  Adw.SwitchRow switch_zram {
+                    title: _("Использовать zRAM");
+                    subtitle: _("Сжатие данных в ОЗУ");
+                    active: true;
+                  }
 
                   Adw.SwitchRow switch_swap {
                     title: _("Использовать файл подкачки");
+                    subtitle: _("Резерв на случай нехватки ОЗУ");
                     active: true;
                   }
 
                   Adw.ActionRow row_swap_size {
                     title: _("Размер (ГиБ)");
-                    subtitle: "2 GiB"; 
+                    subtitle: "2 GiB";
 
                     [bottom]
                     Gtk.Scale scale_swap {
                       hexpand: true;
                       digits: 0;
                       draw-value: true;
+
                       adjustment: Gtk.Adjustment {
-                        lower: 1; upper: 32; value: 2; step-increment: 1;
+                        lower: 1;
+                        upper: 32;
+                        value: 2;
+                        step-increment: 1;
                       };
                     }
                   }
@@ -160,8 +205,14 @@ template $PartitionPage : Adw.NavigationPage {
         margin-end: 10;
         margin-top: 10;
         margin-start: 10;
-        styles ["suggested-action", "pill"]
+
+        styles [
+          "suggested-action",
+          "pill",
+        ]
+
         action-name: "win.next_step";
+
         child: Adw.ButtonContent {
           icon-name: "go-next-symbolic";
           label: _("Далее");

@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.4.7"
+VERSION = "0.4.9"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -279,22 +279,33 @@ class InstallPage(Adw.NavigationPage):
                 self.an_error_occurred()
                 return
             
-            swap_size = part_conf["swap_size"]
+            swap_size = part_conf.get("swap_size", 0)
             self.log(_("INFO: Размер файла подкаки: ") + str(swap_size))
 
-            # LUKS, LVM
             self.set_progress(0.2)
             self.log(_("INFO: Настройка шифрования LUKS2"))
             self.execute(['cryptsetup', 'luksFormat', rootfs_partition], input_str=self.config["encryption_pwd"]) 
-            self.execute(['cryptsetup', 'luksOpen', rootfs_partition, 'cryptlvm'], input_str=self.config["encryption_pwd"])
-            
-            self.execute(['pvcreate', '/dev/mapper/cryptlvm'])
-            self.execute(['vgcreate', 'volumegroup', '/dev/mapper/cryptlvm'])
-            
-            self.execute(['lvcreate', '-l', '100%FREE', 'volumegroup', '-n', 'root']) 
-            
-            root_lv_path = "/dev/volumegroup/root"
-            self.execute(['mkfs.ext4', root_lv_path])
+            self.execute(['cryptsetup', 'luksOpen', rootfs_partition, 'secuxroot'], input_str=self.config["encryption_pwd"])
+                        
+            root_device_path = "/dev/mapper/secuxroot"
+            fs_type = part_conf.get("fs_type", "btrfs")
+
+            self.log(f"INFO: Форматирование корневого раздела в {fs_type}")
+            if fs_type == "btrfs":
+                self.execute(['mkfs.btrfs', '-f', root_device_path])
+                self.execute(['mount', root_device_path, '/mnt'])
+                self.execute(['btrfs', 'subvolume', 'create', '/mnt/@'])
+                self.execute(['btrfs', 'subvolume', 'create', '/mnt/@home'])
+                self.execute(['umount', '/mnt'])
+
+                # space_cache=v2 is anyway enabled by default since 4.5
+                btrfs_opts = 'noatime,compress=zstd'
+                self.execute(['mount', '-o', f'{btrfs_opts},subvol=@', root_device_path, '/mnt'])
+                self.execute(['mkdir', '-p', '/mnt/home'])
+                self.execute(['mount', '-o', f'{btrfs_opts},subvol=@home', root_device_path, '/mnt/home'])
+            else:
+                self.execute(['mkfs.ext4', root_device_path])
+                self.execute(['mount', root_device_path, '/mnt'])
                     
             if part_conf['mode'] == "auto":
                 self.execute(['mkfs.fat', '-F32', efi_partition])
@@ -302,12 +313,15 @@ class InstallPage(Adw.NavigationPage):
             mount_point = '/mnt'
             efi_mount_point = os.path.join(mount_point, 'efi')
 
-            self.execute(['mount', root_lv_path, mount_point])
+            self.execute(['mount', root_device_path, mount_point])
             if swap_size > 0:
                 swap_path = os.path.join(mount_point, "swapfile")
-                self.execute(['fallocate', '-l', f'{str(swap_size)}G', swap_path])
-                self.execute(['chmod', '600', swap_path])
-                self.execute(['mkswap', swap_path])
+                if fs_type == 'btrfs':
+                    self.execute(['btrfs', 'filesystem', 'mkswapfile', '--size', f'{swap_size}G', swap_path])
+                else:
+                    self.execute(['fallocate', '-l', f'{str(swap_size)}G', swap_path])
+                    self.execute(['chmod', '600', swap_path])
+                    self.execute(['mkswap', swap_path])
                 self.execute(['swapon', swap_path])
                 
             # Монтирование
@@ -335,11 +349,18 @@ class InstallPage(Adw.NavigationPage):
             kernels = self.config["kernels"]
             user_packages = self.config["packages"]
 
-            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'lvm2', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks', 'bluez', 'bluez-utils', 'clang', 'lld']
+            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks', 'bluez', 'bluez-utils', 'clang', 'lld']
             pacstrap_packages.extend(self._get_ucode_package())
             pacstrap_packages.extend(kernels)
             pacstrap_packages.extend(user_packages)
             pacstrap_packages.extend([i+'-headers' for i in kernels])
+
+            if fs_type == 'btrfs':
+                pacstrap_packages.append("btrfs-progs")
+
+            if self.config.get("zram", True):
+                pacstrap_packages.append('zram-generator')
+
 
             if self.config['desktop'] == 'gnome':
                 self.log("> DE: GNOME")
@@ -489,7 +510,7 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
             self.log(_("INFO: Настройка доверенной загрузки"))
-            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt lvm2 filesystems fsck)\n"
+            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
 
             for kernel in self.config['kernels']:
@@ -515,13 +536,32 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             process = subprocess.run(["sudo", "blkid", '-s', 'UUID', '-o', 'value', rootfs_partition], check=True, capture_output=True)
             uuid = process.stdout.strip().decode()
             self.log(f"UUID: {uuid}")
-            cmdline_content = f"rd.luks.name={uuid}=cryptlvm root={root_lv_path} rw rootfstype=ext4 rd.shell=0 rd.emergency=reboot audit=1 quiet slab_nomerge iommu=force iommu.strict=1 iommu.passthrough=0 randomize_kstack_offset=1 vsyscall=none debugfs=off oops=panic init_on_alloc=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
+            rootflags = "rootflags=subvol=@ " if fs_type == "btrfs" else ""
+
+            cmdline_content = f"rd.luks.name={uuid}=secuxroot root={root_device_path} rw {rootflags}rootfstype={fs_type} rd.shell=0 rd.emergency=reboot audit=1 quiet slab_nomerge iommu=force iommu.strict=1 iommu.passthrough=0 randomize_kstack_offset=1 vsyscall=none debugfs=off oops=panic init_on_alloc=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{cmdline_content}" > /etc/cmdline.d/root.conf'])
+
+            if self.config.get("zram", True):
+                self.log(_("INFO: Настройка zRAM..."))
+                zram_conf = "[zram0]\nzram-size = ram / 2\ncompression-algorithm = zstd\nswap-priority = 100\n"
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{zram_conf}" > /etc/systemd/zram-generator.conf'])
 
             self.set_progress(0.8)
 
             # Creating UKI config
-            uki_conf_content = "[UKI]\nOSRelease=@/etc/os-release\nPCRBanks=sha256\n\n[PCRSignature:initrd]\nPhases=enter-initrd\nPCRPrivateKey=/etc/kernel/pcr-initrd.key.pem\nPCRPublicKey=/etc/kernel/pcr-initrd.pub.pem\n"
+            uki_conf_content = """[UKI]
+OSRelease=@/etc/os-release
+PCRBanks=sha256
+
+[PCRSignature:initrd]
+Phases=enter-initrd
+PCRPrivateKey=/etc/kernel/pcr-initrd.key.pem
+PCRPublicKey=/etc/kernel/pcr-initrd.pub.pem
+
+[PCRSignature:system]
+Phases=enter-initrd leave-initrd sysinit ready
+PCRPrivateKey=/etc/kernel/pcr-system.key.pem
+PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{uki_conf_content}\' > /etc/kernel/uki.conf'])
 
             # Generate ukify keys
@@ -1017,6 +1057,8 @@ class PartitionPage(Adw.NavigationPage):
     content_stack = Gtk.Template.Child()
     
     disk_combo_auto = Gtk.Template.Child()
+    combo_fs = Gtk.Template.Child()
+    switch_zram = Gtk.Template.Child() 
     
     btn_gnome_disks = Gtk.Template.Child()
     btn_refresh = Gtk.Template.Child()
@@ -1089,32 +1131,38 @@ class PartitionPage(Adw.NavigationPage):
         """Сбор данных для установки"""
         if self.btn_auto.get_active():
             model = self.disk_combo_auto.get_model()
-            idx = self.disk_combo_auto.get_selected()
-            disk = model.get_string(idx) if model else None
+            index = self.disk_combo_auto.get_selected()
+            disk = model.get_string(index) if model else None
             disk = disk.split(' ')[0]
 
-            swap_size = int(self.scale_swap.get_value())
-
-            return {"mode": "auto", "target": disk, 'swap_size': swap_size}
+            return {"mode": "auto", "target": disk, 'swap_size': 2, 'fs_type': 'btrfs', 'zram': True}
         else:
             model = self.combo_efi.get_model()
-            idx = self.combo_efi.get_selected()
-            efi_part = model.get_string(idx) if model else None
+            index = self.combo_efi.get_selected()
+            efi_part = model.get_string(index) if model else None
             efi_part = efi_part.split(' ')[0]
 
             model = self.combo_root.get_model()
-            idx = self.combo_root.get_selected()
-            root_part = model.get_string(idx) if model else None
+            index = self.combo_root.get_selected()
+            root_part = model.get_string(index) if model else None
             root_part = root_part.split(' ')[0]
+
+            fs_model = self.combo_fs.get_model()
+            fs_idx = self.combo_fs.get_selected()
+            fs_type = fs_model.get_string(fs_idx) if fs_model else "ext4"
 
             swap_enabled = self.switch_swap.get_active()
             swap_size = int(self.scale_swap.get_value()) if swap_enabled else 0
+
+            zram_enabled = self.switch_zram.get_active() 
 
             return {
                 "mode": "manual",
                 "efi_part": efi_part,
                 "root_part": root_part,
                 "swap_size": swap_size,
+                'fs_type': fs_type,
+                'zram': zram_enabled
             }
 
 
