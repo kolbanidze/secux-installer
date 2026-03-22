@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.5.1"
+VERSION = "0.5.2"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -31,6 +31,8 @@ LOCALES_DIR = os.path.join(BASE_DIR, "locales")
 
 REPO_URL_MAIN = "https://secux.tonightisthenight.site/secux-repo/"
 REPO_URL_MIRROR = "https://kolbanidze-secux-repo.hf.space"
+
+class InstallError(Exception): pass
 
 def get_ui_path(filename):
     return os.path.join(os.path.join(BASE_DIR, "ui"), filename)
@@ -173,36 +175,31 @@ class InstallPage(Adw.NavigationPage):
         cmd_str = " ".join(cmd)
         self.log(f"> {cmd_str}")
 
-        try:
-            process = subprocess.Popen(
-                ["sudo"] + cmd,
-                stdin=subprocess.PIPE if input_str else None,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                shell=shell
-            )
+        process = subprocess.Popen(
+            ["sudo"] + cmd,
+            stdin=subprocess.PIPE if input_str else None,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            shell=shell
+        )
 
-            if input_str:
-                stdout_data, _ = process.communicate(input=input_str + "\n")
-                if stdout_data:
-                    self.update_console(stdout_data)
-            else:
-                for line in process.stdout:
-                    self.update_console(line)
-            
-            process.wait()
-            
-            if process.returncode != 0:
-                self.log("ERROR: Command failed with code " + str(process.returncode))
-                self.an_error_occurred()
-                raise Exception
-            
-            return 0
-
-        except Exception as e:
-            self.log(e)
-            return 1
+        if input_str:
+            stdout_data, _ = process.communicate(input=input_str + "\n")
+            if stdout_data:
+                self.update_console(stdout_data)
+        else:
+            for line in process.stdout:
+                self.update_console(line)
+        
+        process.wait()
+        
+        if process.returncode != 0:
+            self.log("ERROR: Command failed with code " + str(process.returncode))
+            self.an_error_occurred()
+            raise InstallError(f"Command failed: {' '.join(cmd)}")
+        
+        return 0
 
     def __list_partitions(self, drive):
         result = subprocess.run(['sudo', 'lsblk', '-ln', '-o', 'NAME,TYPE'], stdout=subprocess.PIPE, text=True)
@@ -256,6 +253,7 @@ class InstallPage(Adw.NavigationPage):
                     self.log(_("ОШИБКА: не удалось создать разделы"))
                     return
                 
+                self.execute(['partprobe', drive]) 
                 partitions = self.__list_partitions(drive)
                 if len(partitions) < 2:
                     self.log(_("ОШИБКА: не удалось найти разделы"))
@@ -348,7 +346,7 @@ class InstallPage(Adw.NavigationPage):
             kernels = self.config["kernels"]
             user_packages = self.config["packages"]
 
-            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'secux-hooks', 'bluez', 'bluez-utils', 'clang', 'lld']
+            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'bluez', 'bluez-utils', 'clang', 'lld']
             pacstrap_packages.extend(self._get_ucode_package())
             pacstrap_packages.extend(kernels)
             pacstrap_packages.extend(user_packages)
@@ -542,7 +540,7 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
 
             if self.config.get("zram", True):
                 self.log(_("INFO: Настройка zRAM..."))
-                zram_conf = "[zram0]\nzram-size = ram / 2\ncompression-algorithm = zstd\nswap-priority = 100\n"
+                zram_conf = "[zram0]\nzram-size = min(ram / 2, 8192)\ncompression-algorithm = zstd\nswap-priority = 100\n"
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{zram_conf}" > /etc/systemd/zram-generator.conf'])
 
             self.set_progress(0.8)
@@ -596,9 +594,7 @@ PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
 
             installer_path = "/usr/local/bin/secux-installer"
 
-            # Mitigated by secux-hooks
-            # self.execute(['cp', f'{installer_path}/images/SecuxLinux.svg', f'{mount_point}/usr/share/icons/'])
-
+            self.execute(['stdbuf', '-oL', 'pacstrap', mount_point, 'secux-hooks'])
             self.execute(['rm', '-f', f'{mount_point}/usr/share/factory/etc/ssh/sshd_config.d/99-archlinux.conf'])
             self.execute(['rm', '-f', f'{mount_point}/etc/debuginfod/archlinux.urls'])
             self.execute(['rm', '-f', f'{mount_point}/etc/ssh/sshd_config.d/99-archlinux.conf'])
@@ -705,9 +701,12 @@ PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
             
             # Обновляем UI по завершении
             GLib.idle_add(self._on_install_finished, True)
-
+        
+        except InstallError as e:
+            self.log(f"Error: {e}")
+            GLib.idle_add(self._on_install_finished, False)
         except Exception as e:
-            self.log(f"CRITICAL ERROR: {e}")
+            self.log(f"Unknown error: {e}")
             import traceback
             self.log(traceback.format_exc())
             GLib.idle_add(self._on_install_finished, False)
@@ -1169,7 +1168,6 @@ class PartitionPage(Adw.NavigationPage):
 class KernelPage(Adw.NavigationPage):
     __gtype_name__ = "KernelPage"
     
-    # Получаем доступ к кнопкам
     btn_hardened = Gtk.Template.Child()
     btn_lts = Gtk.Template.Child()
     btn_linux = Gtk.Template.Child()
