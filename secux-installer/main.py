@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.5.2"
+VERSION = "0.5.3"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -507,7 +507,7 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
             self.log(_("INFO: Настройка доверенной загрузки"))
-            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=()\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
+            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=(/etc/hostname)\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
 
             for kernel in self.config['kernels']:
@@ -602,7 +602,8 @@ PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
             self.execute(['rm', '-f', f'{mount_point}/usr/share/factory/etc/arch-release'])
             self.execute(['rm', '-f', f'{mount_point}/usr/share/plymouth/themes/spinner/watermark.png'])
 
-            self.execute(['arch-chroot', mount_point, 'mkinitcpio', '-P'])
+            # Instead of mkinitcpio -P
+            self.execute(['stdbuf', '-oL', 'pacstrap', mount_point] + kernels)
             
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'NetworkManager.service'])
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'systemd-timesyncd.service'])
@@ -683,9 +684,9 @@ PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
             # Hardening
             self.execute(['cp', f'{installer_path}/scripts/hardening.conf', f'{mount_point}/etc/sysctl.d/'])
             if self.config['desktop'] == 'console':
-                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -c "user.max_user_namespaces=0" >> /etc/sysctl.d/hardening.conf'])
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "user.max_user_namespaces=0" >> /etc/sysctl.d/hardening.conf'])
             else:
-                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -c "kernel.unprivileged_userns_clone=1" >> /etc/sysctl.d/hardening.conf'])
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "kernel.unprivileged_userns_clone=1" >> /etc/sysctl.d/hardening.conf'])
 
             self.execute(['arch-chroot', mount_point, 'ufw', 'default', 'deny'])
             self.execute(['sed', '-i', 's/ENABLED=no/ENABLED=yes/', f"{mount_point}/etc/ufw/ufw.conf"])
