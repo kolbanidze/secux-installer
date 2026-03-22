@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-17 20:49+0300\n"
+"POT-Creation-Date: 2026-03-22 15:09+0300\n"
 "PO-Revision-Date: 2025-12-21 11:21+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -18,35 +18,35 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: main.py:133
+#: main.py:134
 msgid "INFO: Сбор данных завершен. Начало установки..."
 msgstr ""
 
-#: main.py:248
+#: main.py:249
 msgid "INFO: Автоматическая разметка диска "
 msgstr ""
 
-#: main.py:251
+#: main.py:252
 msgid "ОШИБКА: не удалось форматировать диск"
 msgstr ""
 
-#: main.py:255
+#: main.py:256
 msgid "ОШИБКА: не удалось создать разделы"
 msgstr ""
 
-#: main.py:260
+#: main.py:261
 msgid "ОШИБКА: не удалось найти разделы"
 msgstr ""
 
-#: main.py:268
+#: main.py:269
 msgid "INFO: Используется ручная разметка."
 msgstr ""
 
-#: main.py:277
+#: main.py:278
 msgid "ОШИБКА: не удалось определить разделы"
 msgstr ""
 
-#: main.py:282
+#: main.py:283
 msgid "INFO: Размер файла подкаки: "
 msgstr ""
 
@@ -54,88 +54,92 @@ msgstr ""
 msgid "INFO: Настройка шифрования LUKS2"
 msgstr ""
 
-#: main.py:314
+#: main.py:328
 msgid "INFO: Монтирование файловых систем..."
 msgstr ""
 
-#: main.py:329
+#: main.py:343
 msgid "INFO: Установка пакетов операционной системы"
 msgstr ""
 
-#: main.py:353
+#: main.py:374
 msgid "> Настройка максимального уровня защищённости"
 msgstr ""
 
-#: main.py:356
+#: main.py:377
 msgid "> Настройка защиты с обратной совместимостью"
 msgstr ""
 
-#: main.py:359
+#: main.py:380
 msgid "> Отсутствие защиты"
 msgstr ""
 
-#: main.py:366
+#: main.py:387
 msgid "INFO: Настройка операционной системы"
 msgstr ""
 
-#: main.py:369
+#: main.py:390
 msgid "INFO: Настройка собственного репозитория ПО"
 msgstr ""
 
-#: main.py:490
+#: main.py:511
 msgid "INFO: Настройка доверенной загрузки"
 msgstr ""
 
-#: main.py:684
+#: main.py:544
+msgid "INFO: Настройка zRAM..."
+msgstr ""
+
+#: main.py:724
 msgid "Установка завершена"
 msgstr ""
 
-#: main.py:685
+#: main.py:725
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr ""
 
-#: main.py:688
+#: main.py:728
 msgid "Ошибка установки"
 msgstr ""
 
-#: main.py:689
+#: main.py:729
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr ""
 
-#: main.py:1452
+#: main.py:1500
 msgid "Внимание"
 msgstr ""
 
-#: main.py:1452
+#: main.py:1500
 msgid ""
 "Для работы системы необходима поддержка UEFI.\n"
 "Установка системы невозможна."
 msgstr ""
 
-#: main.py:1486
+#: main.py:1534
 msgid "ОШИБКА: отсутствует подключение к интернету!"
 msgstr ""
 
-#: main.py:1487 main.py:1493
+#: main.py:1535 main.py:1541
 msgid "Ошибка"
 msgstr ""
 
-#: main.py:1487
+#: main.py:1535
 msgid "Отсутствует подключение к интернету"
 msgstr ""
 
-#: main.py:1492
+#: main.py:1540
 msgid ""
 "ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты "
 "необходимо включить Setup Mode."
 msgstr ""
 
-#: main.py:1493
+#: main.py:1541
 msgid ""
 "Setup Mode отключен, что необходимо для применения всех механизмов защиты."
 msgstr ""
 
-#: main.py:1544
+#: main.py:1592
 msgid "Текущий язык: русский"
 msgstr ""
 
@@ -155,7 +159,7 @@ msgstr ""
 msgid "Консольный"
 msgstr ""
 
-#: ui/desktop.ui:82 ui/encryption.ui:138 ui/kernel.ui:96 ui/partition.ui:215
+#: ui/desktop.ui:82 ui/encryption.ui:138 ui/kernel.ui:96 ui/partition.ui:242
 #: ui/security.ui:85 ui/software.ui:154 ui/source.ui:129 ui/timezone.ui:75
 #: ui/user.ui:191 ui/welcome.ui:60
 msgid "Далее"
@@ -318,15 +322,35 @@ msgstr ""
 msgid "Основной раздел системы"
 msgstr ""
 
-#: ui/partition.ui:157 ui/summary.ui:293
-msgid "Файл подкачки"
+#: ui/partition.ui:155
+msgid "Файловая система"
 msgstr ""
 
-#: ui/partition.ui:160
+#: ui/partition.ui:156
+msgid "Основного раздела системы"
+msgstr ""
+
+#: ui/partition.ui:176
+msgid "Виртуальная память"
+msgstr ""
+
+#: ui/partition.ui:179
+msgid "Использовать zRAM"
+msgstr ""
+
+#: ui/partition.ui:180
+msgid "Сжатие данных в ОЗУ"
+msgstr ""
+
+#: ui/partition.ui:186
 msgid "Использовать файл подкачки"
 msgstr ""
 
-#: ui/partition.ui:166
+#: ui/partition.ui:187
+msgid "Резерв на случай нехватки ОЗУ"
+msgstr ""
+
+#: ui/partition.ui:193
 msgid "Размер (ГиБ)"
 msgstr ""
 
@@ -508,6 +532,10 @@ msgstr ""
 
 #: ui/summary.ui:265
 msgid "Настроено вручную"
+msgstr ""
+
+#: ui/summary.ui:293
+msgid "Файл подкачки"
 msgstr ""
 
 #: ui/summary.ui:302

@@ -1,136 +1,94 @@
-# Очистка старых правил перед применением новых.
 -D
-# Увеличение буфера (backlog) для высоких нагрузок, чтобы не терять события.
--b 16384
-# Действие при сбое (1 = писать в dmesg/printk, не вызывать kernel panic).
+-b 65536
 -f 1
-# Время ожидания (мс) при переполнении буфера.
 --backlog_wait_time 60000
+-c
 
-# Мониторинг конфигурации и логов самого auditd (защита от скрытия следов взлома).
--w /etc/audit/ -p wa -k audit_conf
--w /etc/libaudit.conf -p wa -k audit_conf
--w /var/log/audit/ -p wa -k audit_log
+-a always,exit -F dir=/etc/audit/ -F perm=wa -k audit_conf
+-a always,exit -F path=/etc/libaudit.conf -F perm=wa -k audit_conf
+-a always,exit -F dir=/var/log/audit/ -F perm=wa -k audit_log
 
-# Мониторинг истории входов/выходов и сессий пользователей.
--w /var/log/wtmp -p wa -k logins
--w /var/log/btmp -p wa -k logins
--w /var/log/lastlog -p wa -k logins
--w /run/utmp -p wa -k logins
+-a always,exit -F path=/var/log/wtmp -F perm=wa -k logins
+-a always,exit -F path=/var/log/btmp -F perm=wa -k logins
+-a always,exit -F path=/var/log/lastlog -F perm=wa -k logins
+-a always,exit -F path=/run/utmp -F perm=wa -k logins
 
-# Контроль изменения баз пользователей, паролей, групп и модулей авторизации (PAM).
--w /etc/passwd -p wa -k auth
--w /etc/shadow -p wa -k auth
--w /etc/group -p wa -k auth
--w /etc/gshadow -p wa -k auth
--w /etc/security/ -p wa -k auth
--w /etc/login.defs -p wa -k auth
--w /etc/pam.d/ -p wa -k pam
+-a always,exit -F path=/etc/passwd -F perm=wa -k auth
+-a always,exit -F path=/etc/shadow -F perm=wa -k auth
+-a always,exit -F path=/etc/group -F perm=wa -k auth
+-a always,exit -F path=/etc/gshadow -F perm=wa -k auth
+-a always,exit -F path=/etc/login.defs -F perm=wa -k auth
+-a always,exit -F dir=/etc/security/ -F perm=wa -k auth
+-a always,exit -F dir=/etc/pam.d/ -F perm=wa -k pam
 
-# Мониторинг изменения правил повышения привилегий (sudo).
--w /etc/sudoers -p wa -k sudo
--w /etc/sudoers.d/ -p wa -k sudo
+-a always,exit -F path=/etc/sudoers -F perm=wa -k sudo
+-a always,exit -F dir=/etc/sudoers.d/ -F perm=wa -k sudo
 
-# Контроль загрузки/выгрузки модулей ядра (rootkits на уровне ядра).
--w /usr/bin/kmod -p x -k kernel_modules
--w /etc/modprobe.d/ -p wa -k kernel_modules
--w /etc/modules-load.d/ -p wa -k kernel_modules
+-a always,exit -F path=/etc/ssh/sshd_config -F perm=wa -k sshd_config
+-a always,exit -F dir=/etc/ssh/sshd_config.d/ -F perm=wa -k sshd_config
+-a always,exit -F path=/etc/ssh/ssh_config -F perm=wa -k ssh_config
+-a always,exit -F dir=/etc/ssh/ssh_config.d/ -F perm=wa -k ssh_config
+-a always,exit -F dir=/root/.ssh/ -F perm=wa -k ssh_keys
+
 -a always,exit -F arch=b64 -S init_module,finit_module,delete_module -k kernel_modules
--a always,exit -F arch=b32 -S init_module,finit_module,delete_module -k kernel_modules
+-a always,exit -F path=/usr/bin/kmod -F perm=x -k kernel_modules
+-a always,exit -F dir=/etc/modprobe.d/ -F perm=wa -k kernel_modules
+-a always,exit -F dir=/etc/modules-load.d/ -F perm=wa -k kernel_modules
 
-# Отслеживание отказа в доступе (EPERM, EACCES) к файлам от обычных пользователей (auid>=1000). Помогает выявить попытки несанкционированного доступа.
--a always,exit -F arch=b64 -S openat,openat2,creat,unlink,unlinkat,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -k fs_denied
--a always,exit -F arch=b64 -S openat,openat2,creat,unlink,unlinkat,truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -k fs_denied
--a always,exit -F arch=b32 -S open,openat,creat,unlink,unlinkat,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -k fs_denied
--a always,exit -F arch=b32 -S open,openat,creat,unlink,unlinkat,truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -k fs_denied
-
-# Мониторинг инъекций кода в другие процессы и доступа к чужой памяти (process injection и credential dumping).
--a always,exit -F arch=b64 -S ptrace -k process_injection
--a always,exit -F arch=b32 -S ptrace -k process_injection
--a always,exit -F arch=b64 -S process_vm_readv,process_vm_writev -k process_injection
--a always,exit -F arch=b32 -S process_vm_readv,process_vm_writev -k process_injection
-
-# Отслеживание изменений системного времени (критично для защиты от подделки таймстампов в логах).
--a always,exit -F arch=b64 -S adjtimex,settimeofday,clock_settime -F auid!=unset -k time_change
--a always,exit -F arch=b32 -S adjtimex,settimeofday,clock_settime -F auid!=unset -k time_change
--w /etc/localtime -p wa -k time_change
-
-# Мониторинг изменений сетевой конфигурации, имени хоста и настроек DNS.
--a always,exit -F arch=b64 -S sethostname,setdomainname -k network_config
--a always,exit -F arch=b32 -S sethostname,setdomainname -k network_config
--w /etc/hostname -p wa -k network_config
--w /etc/hosts -p wa -k network_config
--w /etc/resolv.conf -p wa -k network_config
--w /etc/systemd/network/ -p wa -k network_config
--w /etc/NetworkManager/ -p wa -k network_config
-
-# Отслеживание монтирования/размонтирования файловых систем (выявление подключения флешек или скрытых разделов).
--a always,exit -F arch=b64 -S mount,umount2 -F auid!=unset -k mounts
--a always,exit -F arch=b32 -S mount,umount2 -F auid!=unset -k mounts
--a always,exit -F arch=b64 -S fsopen,fsmount,move_mount -F auid!=unset -k mounts
--w /etc/fstab -p wa -k mounts
-
-# Контроль юнитов systemd (популярный вектор создания Persistence / закрепления в системе).
--w /etc/systemd/system/ -p wa -k systemd_persist
--w /usr/lib/systemd/system/ -p wa -k systemd_persist
--w /etc/systemd/user/ -p wa -k systemd_persist
--w /usr/lib/systemd/user/ -p wa -k systemd_persist
--w /etc/systemd/logind.conf -p wa -k systemd_persist
--w /etc/systemd/journald.conf -p wa -k systemd_persist
-
-# Отслеживание системных таймеров (альтернатива cron для закрепления в системе).
--w /etc/systemd/system/timers.target.wants/ -p wa -k systemd_timers
-
-# Мониторинг конфигурации SSH сервера/клиента и закрытых ключей root (защита от создания бэкдоров для удаленного доступа).
--w /etc/ssh/sshd_config -p wa -k sshd_config
--w /etc/ssh/sshd_config.d/ -p wa -k sshd_config
--w /etc/ssh/ssh_config -p wa -k ssh_config
--w /etc/ssh/ssh_config.d/ -p wa -k ssh_config
--w /root/.ssh/ -p wa -k ssh_keys
-
-# Контроль профилей оболочки, переменных окружения и загрузчика библиотек (включая защиту от атак типа LD_PRELOAD).
--w /etc/profile -p wa -k shell_config
--w /etc/profile.d/ -p wa -k shell_config
--w /etc/bash.bashrc -p wa -k shell_config
--w /etc/environment -p wa -k shell_config
--w /etc/shells -p wa -k shell_config
--w /etc/ld.so.conf -p wa -k shell_config
--w /etc/ld.so.conf.d/ -p wa -k shell_config
--w /etc/ld.so.preload -p wa -k shell_config
-
-# Мониторинг изменений правил межсетевого экрана (firewall bypass).
--w /etc/nftables.conf -p wa -k firewall
--w /etc/iptables/ -p wa -k firewall
--w /usr/bin/nft -p x -k firewall
--w /usr/bin/iptables -p x -k firewall
--w /usr/bin/ip6tables -p x -k firewall
-
-# Контроль пакетного менеджера pacman (отслеживание установки вредоносных пакетов или удаления защитного ПО).
--w /etc/pacman.conf -p wa -k package_manager
--w /etc/pacman.d/ -p wa -k package_manager
--w /var/log/pacman.log -p wa -k package_manager
--w /usr/bin/pacman -p x -k package_manager
-
-# Отслеживание пересборки образов инициализации ядра (лог внедрения руткитов на этапе ранней загрузки).
--w /etc/mkinitcpio.conf -p wa -k initramfs
--w /etc/mkinitcpio.d/ -p wa -k initramfs
--w /usr/bin/mkinitcpio -p x -k initramfs
-
-# Контроль конфигурации systemd-boot (лог модификации параметров запуска ядра).
--w /boot/loader/ -p wa -k bootloader
--w /boot/loader/entries/ -p wa -k bootloader
--w /usr/bin/bootctl -p x -k bootloader
-
-# Мониторинг конфигурации NSS (Name Service Switch), используемой для спуфинга разрешения имен и подмены авторизации.
--w /etc/nsswitch.conf -p wa -k nameservice
--w /etc/host.conf -p wa -k nameservice
-
-# Отслеживание загрузки eBPF-программ (популярный современный вектор скрытых руткитов и эксплойтов).
 -a always,exit -F arch=b64 -S bpf -F auid!=unset -k bpf_load
 
-# Контроль включения/выключения файлов подкачки (используется для дампа оперативной памяти на диск).
--a always,exit -F arch=b64 -S swapon,swapoff -k swap
--a always,exit -F arch=b32 -S swapon,swapoff -k swap
+-a always,exit -F arch=b64 -S adjtimex,settimeofday,clock_settime -F auid!=unset -k time_change
+-a always,exit -F path=/etc/localtime -F perm=wa -k time_change
 
-# Блокировка конфигурации auditd до следующей перезагрузки ПК (не позволяет злоумышленнику выключить аудит).
+-a always,exit -F arch=b64 -S sethostname,setdomainname -k network_config
+-a always,exit -F path=/etc/hostname -F perm=wa -k network_config
+-a always,exit -F path=/etc/hosts -F perm=wa -k network_config
+-a always,exit -F path=/etc/resolv.conf -F perm=wa -k network_config
+-a always,exit -F dir=/etc/systemd/network/ -F perm=wa -k network_config
+-a always,exit -F dir=/etc/NetworkManager/ -F perm=wa -k network_config
+-a always,exit -F path=/etc/nsswitch.conf -F perm=wa -k nameservice
+-a always,exit -F path=/etc/host.conf -F perm=wa -k nameservice
+
+-a always,exit -F path=/etc/nftables.conf -F perm=wa -k firewall
+-a always,exit -F dir=/etc/iptables/ -F perm=wa -k firewall
+-a always,exit -F path=/usr/bin/nft -F perm=x -k firewall
+-a always,exit -F path=/usr/bin/iptables -F perm=x -k firewall
+
+-a always,exit -F dir=/etc/systemd/system/ -F perm=wa -k systemd_persist
+-a always,exit -F dir=/usr/lib/systemd/system/ -F perm=wa -k systemd_persist
+-a always,exit -F dir=/etc/systemd/user/ -F perm=wa -k systemd_persist
+-a always,exit -F dir=/usr/lib/systemd/user/ -F perm=wa -k systemd_persist
+-a always,exit -F path=/etc/systemd/logind.conf -F perm=wa -k systemd_persist
+-a always,exit -F path=/etc/systemd/journald.conf -F perm=wa -k systemd_persist
+
+-a always,exit -F path=/etc/profile -F perm=wa -k shell_config
+-a always,exit -F dir=/etc/profile.d/ -F perm=wa -k shell_config
+-a always,exit -F path=/etc/bash.bashrc -F perm=wa -k shell_config
+-a always,exit -F path=/etc/environment -F perm=wa -k shell_config
+-a always,exit -F path=/etc/shells -F perm=wa -k shell_config
+-a always,exit -F path=/etc/ld.so.conf -F perm=wa -k shell_config
+-a always,exit -F dir=/etc/ld.so.conf.d/ -F perm=wa -k shell_config
+-a always,exit -F path=/etc/ld.so.preload -F perm=wa -k shell_config
+
+-a always,exit -F path=/etc/mkinitcpio.conf -F perm=wa -k initramfs
+-a always,exit -F dir=/etc/mkinitcpio.d/ -F perm=wa -k initramfs
+-a always,exit -F path=/usr/bin/mkinitcpio -F perm=x -k initramfs
+-a always,exit -F dir=/efi/loader/ -F perm=wa -k bootloader
+-a always,exit -F path=/usr/bin/bootctl -F perm=x -k bootloader
+
+-a always,exit -F path=/etc/pacman.conf -F perm=wa -k package_manager
+-a always,exit -F dir=/etc/pacman.d/ -F perm=wa -k package_manager
+-a always,exit -F path=/var/log/pacman.log -F perm=wa -k package_manager
+-a always,exit -F path=/usr/bin/pacman -F perm=x -k package_manager
+
+-a always,exit -F arch=b64 -S ptrace -k process_injection
+-a always,exit -F arch=b64 -S process_vm_readv,process_vm_writev -k process_injection
+
+-a always,exit -F arch=b64 -S mount,umount2,fsopen,fsmount,move_mount -F auid!=unset -k mounts
+-a always,exit -F path=/etc/fstab -F perm=wa -k mounts
+-a always,exit -F arch=b64 -S swapon,swapoff -k swap
+
+-a always,exit -F arch=b64 -S openat,openat2,creat,unlink,unlinkat,truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -k fs_denied
+-a always,exit -F arch=b64 -S openat,openat2,creat,unlink,unlinkat,truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -k fs_denied
+
 -e 2
