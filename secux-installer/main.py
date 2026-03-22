@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.4.9"
+VERSION = "0.5.0"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -313,7 +313,6 @@ class InstallPage(Adw.NavigationPage):
             mount_point = '/mnt'
             efi_mount_point = os.path.join(mount_point, 'efi')
 
-            self.execute(['mount', root_device_path, mount_point])
             if swap_size > 0:
                 swap_path = os.path.join(mount_point, "swapfile")
                 if fs_type == 'btrfs':
