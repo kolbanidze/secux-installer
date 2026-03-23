@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.5.3"
+VERSION = "0.5.4"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -637,9 +637,7 @@ PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
 
             for kernel in self.config['kernels']:
                 entry_content = f"title Secux Linux ({kernel})\nefi /EFI/secux/secux-{kernel}.efi\n"
-                entry_fallback_content = f"title Secux Linux ({kernel}-fallback)\nefi /EFI/secux/secux-{kernel}-fallback.efi\n"
                 self.execute(['bash', '-c', f'echo -e "{entry_content}" > {mount_point}/efi/loader/entries/secux-{kernel}.conf'])
-                self.execute(['bash', '-c', f'echo -e "{entry_fallback_content}" > {mount_point}/efi/loader/entries/secux-{kernel}-fallback.conf'])
 
             if self.config["security"] == "secure_full":
                 self.execute(['arch-chroot', mount_point, 'sbctl', 'create-keys'])
@@ -658,7 +656,6 @@ PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
                 self.execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', '/efi/EFI/systemd/systemd-bootx64.efi', '/usr/lib/systemd/boot/efi/systemd-bootx64.efi'])
                 for kernel in self.config['kernels']:
                     self.execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', f'/efi/EFI/secux/secux-{kernel}.efi', f'/efi/EFI/secux/secux-{kernel}.efi'])
-                    self.execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', f'/efi/EFI/secux/secux-{kernel}-fallback.efi', f'/efi/EFI/secux/secux-{kernel}-fallback.efi'])
 
                 mok_input = f"{self.config['MOK']}\n{self.config['MOK']}\n"
                 self.execute(['arch-chroot', mount_point, 'mokutil', '--import', '/etc/secureboot/sb.cer'], input_str=mok_input)
