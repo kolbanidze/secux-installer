@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.5.4"
+VERSION = "0.5.5"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -602,6 +602,10 @@ PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
             self.execute(['rm', '-f', f'{mount_point}/usr/share/factory/etc/arch-release'])
             self.execute(['rm', '-f', f'{mount_point}/usr/share/plymouth/themes/spinner/watermark.png'])
 
+            # Hostname
+            hostname = self.config['user']["hostname"]
+            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{hostname}" > /etc/hostname'])
+
             # Instead of mkinitcpio -P
             self.execute(['stdbuf', '-oL', 'pacstrap', mount_point] + kernels)
             
@@ -618,10 +622,6 @@ PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
             elif self.config["desktop"] == "kde":
                 self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'sddm.service'])
                 self.execute(['sed', '-i', 's/^Current=.*/Current=breeze/', f'{mount_point}/usr/lib/sddm/sddm.conf.d/default.conf'])
-
-            # Hostname
-            hostname = self.config['user']["hostname"]
-            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{hostname}" > /etc/hostname'])
             
             self.execute(['arch-chroot', mount_point, 'bootctl', 'install', '--esp-path=/efi']) 
 
