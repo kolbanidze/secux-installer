@@ -470,7 +470,6 @@ msgid "Выберите, откуда установщик будет загру
 msgstr "Choose where the installer will download system files from."
 
 #: ui/source.ui:35
-#, fuzzy
 msgid "Собственные репозитории Secux"
 msgstr "Secux native repositories"
 
