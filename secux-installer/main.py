@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.6.0"
+VERSION = "0.6.1"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -328,8 +328,11 @@ class InstallPage(Adw.NavigationPage):
 
             # Настройка репозиториев
             self.set_progress(0.35)
-            if self.config['source'] == "online":   
-                self.execute(['cp', '/etc/pacman_online.conf', '/etc/pacman.conf'])
+            if self.config['source'] == "online":
+                if self.config['repo_source'] == 'secux':
+                    self.execute(['cp', '/etc/pacman_online_secux.conf', '/etc/pacman.conf'])
+                else:
+                    self.execute(['cp', '/etc/pacman_online.conf', '/etc/pacman.conf'])
             else:
                 self.execute(['cp', '/etc/pacman_offline.conf', '/etc/pacman.conf'])
             self.execute(['pacman-key', '--init'])
