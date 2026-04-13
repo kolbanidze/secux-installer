@@ -1,5 +1,5 @@
 pkgname=secux-installer
-pkgver=0.5.6
+pkgver=0.6.0
 pkgrel=1
 pkgdesc="Secux Linux Installer"
 arch=('x86_64')

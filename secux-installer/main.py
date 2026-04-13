@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.5.6"
+VERSION = "0.6.0"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -503,11 +503,19 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
                 self.execute(['mkdir', '-p', f"{mount_point}/etc/xdg"])
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{kde_config}" >> {mount_point}/etc/xdg/kxkbrc'])
 
+            # Adding PCR 15 extend when LUKS unlocked
+            dir = "/etc/systemd/system/systemd-cryptsetup@.service.d"
+            self.execute(['arch-chroot', mount_point, 'mkdir', '-p', dir])
+            override = """
+[Service]
+ExecStartPost=/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
+"""
+            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{override}\' > {dir}/extpcr.conf'])
             
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
             self.log(_("INFO: Настройка доверенной загрузки"))
-            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=(/etc/hostname)\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
+            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=(/etc/hostname /etc/systemd/system/systemd-cryptsetup@.service.d/extpcr.conf)\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
 
             for kernel in self.config['kernels']:
@@ -546,23 +554,11 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             self.set_progress(0.8)
 
             # Creating UKI config
+            # Now it doesn't contain PCRSignature due to moving to pcrlock
             uki_conf_content = """[UKI]
 OSRelease=@/etc/os-release
-PCRBanks=sha256
-
-[PCRSignature:initrd]
-Phases=enter-initrd
-PCRPrivateKey=/etc/kernel/pcr-initrd.key.pem
-PCRPublicKey=/etc/kernel/pcr-initrd.pub.pem
-
-[PCRSignature:system]
-Phases=enter-initrd leave-initrd sysinit ready
-PCRPrivateKey=/etc/kernel/pcr-system.key.pem
-PCRPublicKey=/etc/kernel/pcr-system.pub.pem"""
+PCRBanks=sha256"""
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{uki_conf_content}\' > /etc/kernel/uki.conf'])
-
-            # Generate ukify keys
-            self.execute(['arch-chroot', mount_point, 'ukify', 'genkey', '--config=/etc/kernel/uki.conf'])
 
             current_lang = os.environ.get("LANG", "en_US.UTF-8")
             setup_english = True
