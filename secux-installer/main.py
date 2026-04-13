@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.6.1"
+VERSION = "0.6.2"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -393,6 +393,8 @@ class InstallPage(Adw.NavigationPage):
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{repo_conf_line}" >> /etc/pacman.conf'])
             self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo.gpg', f'{mount_point}/usr/share/pacman/keyrings/'])
             self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo-trusted', f'{mount_point}/usr/share/pacman/keyrings/'])
+            self.execute(['arch-chroot', mount_point, 'pacman-key', '--init'])
+            self.execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'archlinux'])
             self.execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'secux-repo'])
 
             if self.config['repo_source'] == 'secux':
