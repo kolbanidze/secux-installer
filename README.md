@@ -5,7 +5,7 @@
 This repository contains the source code of the Secux Linux graphical installer.
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/kolbanidze/secux-installer/refs/heads/main/welcome.png" width=384>
+    <img src="https://raw.githubusercontent.com/kolbanidze/secux-installer/refs/heads/main/welcome.en.png" width=384>
 </p>
 
 ## Launch
