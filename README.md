@@ -1,51 +1,51 @@
 # secux-installer
 
-В этом репозитории находятся исходники графического установщика Secux Linux.
+[![Russian](https://img.shields.io/badge/README-на_русском-red.svg)](README.ru.md)
+
+This repository contains the source code of the Secux Linux graphical installer.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/kolbanidze/secux-installer/refs/heads/main/welcome.png" width=384>
 </p>
 
-## Запуск
+## Launch
 
-Приложение автоматически запускается в ISO образе Secux Linux.
+The application launches automatically in the Secux Linux ISO image.
 
-Для ручного обновления пакета используйте: `sudo pacman -Sy secux-installer`
+For a manual package update, use: `sudo pacman -Sy secux-installer`
 
-Для запуска в среде разработки или тестирования:
+For launching in a development or testing environment:
 `python main.py`
 
-### Техническая информация
-*   Интерфейс написан на Python с использованием GTK 4 и Libadwaita.
-*   Взаимодействие с диском и системой осуществляется через `subprocess` от root. Для root доступа используется `sudo` 
-*   Зависимости:
-    *   `python-gobject`
-    *   `libadwaita`
-    *   `gtk4`
+### Technical Information
+* The interface is written in Python using GTK 4 and Libadwaita.
+* Interaction with the disk and the system is carried out through `subprocess` as root. For root access, `sudo` is used
+* Dependencies:
+    * `python-gobject`
+    * `libadwaita`
+    * `gtk4`
 
-## Этапы установки
+## Installation Stages
 
-* Язык интерфейса
-* Часовой пояс
-* Уровень безопасности
-    * Максимальная безопасность: только собственные ключи Secure Boot
-    * Безопасность с обратной совместимостью: доверие к Microsoft, использование shim
-    * Никакой безопасности((
-* Окружение рабочего стола
+* Interface language
+* Time zone
+* Security level
+    * Maximum security: only custom Secure Boot keys
+    * Security with backward compatibility: trust in Microsoft, use of shim
+    * No security((
+* Desktop environment
     * GNOME
     * KDE
-    * Консоль (для серверов)
-* Ядро Linux
+    * Console (for servers)
+* Linux kernel
     * Linux hardened
     * Linux LTS
     * Linux
-* Разметка диска
-* Выбор пароля LUKS
-* Создание пользователя администратора
-* Выбор источника установки
-    * Онлайн
-    * Офлайн
-* Выбор предустановленного ПО
-* Установка системы
-
-
+* Disk partitioning
+* LUKS password selection
+* Administrator user creation
+* Installation source selection
+    * Online
+    * Offline
+* Pre-installed software selection
+* System installation
