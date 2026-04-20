@@ -32,7 +32,7 @@ For launching in a development or testing environment:
 * Security level
     * Maximum security: only custom Secure Boot keys
     * Security with backward compatibility: trust in Microsoft, use of shim
-    * No security((
+    * No security:(
 * Desktop environment
     * GNOME
     * KDE
