@@ -38,7 +38,7 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                         <property name="activatable-widget">repo_switch</property>
                         <child type="suffix">
                           <object class="GtkSwitch" id="repo_switch">
-                            <property name="active">true</property>
+                            <property name="active">false</property>
                             <property name="valign">3</property>
                           </object>
                         </child>
