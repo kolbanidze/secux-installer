@@ -1,7 +1,7 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $KernelPage : Adw.NavigationPage {
+template $KernelPage: Adw.NavigationPage {
   title: _("Ядро");
   tag: "kernel";
 
@@ -12,10 +12,10 @@ template $KernelPage : Adw.NavigationPage {
     content: Adw.Clamp {
       maximum-size: 500;
       tightening-threshold: 100;
-      
+
       child: Gtk.Box {
         orientation: vertical;
-        
+
         Adw.PreferencesPage {
           Adw.PreferencesGroup {
             title: _("Выберите виды ядра Linux");
@@ -23,11 +23,11 @@ template $KernelPage : Adw.NavigationPage {
 
             Adw.ActionRow {
               title: _("Linux Secux (Hardened)");
-              activatable-widget: btn_hardened; 
+              activatable-widget: btn_hardened;
 
               [prefix]
               Gtk.CheckButton btn_hardened {
-                active: true; 
+                active: true;
               }
             }
 
@@ -46,14 +46,31 @@ template $KernelPage : Adw.NavigationPage {
               [prefix]
               Gtk.CheckButton btn_linux {}
             }
+
+            Adw.ActionRow {
+              title: _("Игровой режим");
+              subtitle: _("Отключение функций безопасности, которые могут несущественно снижать производительность");
+              icon-name: "input-gaming-symbolic";
+              activatable-widget: gay_ming_switch;
+
+              [suffix]
+              Gtk.Switch gay_ming_switch {
+                active: false;
+                valign: center;
+              }
+            }
           }
         }
-        
+
         Gtk.Label {
           label: _("Linux Hardened - повышенная безопасность\nLinux LTS - надежность\nLinux - последние обновления");
           justify: center;
           wrap: true;
-          styles ["dim-label", "caption"]
+
+          styles [
+            "dim-label",
+            "caption",
+          ]
         }
       };
     };
@@ -67,8 +84,13 @@ template $KernelPage : Adw.NavigationPage {
         margin-top: 10;
         margin-start: 10;
 
-        styles ["suggested-action", "pill"]
+        styles [
+          "suggested-action",
+          "pill",
+        ]
+
         action-name: "win.next_step";
+
         child: Adw.ButtonContent {
           icon-name: "go-next-symbolic";
           label: _("Далее");

@@ -20,10 +20,11 @@ template $EncryptionPage: Adw.NavigationPage {
         margin-bottom: 24;
         margin-start: 12;
         margin-end: 12;
-        
+
         Adw.PreferencesGroup {
           title: _("Шифрование диска");
           description: _("Защитите ваши данные паролем.\nИспользуйте только латинские символы.");
+
           Adw.PasswordEntryRow password_entry {
             title: _("Пароль");
           }
@@ -33,11 +34,30 @@ template $EncryptionPage: Adw.NavigationPage {
           }
         }
 
+        Adw.PreferencesGroup no_encryption_group {
+          visible: false;
+
+          Adw.ActionRow {
+            title: _("Не использовать шифрование диска");
+            subtitle: _(
+              "Не рекомендуется активировать. Существенно снижает безопасность в случае краж и физического доступа"
+            );
+            icon-name: "channel-insecure-symbolic";
+            activatable-widget: no_encryption_switch;
+
+            [suffix]
+            Gtk.Switch no_encryption_switch {
+              active: false;
+              valign: center;
+            }
+          }
+        }
+
         Adw.PreferencesGroup mok_group {
           visible: false;
           title: _("Machine Owner Key");
           description: _("Одноразовый пароль для управления ключами безопасности.");
-          
+
           Adw.PasswordEntryRow mok_entry {
             title: _("Одноразовый пароль");
           }
@@ -49,8 +69,10 @@ template $EncryptionPage: Adw.NavigationPage {
 
         Gtk.Stack error_stack {
           transition-type: crossfade;
+
           Gtk.StackPage {
             name: "none";
+
             child: Box {};
           }
 
@@ -108,8 +130,13 @@ template $EncryptionPage: Adw.NavigationPage {
         margin-top: 10;
         margin-start: 10;
 
-        styles ["suggested-action", "pill"]
+        styles [
+          "suggested-action",
+          "pill",
+        ]
+
         action-name: "encryption.validate";
+
         child: Adw.ButtonContent {
           icon-name: "go-next-symbolic";
           label: _("Далее");

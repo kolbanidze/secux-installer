@@ -56,6 +56,20 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                             </child>
                           </object>
                         </child>
+                        <child>
+                          <object class="AdwActionRow">
+                            <property name="title" translatable="yes">Игровой режим</property>
+                            <property name="subtitle" translatable="yes">Отключение функций безопасности, которые могут несущественно снижать производительность</property>
+                            <property name="icon-name">input-gaming-symbolic</property>
+                            <property name="activatable-widget">gay_ming_switch</property>
+                            <child type="suffix">
+                              <object class="GtkSwitch" id="gay_ming_switch">
+                                <property name="active">false</property>
+                                <property name="valign">3</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>

@@ -8,5 +8,7 @@
     <file alias="scalable/actions/browser-firefox-symbolic.svg">icons/browser-firefox-symbolic.svg</file>
     <file alias="scalable/actions/vlc-logo-symbolic.svg">icons/vlc-logo-symbolic.svg</file>
     <file alias="scalable/actions/keepassxc-logo-symbolic.svg">icons/keepassxc-logo-symbolic.svg</file>
+    <file alias="scalable/actions/input-gaming-symbolic.svg">icons/input-gaming-symbolic.svg</file>
+    <file alias="scalable/actions/channel-insecure-symbolic.svg">icons/channel-insecure-symbolic.svg</file>
   </gresource>
 </gresources>

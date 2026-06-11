@@ -44,6 +44,25 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                   </object>
                 </child>
                 <child>
+                  <object class="AdwPreferencesGroup" id="no_encryption_group">
+                    <property name="visible">false</property>
+                    <child>
+                      <object class="AdwActionRow">
+                        <property name="title" translatable="yes">Не использовать шифрование диска</property>
+                        <property name="subtitle" translatable="yes">Не рекомендуется активировать. Существенно снижает безопасность в случае краж и физического доступа</property>
+                        <property name="icon-name">channel-insecure-symbolic</property>
+                        <property name="activatable-widget">no_encryption_switch</property>
+                        <child type="suffix">
+                          <object class="GtkSwitch" id="no_encryption_switch">
+                            <property name="active">false</property>
+                            <property name="valign">3</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
                   <object class="AdwPreferencesGroup" id="mok_group">
                     <property name="visible">false</property>
                     <property name="title" translatable="yes">Machine Owner Key</property>

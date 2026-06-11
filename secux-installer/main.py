@@ -22,15 +22,14 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.6.3"
+VERSION = "0.6.5"
 
 LOG_FILE = "/tmp/secux-install.log"
 
 APP_ID = "secux-installer"
 LOCALES_DIR = os.path.join(BASE_DIR, "locales")
 
-REPO_URL_MAIN = "https://secux.tonightisthenight.site/secux-repo/"
-REPO_URL_MIRROR = "https://kolbanidze-secux-repo.hf.space"
+REPO_URL = "https://kolbanidze-secux-repo.hf.space"
 
 class InstallError(Exception): pass
 
@@ -122,7 +121,6 @@ class InstallPage(Adw.NavigationPage):
 
         self.config = {
             "source": main_window.source_page.get_source_mode(),
-            "repo_source": main_window.source_page.get_repo_source(),
             "user": main_window.user_page.get_user(),
             "partition": main_window.partition_page.get_config(),
             "security": main_window.security_page.get_selected_mode(),
@@ -131,10 +129,11 @@ class InstallPage(Adw.NavigationPage):
             "encryption_pwd": main_window.encryption_page.get_password(),
             "kernels": main_window.kernel_page.get_selected_kernels(),
             "packages": main_window.software_page.get_selected_packages(),
-            "MOK": main_window.encryption_page.get_mok_password()
+            "MOK": main_window.encryption_page.get_mok_password(),
+            "gaming_mode": main_window.kernel_page.get_gaming_mode(),
+            "encryption_enabled": main_window.encryption_page.get_is_encryption_enabled()
         }
         self.log(_("INFO: Сбор данных завершен. Начало установки..."))
-        
         thread = threading.Thread(target=self._installation_sequence, daemon=True)
         thread.start()
 
@@ -281,11 +280,16 @@ class InstallPage(Adw.NavigationPage):
             self.log(_("INFO: Размер файла подкаки: ") + str(swap_size))
 
             self.set_progress(0.2)
-            self.log(_("INFO: Настройка шифрования LUKS2"))
-            self.execute(['cryptsetup', 'luksFormat', rootfs_partition], input_str=self.config["encryption_pwd"]) 
-            self.execute(['cryptsetup', 'luksOpen', rootfs_partition, 'secuxroot'], input_str=self.config["encryption_pwd"])
+            if self.config["encryption_enabled"] and self.config["encryption_pwd"]:
+                self.log(_("INFO: Настройка шифрования LUKS2"))
+                self.execute(['cryptsetup', 'luksFormat', rootfs_partition], input_str=self.config["encryption_pwd"]) 
+                self.execute(['cryptsetup', 'luksOpen', rootfs_partition, 'secuxroot'], input_str=self.config["encryption_pwd"])
                         
-            root_device_path = "/dev/mapper/secuxroot"
+                root_device_path = "/dev/mapper/secuxroot"
+            else:
+                self.log(_("INFO: Установки системы без шифрования диска"))
+                root_device_path = rootfs_partition
+
             fs_type = part_conf.get("fs_type", "btrfs")
 
             self.log(f"INFO: Форматирование корневого раздела в {fs_type}")
@@ -329,10 +333,7 @@ class InstallPage(Adw.NavigationPage):
             # Настройка репозиториев
             self.set_progress(0.35)
             if self.config['source'] == "online":
-                if self.config['repo_source'] == 'secux':
-                    self.execute(['cp', '/etc/pacman_online_secux.conf', '/etc/pacman.conf'])
-                else:
-                    self.execute(['cp', '/etc/pacman_online.conf', '/etc/pacman.conf'])
+                self.execute(['cp', '/etc/pacman_online.conf', '/etc/pacman.conf'])
             else:
                 self.execute(['cp', '/etc/pacman_offline.conf', '/etc/pacman.conf'])
             self.execute(['pacman-key', '--init'])
@@ -349,7 +350,7 @@ class InstallPage(Adw.NavigationPage):
             kernels = self.config["kernels"]
             user_packages = self.config["packages"]
 
-            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'bluez', 'bluez-utils', 'clang', 'lld']
+            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'bluez', 'bluez-utils', 'clang', 'lld', 'wireless-regdb']
             pacstrap_packages.extend(self._get_ucode_package())
             pacstrap_packages.extend(kernels)
             pacstrap_packages.extend(user_packages)
@@ -364,10 +365,10 @@ class InstallPage(Adw.NavigationPage):
 
             if self.config['desktop'] == 'gnome':
                 self.log("> DE: GNOME")
-                pacstrap_packages.extend(["xorg", "gnome", "networkmanager-openvpn", "gnome-tweaks", "gdm", 'gnome-shell-extension-appindicator', 'gnome-shell-extension-desktop-icons-ng'])
+                pacstrap_packages.extend(["gnome", "networkmanager-openvpn", "gnome-tweaks", "gdm", 'gnome-shell-extension-appindicator', 'gnome-shell-extension-desktop-icons-ng'])
             elif self.config['desktop'] == 'kde':
                 self.log("> DE: KDE")
-                pacstrap_packages.extend(["xorg", "plasma", "networkmanager-openvpn", "kde-applications"])
+                pacstrap_packages.extend(["plasma", "networkmanager-openvpn", "kde-applications", 'plasma-login-manager'])
             else:
                 self.log("> DE: Console")
             
@@ -389,17 +390,13 @@ class InstallPage(Adw.NavigationPage):
 
             # Adding custom repo
             self.log(_("INFO: Настройка собственного репозитория ПО"))
-            repo_conf_line = f'\n[secux-repo]\nServer = {REPO_URL_MAIN}\nServer = {REPO_URL_MIRROR}\n'
+            repo_conf_line = f'\n[secux-repo]\nServer = {REPO_URL}\n'
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{repo_conf_line}" >> /etc/pacman.conf'])
             self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo.gpg', f'{mount_point}/usr/share/pacman/keyrings/'])
             self.execute(['cp', '/usr/share/pacman/keyrings/secux-repo-trusted', f'{mount_point}/usr/share/pacman/keyrings/'])
             self.execute(['arch-chroot', mount_point, 'pacman-key', '--init'])
             self.execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'archlinux'])
             self.execute(['arch-chroot', mount_point, 'pacman-key', '--populate', 'secux-repo'])
-
-            if self.config['repo_source'] == 'secux':
-                sed_command = "sed -i 's|Include = /etc/pacman.d/mirrorlist|Server = https://secux.tonightisthenight.site/$repo/os/$arch|g' /etc/pacman.conf"
-                self.execute(['arch-chroot', mount_point, 'bash', '-c', sed_command])
             
             self.set_progress(0.62)
             self.execute(['bash', '-c', 'genfstab -U /mnt >> /mnt/etc/fstab']) 
@@ -412,10 +409,10 @@ class InstallPage(Adw.NavigationPage):
             user = self.config["user"]
             self.log(f"INFO: Создание пользователя {user['username']}...")
             self.execute(['arch-chroot', '/mnt', 'useradd', '-m', user['username'], '-c', user['fullname']])
-            self.execute(['arch-chroot', '/mnt', 'passwd', user['username']], input_str=f"{user['password']}\n{user['password']}")
-
-            sudoers_line = '"%wheel ALL=(ALL:ALL) ALL"'
-            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo {sudoers_line} >> /etc/sudoers']) 
+            self.execute(['arch-chroot', '/mnt', 'chpasswd'], input_str=f"{user['username']}:{user['password']}")
+            
+            sudoers_line = '%wheel ALL=(ALL:ALL) ALL'
+            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{sudoers_line}" > /etc/sudoers.d/10-wheel'])
             self.execute(['arch-chroot', mount_point, 'usermod', '-aG', 'wheel', user['username']])
 
             # Copy Wi-Fi for OS
@@ -424,7 +421,7 @@ class InstallPage(Adw.NavigationPage):
             src_dir = '/etc/NetworkManager/system-connections'
             dst_dir = f'{mount_point}/etc/NetworkManager/system-connections'
             if not os.path.exists(dst_dir):
-                self.execute(['mkdir', '-r', dst_dir])
+                self.execute(['mkdir', '-p', dst_dir])
             
             self.execute(['cp', '-a', f'{src_dir}/.', dst_dir])
             ls_proc = subprocess.run(['sudo', 'ls', dst_dir], capture_output=True, text=True)
@@ -513,7 +510,7 @@ apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.
             self.execute(['arch-chroot', mount_point, 'mkdir', '-p', dir])
             override = """
 [Service]
-ExecStartPost=/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
+ExecStartPost=-/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
 """
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{override}\' > {dir}/extpcr.conf'])
             
@@ -521,6 +518,8 @@ ExecStartPost=/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
             # Creating mkinitcpio.conf
             self.log(_("INFO: Настройка доверенной загрузки"))
             mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=(/etc/hostname /etc/systemd/system/systemd-cryptsetup@.service.d/extpcr.conf)\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
+            if not (self.config["encryption_enabled"] and self.config["encryption_pwd"]):
+                mkinitcpio_conf_content = mkinitcpio_conf_content.replace("sd-encrypt ", "")
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
 
             for kernel in self.config['kernels']:
@@ -548,7 +547,25 @@ ExecStartPost=/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
             self.log(f"UUID: {uuid}")
             rootflags = "rootflags=subvol=@ " if fs_type == "btrfs" else ""
 
-            cmdline_content = f"rd.luks.name={uuid}=secuxroot root={root_device_path} rw {rootflags}rootfstype={fs_type} rd.shell=0 rd.emergency=reboot audit=1 quiet slab_nomerge iommu=force iommu.strict=1 iommu.passthrough=0 randomize_kstack_offset=1 vsyscall=none debugfs=off oops=panic init_on_alloc=1 pti=on lockdown=confidentiality lsm=landlock,lockdown,yama,integrity,apparmor,bpf splash"
+            # slab_nomerge randomize_kstack_offset=1 init_on_alloc=1 pti=on
+
+            cmdline = []
+
+            if self.config["encryption_enabled"] and self.config["encryption_pwd"]:
+                cmdline.extend([f"rd.luks.name={uuid}=secuxroot", "root=/dev/mapper/secuxroot"])
+            else:
+                cmdline.append(f"root=UUID={uuid}")
+
+            cmdline.extend(['rw', f"{rootflags}rootfstype={fs_type}",
+                            "rd.shell=0", "rd.emergency=reboot", "audit=1", "quiet", "iommu=force", "iommu.strict=1", "iommu.passthrough=0",
+                            "vsyscall=none", "debugfs=off", "oops=panic", "lockdown=confidentiality",
+                            "lsm=landlock,lockdown,yama,integrity,apparmor,bpf", "splash"])
+                        
+            if not self.config['gaming_mode']:
+                cmdline.extend(["slab_nomerge", "randomize_kstack_offset=1", "init_on_alloc=1", "pti=on"])
+
+            cmdline_content = " ".join(cmdline)
+
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{cmdline_content}" > /etc/cmdline.d/root.conf'])
 
             if self.config.get("zram", True):
@@ -583,9 +600,7 @@ PCRBanks=sha256"""
             # self.execute(['arch-chroot', mount_point, 'bash', '-c', 'echo "FONT=eurlatgr" >> /etc/vconsole.conf'])
 
             # Set plymouth theme
-            self.execute(['rm', '-rf', f'{mount_point}/usr/share/plymouth/themes'])
-            self.execute(['cp', '-r', '/usr/share/plymouth/themes/', f'{mount_point}/usr/share/plymouth/themes/'])
-            self.execute(['arch-chroot', mount_point, 'plymouth-set-default-theme', 'bgrt-nologo']) 
+            self.execute(['arch-chroot', mount_point, 'plymouth-set-default-theme', 'bgrt']) 
 
             # Prepare EFI Partition
             self.execute(['mkdir', '-p', f'{mount_point}/efi/EFI/secux'])
@@ -621,10 +636,9 @@ PCRBanks=sha256"""
                 self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'gdm.service'])
 
             elif self.config["desktop"] == "kde":
-                self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'sddm.service'])
-                self.execute(['sed', '-i', 's/^Current=.*/Current=breeze/', f'{mount_point}/usr/lib/sddm/sddm.conf.d/default.conf'])
+                self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'plasma-login-manager.service'])
             
-            self.execute(['arch-chroot', mount_point, 'bootctl', 'install', '--esp-path=/efi']) 
+            self.execute(['arch-chroot', mount_point, 'bootctl', 'install', '--esp-path=/efi', '--variables', 'no']) 
 
             default_kernel_conf = ""
             if 'linux-secux' in self.config['kernels']: default_kernel_conf = "secux-linux-secux.conf"
@@ -653,6 +667,8 @@ PCRBanks=sha256"""
                 self.execute(['cp', f'{mount_point}/usr/share/shim-signed/mmx64.efi', f'{mount_point}/efi/EFI/secux/mmx64.efi'])
                 self.execute(['mkdir', '-p', f'{mount_point}/etc/secureboot'])
                 self.execute(['openssl', 'req', '-newkey', 'rsa:4096', '-nodes', '-keyout', f'{mount_point}/etc/secureboot/sb.key', '-new', '-x509', '-sha256', '-days', '3650', '-subj', '/CN=Secux Linux MOK/', '-out', f'{mount_point}/etc/secureboot/sb.crt'])
+                self.execute(['chmod', '700', f'{mount_point}/etc/secureboot'])
+                self.execute(['chmod', '400', f'{mount_point}/etc/secureboot/sb.key'])
                 self.execute(['openssl', 'x509', '-outform', 'DER', '-in', f'{mount_point}/etc/secureboot/sb.crt', '-out', f'{mount_point}/etc/secureboot/sb.cer'])
                 self.execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', '/efi/EFI/systemd/systemd-bootx64.efi', '/usr/lib/systemd/boot/efi/systemd-bootx64.efi'])
                 for kernel in self.config['kernels']:
@@ -680,7 +696,11 @@ PCRBanks=sha256"""
             self.set_progress(0.95)
 
             # Hardening
-            self.execute(['cp', f'{installer_path}/scripts/hardening.conf', f'{mount_point}/etc/sysctl.d/'])
+            if self.config["gaming_mode"]:
+                self.execute(['cp', f'{installer_path}/scripts/hardening_gaming.conf', f"{mount_point}/etc/sysctl.d"])
+            else:
+                self.execute(['cp', f'{installer_path}/scripts/hardening.conf', f'{mount_point}/etc/sysctl.d/'])
+            
             if self.config['desktop'] == 'console':
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "user.max_user_namespaces=0" >> /etc/sysctl.d/hardening.conf'])
             else:
@@ -832,7 +852,6 @@ class SourcePage(Adw.NavigationPage):
     btn_online = Gtk.Template.Child()
     btn_offline = Gtk.Template.Child()
     status_stack = Gtk.Template.Child()
-    repo_switch = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -859,12 +878,6 @@ class SourcePage(Adw.NavigationPage):
         if self.btn_online.get_active():
             return "online"
         return "offline"
-
-    def get_repo_source(self):
-        if self.repo_switch.get_active():
-            return "secux"
-        else:
-            return "arch"
 
 
 @Gtk.Template(filename=get_ui_path("user.ui"))
@@ -913,7 +926,7 @@ class UserPage(Adw.NavigationPage):
             self.error_stack.set_visible_child_name("empty")
             return
 
-        if not hostname.isascii() or hostname[0].isdigit():
+        if not hostname.isascii() or hostname[0].isdigit() or ';' in hostname:
             self.error_stack.set_visible_child_name("ascii_host")
             return
             
@@ -958,8 +971,8 @@ class EncryptionPage(Adw.NavigationPage):
     
     password_entry = Gtk.Template.Child()
     confirm_entry = Gtk.Template.Child()
-    
-    # Новые виджеты
+    no_encryption_group = Gtk.Template.Child()
+    no_encryption_switch = Gtk.Template.Child()    
     mok_group = Gtk.Template.Child()
     mok_entry = Gtk.Template.Child()
     mok_confirm_entry = Gtk.Template.Child()
@@ -989,33 +1002,38 @@ class EncryptionPage(Adw.NavigationPage):
         is_compat = (security_mode == "secure_compat")
         self.mok_group.set_visible(is_compat)
 
+    def set_no_encryption_group(self, value):
+        """Если используется gaming mode, то можно показать вариант установки без шифрования"""
+        if not value:
+            self.no_encryption_switch.set_active(False)
+        self.no_encryption_group.set_visible(value)
+
     def on_text_changed(self, *args):
         if self.error_stack.get_visible_child_name() != "none":
             self.error_stack.set_visible_child_name("none")
 
-    def show_error(self, message):
-        # Этот метод не использовался в оригинале, но если есть label, то ок. 
-        # В оригинале error_stack, поэтому оставляем логику ниже.
-        pass 
+    def get_is_encryption_enabled(self):
+        return not self.no_encryption_switch.get_active()
 
     def on_validate_and_next(self, action, param):
-        # 1. Валидация основного пароля диска
+        # Валидация основного пароля диска
         pwd = self.password_entry.get_text()
         confirm = self.confirm_entry.get_text()
 
-        if not pwd:
-            self.error_stack.set_visible_child_name("empty")
-            return
+        if self.get_is_encryption_enabled():
+            if not pwd:
+                self.error_stack.set_visible_child_name("empty")
+                return
 
-        if pwd != confirm:
-            self.error_stack.set_visible_child_name("mismatch")
-            return
+            if pwd != confirm:
+                self.error_stack.set_visible_child_name("mismatch")
+                return
 
-        if not pwd.isascii():
-            self.error_stack.set_visible_child_name("ascii")
-            return
-        
-        # 2. Валидация MOK пароля (если поле видимо)
+            if not pwd.isascii():
+                self.error_stack.set_visible_child_name("ascii")
+                return
+            
+            # Валидация MOK пароля (если поле видимо)
         if self.mok_group.get_visible():
             mok = self.mok_entry.get_text()
             mok_confirm = self.mok_confirm_entry.get_text()
@@ -1037,7 +1055,10 @@ class EncryptionPage(Adw.NavigationPage):
             win.activate_action("win.next_step", None)
 
     def get_password(self):
-        return self.password_entry.get_text()
+        if self.get_is_encryption_enabled():
+            return self.password_entry.get_text()
+        else:
+            return ""
 
     def get_mok_password(self):
         if self.mok_group.get_visible():
@@ -1170,9 +1191,11 @@ class KernelPage(Adw.NavigationPage):
     btn_hardened = Gtk.Template.Child()
     btn_lts = Gtk.Template.Child()
     btn_linux = Gtk.Template.Child()
+    gay_ming_switch = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.gay_ming_switch.connect("notify::active", self._on_gaming_toggle)
 
     def get_selected_kernels(self) -> list:
         kernels = []
@@ -1183,7 +1206,18 @@ class KernelPage(Adw.NavigationPage):
         if self.btn_linux.get_active():
             kernels.append("linux")
         return kernels
+    
+    def get_gaming_mode(self) -> bool:
+        return self.gay_ming_switch.get_active()
 
+    def _on_gaming_toggle(self, *args):
+        is_gaming_mode_active = self.gay_ming_switch.get_active()
+        if is_gaming_mode_active:
+            self.btn_hardened.set_active(False)
+            self.btn_hardened.set_sensitive(False)
+            self.btn_linux.set_active(True)
+        else:
+            self.btn_hardened.set_sensitive(True)
 
 
 @Gtk.Template(filename=get_ui_path("desktop.ui"))
@@ -1523,6 +1557,10 @@ class InstallerWindow(Adw.ApplicationWindow):
             if isinstance(page_to_open, EncryptionPage):
                 sec_mode = self.security_page.get_selected_mode()
                 page_to_open.update_visibility(sec_mode)
+            
+            if isinstance(page_to_open, EncryptionPage):
+                is_gaming_mode = self.kernel_page.get_gaming_mode()
+                page_to_open.set_no_encryption_group(is_gaming_mode)
             
             if isinstance(page_to_open, InstallPage):
                 if self.source_page.get_source_mode() == 'online':
