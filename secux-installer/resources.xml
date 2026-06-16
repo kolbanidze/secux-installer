@@ -10,5 +10,7 @@
     <file alias="scalable/actions/keepassxc-logo-symbolic.svg">icons/keepassxc-logo-symbolic.svg</file>
     <file alias="scalable/actions/input-gaming-symbolic.svg">icons/input-gaming-symbolic.svg</file>
     <file alias="scalable/actions/channel-insecure-symbolic.svg">icons/channel-insecure-symbolic.svg</file>
+    <file alias="scalable/actions/server-pick-symbolic.svg">icons/server-pick-symbolic.svg</file>
+    <file alias="scalable/actions/package-x-generic-symbolic.svg">icons/package-x-generic-symbolic.svg</file>
   </gresource>
 </gresources>

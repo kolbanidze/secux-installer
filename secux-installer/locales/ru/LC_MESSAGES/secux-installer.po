@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-07 22:42+0300\n"
+"POT-Creation-Date: 2026-06-16 19:40+0300\n"
 "PO-Revision-Date: 2025-12-21 11:21+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -62,88 +62,88 @@ msgstr ""
 msgid "INFO: Монтирование файловых систем..."
 msgstr ""
 
-#: main.py:345
+#: main.py:343
 msgid "INFO: Установка пакетов операционной системы"
 msgstr ""
 
-#: main.py:376
+#: main.py:381
 msgid "> Настройка максимального уровня защищённости"
 msgstr ""
 
-#: main.py:379
+#: main.py:384
 msgid "> Настройка защиты с обратной совместимостью"
 msgstr ""
 
-#: main.py:382
+#: main.py:387
 msgid "> Отсутствие защиты"
 msgstr ""
 
-#: main.py:389
+#: main.py:394
 msgid "INFO: Настройка операционной системы"
 msgstr ""
 
-#: main.py:392
+#: main.py:397
 msgid "INFO: Настройка собственного репозитория ПО"
 msgstr ""
 
-#: main.py:519
+#: main.py:527
 msgid "INFO: Настройка доверенной загрузки"
 msgstr ""
 
-#: main.py:572
+#: main.py:577
 msgid "INFO: Настройка zRAM..."
 msgstr ""
 
-#: main.py:742
+#: main.py:764
 msgid "Установка завершена"
 msgstr ""
 
-#: main.py:743
+#: main.py:765
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr ""
 
-#: main.py:746
+#: main.py:768
 msgid "Ошибка установки"
 msgstr ""
 
-#: main.py:747
+#: main.py:769
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr ""
 
-#: main.py:1531
+#: main.py:1559
 msgid "Внимание"
 msgstr ""
 
-#: main.py:1531
+#: main.py:1559
 msgid ""
 "Для работы системы необходима поддержка UEFI.\n"
 "Установка системы невозможна."
 msgstr ""
 
-#: main.py:1569
+#: main.py:1597
 msgid "ОШИБКА: отсутствует подключение к интернету!"
 msgstr ""
 
-#: main.py:1570 main.py:1576
+#: main.py:1598 main.py:1604
 msgid "Ошибка"
 msgstr ""
 
-#: main.py:1570
+#: main.py:1598
 msgid "Отсутствует подключение к интернету"
 msgstr ""
 
-#: main.py:1575
+#: main.py:1603
 msgid ""
 "ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты "
 "необходимо включить Setup Mode."
 msgstr ""
 
-#: main.py:1576
+#: main.py:1604
 msgid ""
 "Setup Mode отключен, что необходимо для применения всех механизмов защиты."
 msgstr ""
 
-#: main.py:1627
+#: main.py:1655
 msgid "Текущий язык: русский"
 msgstr ""
 
@@ -164,7 +164,7 @@ msgid "Консольный"
 msgstr ""
 
 #: ui/desktop.ui:82 ui/encryption.ui:157 ui/kernel.ui:110 ui/partition.ui:242
-#: ui/security.ui:85 ui/software.ui:154 ui/source.ui:115 ui/timezone.ui:75
+#: ui/security.ui:85 ui/software.ui:176 ui/source.ui:115 ui/timezone.ui:75
 #: ui/user.ui:191 ui/welcome.ui:60
 msgid "Далее"
 msgstr ""
@@ -438,24 +438,40 @@ msgstr ""
 msgid "Центр управления безопасностью Secux Linux"
 msgstr ""
 
-#: ui/software.ui:76
-msgid "Браузер с открытым исходным кодом"
+#: ui/software.ui:65
+msgid "SSH сервер"
+msgstr ""
+
+#: ui/software.ui:66
+msgid "Удаленный доступ и настройка UFW"
 msgstr ""
 
 #: ui/software.ui:87
-msgid "Свободный и бесплатный браузер"
+msgid "Браузер с открытым исходным кодом"
 msgstr ""
 
 #: ui/software.ui:98
-msgid "Универсальный медиаплеер"
+msgid "Свободный и бесплатный браузер"
 msgstr ""
 
 #: ui/software.ui:109
-msgid "Офисный пакет"
+msgid "Универсальный медиаплеер"
 msgstr ""
 
 #: ui/software.ui:120
+msgid "Офисный пакет"
+msgstr ""
+
+#: ui/software.ui:131
 msgid "Менеджер паролей"
+msgstr ""
+
+#: ui/software.ui:141
+msgid "Shelly"
+msgstr ""
+
+#: ui/software.ui:142
+msgid "Менеджер пакетов"
 msgstr ""
 
 #: ui/source.ui:10 ui/summary.ui:56

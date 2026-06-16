@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.6.7"
+VERSION = "0.6.8"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -364,11 +364,18 @@ class InstallPage(Adw.NavigationPage):
             if self.config['desktop'] == 'gnome':
                 self.log("> DE: GNOME")
                 pacstrap_packages.extend(["gnome", "networkmanager-openvpn", "gnome-tweaks", "gdm", 'gnome-shell-extension-appindicator', 'gnome-shell-extension-desktop-icons-ng', 'seahorse', 'gnome-keyring'])
+
             elif self.config['desktop'] == 'kde':
                 self.log("> DE: KDE")
                 pacstrap_packages.extend(["plasma", "networkmanager-openvpn", "kde-applications", 'plasma-login-manager'])
             else:
                 self.log("> DE: Console")
+            
+            if self.config['desktop'] != 'console':
+                pacstrap_packages.extend(['noto-fonts', 'noto-fonts-cjk', 'noto-fonts-emoji', 'noto-fonts-extra'])
+                pacstrap_packages.extend(['ttf-ms-win11', 'ttf-ms-win11-japanese', 'ttf-ms-win11-korean',
+                                          'ttf-ms-win11-sea', 'ttf-ms-win11-thai', 'ttf-ms-win11-zh_cn',
+                                          'ttf-ms-win11-zh_tw', 'ttf-ms-win11-other'])
             
             if self.config['security'] == "secure_full":
                 self.log(_("> Настройка максимального уровня защищённости"))
@@ -548,8 +555,6 @@ ExecStartPost=-/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
             self.log(f"UUID: {uuid}")
             rootflags = "rootflags=subvol=@ " if fs_type == "btrfs" else ""
 
-            # slab_nomerge randomize_kstack_offset=1 init_on_alloc=1 pti=on
-
             cmdline = []
 
             if self.config["encryption_enabled"] and self.config["encryption_pwd"]:
@@ -559,11 +564,10 @@ ExecStartPost=-/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
 
             cmdline.extend(['rw', f"{rootflags}rootfstype={fs_type}",
                             "rd.shell=0", "rd.emergency=reboot", "audit=1", "quiet", "iommu=force", "iommu.strict=1", "iommu.passthrough=0",
-                            "vsyscall=none", "debugfs=off", "oops=panic", "lockdown=confidentiality",
-                            "lsm=landlock,lockdown,yama,integrity,apparmor,bpf", "splash"])
+                            "vsyscall=none", "debugfs=off", "oops=panic", "splash"])
                         
             if not self.config['gaming_mode']:
-                cmdline.extend(["slab_nomerge", "randomize_kstack_offset=1", "init_on_alloc=1", "pti=on"])
+                cmdline.extend(["slab_nomerge", "randomize_kstack_offset=1", "init_on_alloc=1", "pti=on", "lockdown=confidentiality", "lsm=landlock,lockdown,yama,integrity,apparmor,bpf"])
 
             cmdline_content = " ".join(cmdline)
 
@@ -608,6 +612,11 @@ PCRBanks=sha256"""
 
             # Delete previous UKI if exists
             self.execute(['bash', '-c', f'rm -rf {mount_point}/efi/EFI/secux/*'])
+
+            # Enable multilib repo if gaming mode enabled
+            # * for steam pkg
+            if self.config['gaming_mode']:
+                self.execute(["sed", "-i", '/^#\\[multilib\\]/,/^#Include = \\/etc\\/pacman\\.d\\/mirrorlist/ s/^#//', "/etc/pacman.conf"])
 
             installer_path = "/usr/local/bin/secux-installer"
 
@@ -709,7 +718,19 @@ PCRBanks=sha256"""
 
             self.execute(['arch-chroot', mount_point, 'ufw', 'default', 'deny'])
             self.execute(['sed', '-i', 's/ENABLED=no/ENABLED=yes/', f"{mount_point}/etc/ufw/ufw.conf"])
-            # self.execute(['arch-chroot', mount_point, 'ufw', 'enable'])
+            if 'openssh' in user_packages:
+                self.execute(['arch-chroot', mount_point, 'ufw', 'allow', 'ssh'])
+                sshd_config_d_contents = """
+Port 22
+PermitRootLogin prohibit-password
+PubkeyAuthentication yes
+AuthorizedKeysFile      .ssh/authorized_keys
+PasswordAuthentication no
+PermitEmptyPasswords no
+"""
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{sshd_config_d_contents}\' > /etc/ssh/sshd_config.d/10-secux.conf'])
+                self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'sshd'])
+            self.execute(['arch-chroot', mount_point, 'ufw', 'enable'])
             self.execute(['cp', f'{installer_path}/scripts/secux.rules', f'{mount_point}/etc/audit/rules.d/secux.rules'])
 
             # Flatpak offline installation support
@@ -819,6 +840,8 @@ class SoftwarePage(Adw.NavigationPage):
     chk_vlc = Gtk.Template.Child()
     chk_libreoffice = Gtk.Template.Child()
     chk_keepassxc = Gtk.Template.Child()
+    chk_ssh_server = Gtk.Template.Child()
+    chk_shelly = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -842,6 +865,10 @@ class SoftwarePage(Adw.NavigationPage):
             packages.append("libreoffice-fresh")
         if self.chk_keepassxc.get_active():
             packages.append("keepassxc")
+        if self.chk_ssh_server.get_active():
+            packages.append('openssh')
+        if self.chk_shelly.get_active():
+            packages.append('shelly')
             
         return packages
 

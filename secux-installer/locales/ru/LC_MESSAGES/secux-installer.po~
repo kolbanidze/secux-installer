@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-07 21:46+0300\n"
+"POT-Creation-Date: 2026-06-07 22:42+0300\n"
 "PO-Revision-Date: 2025-12-21 11:21+0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -18,128 +18,132 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: main.py:135
+#: main.py:136
 msgid "INFO: Сбор данных завершен. Начало установки..."
 msgstr ""
 
-#: main.py:244
+#: main.py:245
 msgid "INFO: Автоматическая разметка диска "
 msgstr ""
 
-#: main.py:247
+#: main.py:248
 msgid "ОШИБКА: не удалось форматировать диск"
 msgstr ""
 
-#: main.py:251
+#: main.py:252
 msgid "ОШИБКА: не удалось создать разделы"
 msgstr ""
 
-#: main.py:257
+#: main.py:258
 msgid "ОШИБКА: не удалось найти разделы"
 msgstr ""
 
-#: main.py:265
+#: main.py:266
 msgid "INFO: Используется ручная разметка."
 msgstr ""
 
-#: main.py:274
+#: main.py:275
 msgid "ОШИБКА: не удалось определить разделы"
 msgstr ""
 
-#: main.py:279
+#: main.py:280
 msgid "INFO: Размер файла подкаки: "
 msgstr ""
 
-#: main.py:282
+#: main.py:284
 msgid "INFO: Настройка шифрования LUKS2"
 msgstr ""
 
-#: main.py:324
+#: main.py:290
+msgid "INFO: Установки системы без шифрования диска"
+msgstr ""
+
+#: main.py:330
 msgid "INFO: Монтирование файловых систем..."
 msgstr ""
 
-#: main.py:339
+#: main.py:345
 msgid "INFO: Установка пакетов операционной системы"
 msgstr ""
 
-#: main.py:370
+#: main.py:376
 msgid "> Настройка максимального уровня защищённости"
 msgstr ""
 
-#: main.py:373
+#: main.py:379
 msgid "> Настройка защиты с обратной совместимостью"
 msgstr ""
 
-#: main.py:376
+#: main.py:382
 msgid "> Отсутствие защиты"
 msgstr ""
 
-#: main.py:383
+#: main.py:389
 msgid "INFO: Настройка операционной системы"
 msgstr ""
 
-#: main.py:386
+#: main.py:392
 msgid "INFO: Настройка собственного репозитория ПО"
 msgstr ""
 
-#: main.py:513
+#: main.py:519
 msgid "INFO: Настройка доверенной загрузки"
 msgstr ""
 
-#: main.py:557
+#: main.py:572
 msgid "INFO: Настройка zRAM..."
 msgstr ""
 
-#: main.py:725
+#: main.py:742
 msgid "Установка завершена"
 msgstr ""
 
-#: main.py:726
+#: main.py:743
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr ""
 
-#: main.py:729
+#: main.py:746
 msgid "Ошибка установки"
 msgstr ""
 
-#: main.py:730
+#: main.py:747
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr ""
 
-#: main.py:1506
+#: main.py:1531
 msgid "Внимание"
 msgstr ""
 
-#: main.py:1506
+#: main.py:1531
 msgid ""
 "Для работы системы необходима поддержка UEFI.\n"
 "Установка системы невозможна."
 msgstr ""
 
-#: main.py:1540
+#: main.py:1569
 msgid "ОШИБКА: отсутствует подключение к интернету!"
 msgstr ""
 
-#: main.py:1541 main.py:1547
+#: main.py:1570 main.py:1576
 msgid "Ошибка"
 msgstr ""
 
-#: main.py:1541
+#: main.py:1570
 msgid "Отсутствует подключение к интернету"
 msgstr ""
 
-#: main.py:1546
+#: main.py:1575
 msgid ""
 "ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты "
 "необходимо включить Setup Mode."
 msgstr ""
 
-#: main.py:1547
+#: main.py:1576
 msgid ""
 "Setup Mode отключен, что необходимо для применения всех механизмов защиты."
 msgstr ""
 
-#: main.py:1598
+#: main.py:1627
 msgid "Текущий язык: русский"
 msgstr ""
 
@@ -159,7 +163,7 @@ msgstr ""
 msgid "Консольный"
 msgstr ""
 
-#: ui/desktop.ui:82 ui/encryption.ui:138 ui/kernel.ui:110 ui/partition.ui:242
+#: ui/desktop.ui:82 ui/encryption.ui:157 ui/kernel.ui:110 ui/partition.ui:242
 #: ui/security.ui:85 ui/software.ui:154 ui/source.ui:115 ui/timezone.ui:75
 #: ui/user.ui:191 ui/welcome.ui:60
 msgid "Далее"
@@ -187,31 +191,41 @@ msgstr ""
 msgid "Повторите пароль"
 msgstr ""
 
-#: ui/encryption.ui:49
+#: ui/encryption.ui:51
+msgid "Не использовать шифрование диска"
+msgstr ""
+
+#: ui/encryption.ui:52
+msgid ""
+"Не рекомендуется активировать. Существенно снижает безопасность в случае "
+"краж и физического доступа"
+msgstr ""
+
+#: ui/encryption.ui:68
 msgid "Machine Owner Key"
 msgstr ""
 
-#: ui/encryption.ui:50
+#: ui/encryption.ui:69
 msgid "Одноразовый пароль для управления ключами безопасности."
 msgstr ""
 
-#: ui/encryption.ui:53
+#: ui/encryption.ui:72
 msgid "Одноразовый пароль"
 msgstr ""
 
-#: ui/encryption.ui:58
+#: ui/encryption.ui:77
 msgid "Повторите одноразовый пароль"
 msgstr ""
 
-#: ui/encryption.ui:79
+#: ui/encryption.ui:98
 msgid "Пароль не может быть пустым"
 msgstr ""
 
-#: ui/encryption.ui:93 ui/user.ui:160
+#: ui/encryption.ui:112 ui/user.ui:160
 msgid "Пароли не совпадают"
 msgstr ""
 
-#: ui/encryption.ui:107
+#: ui/encryption.ui:126
 msgid "Используйте только английские буквы и цифры"
 msgstr ""
 

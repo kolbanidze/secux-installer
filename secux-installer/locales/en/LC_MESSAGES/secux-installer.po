@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: secux-installer 0.5.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-07 22:42+0300\n"
+"POT-Creation-Date: 2026-06-16 19:40+0300\n"
 "PO-Revision-Date: 2025-12-21 11:30+0300\n"
 "Last-Translator: AI Assistant\n"
 "Language-Team: English\n"
@@ -61,59 +61,59 @@ msgstr "INFO: Installing OS without Full-Disk Encryption (FDE)"
 msgid "INFO: Монтирование файловых систем..."
 msgstr "INFO: Mounting filesystems..."
 
-#: main.py:345
+#: main.py:343
 msgid "INFO: Установка пакетов операционной системы"
 msgstr "INFO: installing OS packages"
 
-#: main.py:376
+#: main.py:381
 msgid "> Настройка максимального уровня защищённости"
 msgstr "> Configuring maximum security level"
 
-#: main.py:379
+#: main.py:384
 msgid "> Настройка защиты с обратной совместимостью"
 msgstr "> Configuring security with backward compatibility"
 
-#: main.py:382
+#: main.py:387
 msgid "> Отсутствие защиты"
 msgstr "> No protection"
 
-#: main.py:389
+#: main.py:394
 msgid "INFO: Настройка операционной системы"
 msgstr "INFO: Configuring OS security mechanisms"
 
-#: main.py:392
+#: main.py:397
 msgid "INFO: Настройка собственного репозитория ПО"
 msgstr "INFO: Setting up secux-repo"
 
-#: main.py:519
+#: main.py:527
 msgid "INFO: Настройка доверенной загрузки"
 msgstr "INFO: Setting up trusted boot"
 
-#: main.py:572
+#: main.py:577
 msgid "INFO: Настройка zRAM..."
 msgstr "INFO: configuring zRAM"
 
-#: main.py:742
+#: main.py:764
 msgid "Установка завершена"
 msgstr "Installation complete"
 
-#: main.py:743
+#: main.py:765
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr "System is ready. Please remove the installation media."
 
-#: main.py:746
+#: main.py:768
 msgid "Ошибка установки"
 msgstr "Installation failed"
 
-#: main.py:747
+#: main.py:769
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr "A critical error occurred. See logs below."
 
-#: main.py:1531
+#: main.py:1559
 msgid "Внимание"
 msgstr "Warning"
 
-#: main.py:1531
+#: main.py:1559
 msgid ""
 "Для работы системы необходима поддержка UEFI.\n"
 "Установка системы невозможна."
@@ -121,19 +121,19 @@ msgstr ""
 "The system requires UEFI support.\n"
 "System installation is not possible"
 
-#: main.py:1569
+#: main.py:1597
 msgid "ОШИБКА: отсутствует подключение к интернету!"
 msgstr "ERROR: no internet connection"
 
-#: main.py:1570 main.py:1576
+#: main.py:1598 main.py:1604
 msgid "Ошибка"
 msgstr "Error"
 
-#: main.py:1570
+#: main.py:1598
 msgid "Отсутствует подключение к интернету"
 msgstr "Internet connection required"
 
-#: main.py:1575
+#: main.py:1603
 msgid ""
 "ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты "
 "необходимо включить Setup Mode."
@@ -141,13 +141,13 @@ msgstr ""
 "ERROR: Secure Boot Setup Mode is OFF. For the highest level of protection "
 "you need to turn on Setup Mode."
 
-#: main.py:1576
+#: main.py:1604
 msgid ""
 "Setup Mode отключен, что необходимо для применения всех механизмов защиты."
 msgstr ""
 "Setup Mode is disabled. It must be enabled to apply all security mechanisms"
 
-#: main.py:1627
+#: main.py:1655
 msgid "Текущий язык: русский"
 msgstr "Current language: English"
 
@@ -168,7 +168,7 @@ msgid "Консольный"
 msgstr "Console (Text-only)"
 
 #: ui/desktop.ui:82 ui/encryption.ui:157 ui/kernel.ui:110 ui/partition.ui:242
-#: ui/security.ui:85 ui/software.ui:154 ui/source.ui:115 ui/timezone.ui:75
+#: ui/security.ui:85 ui/software.ui:176 ui/source.ui:115 ui/timezone.ui:75
 #: ui/user.ui:191 ui/welcome.ui:60
 msgid "Далее"
 msgstr "Next"
@@ -205,7 +205,9 @@ msgstr "Do not use full-disk encryption"
 msgid ""
 "Не рекомендуется активировать. Существенно снижает безопасность в случае "
 "краж и физического доступа"
-msgstr "Not recommended to activate. significantly reduces security in the event of thefts and physical access"
+msgstr ""
+"Not recommended to activate. significantly reduces security in the event of "
+"thefts and physical access"
 
 #: ui/encryption.ui:68
 msgid "Machine Owner Key"
@@ -448,25 +450,41 @@ msgstr "Select programs to install"
 msgid "Центр управления безопасностью Secux Linux"
 msgstr "Secux Linux Security Center"
 
-#: ui/software.ui:76
+#: ui/software.ui:65
+msgid "SSH сервер"
+msgstr "SSH server"
+
+#: ui/software.ui:66
+msgid "Удаленный доступ и настройка UFW"
+msgstr "Remote access and UFW configure"
+
+#: ui/software.ui:87
 msgid "Браузер с открытым исходным кодом"
 msgstr "Open-source web browser"
 
-#: ui/software.ui:87
+#: ui/software.ui:98
 msgid "Свободный и бесплатный браузер"
 msgstr "Free and open-source browser"
 
-#: ui/software.ui:98
+#: ui/software.ui:109
 msgid "Универсальный медиаплеер"
 msgstr "Universal media player"
 
-#: ui/software.ui:109
+#: ui/software.ui:120
 msgid "Офисный пакет"
 msgstr "Office suite"
 
-#: ui/software.ui:120
+#: ui/software.ui:131
 msgid "Менеджер паролей"
 msgstr "Password manager"
+
+#: ui/software.ui:141
+msgid "Shelly"
+msgstr "Shelly"
+
+#: ui/software.ui:142
+msgid "Менеджер пакетов"
+msgstr "Package manager"
 
 #: ui/source.ui:10 ui/summary.ui:56
 msgid "Источник"
