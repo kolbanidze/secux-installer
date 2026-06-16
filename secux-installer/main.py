@@ -511,7 +511,7 @@ always-show-log-out=true
                 kde_config = "[Layout]\n" + "DisplayNames=,\n" + f"LayoutList={layout}\n" +\
                 "Options=grp:alt_shift_toggle\n" + "Use=true\n"
                 self.execute(['mkdir', '-p', f"{mount_point}/etc/xdg"])
-                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{kde_config}" >> {mount_point}/etc/xdg/kxkbrc'])
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{kde_config}" >> /etc/xdg/kxkbrc'])
 
             # Adding PCR 15 extend when LUKS unlocked
             dir = "/etc/systemd/system/systemd-cryptsetup@.service.d"
@@ -646,7 +646,7 @@ PCRBanks=sha256"""
                 self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'gdm.service'])
 
             elif self.config["desktop"] == "kde":
-                self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'plasma-login-manager.service'])
+                self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'plasmalogin.service'])
             
             self.execute(['arch-chroot', mount_point, 'bootctl', 'install', '--esp-path=/efi', '--variables', 'no']) 
 
@@ -719,7 +719,7 @@ PCRBanks=sha256"""
             self.execute(['arch-chroot', mount_point, 'ufw', 'default', 'deny'])
             self.execute(['sed', '-i', 's/ENABLED=no/ENABLED=yes/', f"{mount_point}/etc/ufw/ufw.conf"])
             if 'openssh' in user_packages:
-                self.execute(['arch-chroot', mount_point, 'ufw', 'allow', 'ssh'])
+                # self.execute(['arch-chroot', mount_point, 'ufw', 'allow', 'ssh'])
                 sshd_config_d_contents = """
 Port 22
 PermitRootLogin prohibit-password
