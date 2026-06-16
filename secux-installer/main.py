@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.6.6"
+VERSION = "0.6.7"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -363,7 +363,7 @@ class InstallPage(Adw.NavigationPage):
 
             if self.config['desktop'] == 'gnome':
                 self.log("> DE: GNOME")
-                pacstrap_packages.extend(["gnome", "networkmanager-openvpn", "gnome-tweaks", "gdm", 'gnome-shell-extension-appindicator', 'gnome-shell-extension-desktop-icons-ng'])
+                pacstrap_packages.extend(["gnome", "networkmanager-openvpn", "gnome-tweaks", "gdm", 'gnome-shell-extension-appindicator', 'gnome-shell-extension-desktop-icons-ng', 'seahorse', 'gnome-keyring'])
             elif self.config['desktop'] == 'kde':
                 self.log("> DE: KDE")
                 pacstrap_packages.extend(["plasma", "networkmanager-openvpn", "kde-applications", 'plasma-login-manager'])
@@ -482,6 +482,9 @@ apps=['org.gnome.baobab.desktop', 'org.gnome.DiskUtility.desktop', 'org.gnome.Lo
 name='X-GNOME-Shell-Utilities.directory'
 translate=true
 apps=['org.gnome.Decibels.desktop', 'org.gnome.Connections.desktop', 'org.gnome.Papers.desktop', 'org.gnome.font-viewer.desktop', 'org.gnome.Loupe.desktop', 'org.gnome.Characters.desktop', 'org.gnome.Weather.desktop', 'org.gnome.Contacts.desktop', 'org.gnome.Maps.desktop', 'org.gnome.Music.desktop', 'org.gnome.Showtime.desktop', 'org.gnome.SimpleScan.desktop', 'org.gnome.Evince.desktop', 'vim.desktop']
+
+[org/gnome/shell]
+always-show-log-out=true
 """
                 self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/profile'])
                 self.execute(['arch-chroot', mount_point, 'mkdir', '-p', '/etc/dconf/db/local.d'])
