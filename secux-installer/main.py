@@ -372,7 +372,7 @@ class InstallPage(Adw.NavigationPage):
                 self.log("> DE: Console")
             
             if self.config['desktop'] != 'console':
-                pacstrap_packages.extend(['noto-fonts', 'noto-fonts-cjk', 'noto-fonts-emoji', 'noto-fonts-extra'])
+                pacstrap_packages.extend(['noto-fonts', 'noto-fonts-cjk', 'noto-fonts-extra'])
                 pacstrap_packages.extend(['ttf-ms-win11', 'ttf-ms-win11-japanese', 'ttf-ms-win11-korean',
                                           'ttf-ms-win11-sea', 'ttf-ms-win11-thai', 'ttf-ms-win11-zh_cn',
                                           'ttf-ms-win11-zh_tw', 'ttf-ms-win11-other'])
