@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.6.8"
+VERSION = "0.6.9"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -719,7 +719,7 @@ PCRBanks=sha256"""
             self.execute(['arch-chroot', mount_point, 'ufw', 'default', 'deny'])
             self.execute(['sed', '-i', 's/ENABLED=no/ENABLED=yes/', f"{mount_point}/etc/ufw/ufw.conf"])
             if 'openssh' in user_packages:
-                # self.execute(['arch-chroot', mount_point, 'ufw', 'allow', 'ssh'])
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', 'ufw allow ssh || true'])
                 sshd_config_d_contents = """
 Port 22
 PermitRootLogin prohibit-password
