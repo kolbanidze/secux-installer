@@ -516,7 +516,7 @@ always-show-log-out=true
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
             self.log(_("INFO: Настройка доверенной загрузки"))
-            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=(/etc/hostname /etc/systemd/system/systemd-cryptsetup@.service.d/extpcr.conf)\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
+            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=(/etc/hostname)\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
             if not (self.config["encryption_enabled"] and self.config["encryption_pwd"]):
                 mkinitcpio_conf_content = mkinitcpio_conf_content.replace("sd-encrypt ", "")
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
