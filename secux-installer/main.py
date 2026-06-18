@@ -512,15 +512,6 @@ always-show-log-out=true
                 "Options=grp:alt_shift_toggle\n" + "Use=true\n"
                 self.execute(['mkdir', '-p', f"{mount_point}/etc/xdg"])
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{kde_config}" >> /etc/xdg/kxkbrc'])
-
-            # Adding PCR 15 extend when LUKS unlocked
-            dir = "/etc/systemd/system/systemd-cryptsetup@.service.d"
-            self.execute(['arch-chroot', mount_point, 'mkdir', '-p', dir])
-            override = """
-[Service]
-ExecStartPost=-/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
-"""
-            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{override}\' > {dir}/extpcr.conf'])
             
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
@@ -558,7 +549,7 @@ ExecStartPost=-/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
             cmdline = []
 
             if self.config["encryption_enabled"] and self.config["encryption_pwd"]:
-                cmdline.extend([f"rd.luks.name={uuid}=secuxroot", "root=/dev/mapper/secuxroot"])
+                cmdline.extend([f"rd.luks.name={uuid}=secuxroot", f"rd.luks.options={uuid}=tpm2-measure-pcr=yes", "root=/dev/mapper/secuxroot"])
             else:
                 cmdline.append(f"root=UUID={uuid}")
 
