@@ -513,10 +513,20 @@ always-show-log-out=true
                 self.execute(['mkdir', '-p', f"{mount_point}/etc/xdg"])
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{kde_config}" >> /etc/xdg/kxkbrc'])
             
+            if self.config["encryption_enabled"] and self.config["encryption_pwd"]:
+                # Adding PCR 15 extend when LUKS unlocked
+                dir = "/etc/systemd/system/systemd-cryptsetup@.service.d"
+                self.execute(['arch-chroot', mount_point, 'mkdir', '-p', dir])
+                override = """
+[Service]
+ExecStartPost=-/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
+"""
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{override}\' > {dir}/extpcr.conf'])
+            
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
             self.log(_("INFO: Настройка доверенной загрузки"))
-            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=(/etc/hostname)\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
+            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=(/etc/hostname /etc/systemd/system/systemd-cryptsetup@.service.d/extpcr.conf)\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
             if not (self.config["encryption_enabled"] and self.config["encryption_pwd"]):
                 mkinitcpio_conf_content = mkinitcpio_conf_content.replace("sd-encrypt ", "")
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
@@ -549,7 +559,7 @@ always-show-log-out=true
             cmdline = []
 
             if self.config["encryption_enabled"] and self.config["encryption_pwd"]:
-                cmdline.extend([f"rd.luks.name={uuid}=secuxroot", f"rd.luks.options={uuid}=tpm2-measure-pcr=yes", "root=/dev/mapper/secuxroot"])
+                cmdline.extend([f"rd.luks.name={uuid}=secuxroot", "root=/dev/mapper/secuxroot"])
             else:
                 cmdline.append(f"root=UUID={uuid}")
 
