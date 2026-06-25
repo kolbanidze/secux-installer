@@ -1,42 +1,43 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $SecurityPage : Adw.NavigationPage {
-  title: _("Безопасность");
+template $SecurityPage: Adw.NavigationPage {
+  title: _("Безопасность загрузки");
   tag: "security";
 
   child: Adw.ToolbarView {
     [top]
     Adw.HeaderBar {}
 
-    content: Adw.Clamp { 
-    maximum-size: 500;
-    tightening-threshold: 100;
-    
-    child: Adw.PreferencesPage {
+    content: Adw.Clamp {
+      maximum-size: 500;
+      tightening-threshold: 100;
+
+      child: Adw.PreferencesPage {
         Adw.PreferencesGroup {
           title: _("Выберите вариант установки");
-          description: _("Настройка механизмов защиты операционной системы");
+          description: _("Настройка механизмов защиты загрузки операционной системы");
 
           Adw.ActionRow {
-            title: _("Применение всех механизмов защиты");
-            subtitle: _("Доверие собственным ключам Secure Boot. Требует включения Custom Mode.");
+            title: _("Максимальный уровень");
+            subtitle: _(
+              "Только если вы знаете, что делаете. Замена ключей Secure Boot на собственные. Риск окирпичивания."
+            );
             activatable-widget: btn_secure; // Клик по строке переключает кнопку
 
             [prefix]
-            Gtk.CheckButton btn_secure {
-              active: true;
-            }
+            Gtk.CheckButton btn_secure {}
           }
 
           Adw.ActionRow {
-            title: _("Совместимая защита");
-            subtitle: _("Доверие ключам Microsoft. Менее безопасно, но выше совместимость.");
+            title: _("Стандартная защита");
+            subtitle: _("Доверие ключам Microsoft. Полная совместимость с Windows в dual-boot.");
             activatable-widget: btn_compat;
 
             [prefix]
             Gtk.CheckButton btn_compat {
               group: btn_secure;
+              active: true;
             }
           }
 
@@ -53,7 +54,7 @@ template $SecurityPage : Adw.NavigationPage {
         }
       };
     };
-    
+
     [bottom]
     Gtk.ActionBar {
       [end]
@@ -63,8 +64,13 @@ template $SecurityPage : Adw.NavigationPage {
         margin-top: 10;
         margin-start: 10;
 
-        styles ["suggested-action", "pill"]
+        styles [
+          "suggested-action",
+          "pill",
+        ]
+
         action-name: "win.next_step";
+
         child: Adw.ButtonContent {
           icon-name: "go-next-symbolic";
           label: _("Далее");

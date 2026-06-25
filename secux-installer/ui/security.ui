@@ -7,7 +7,7 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="SecurityPage" parent="AdwNavigationPage">
-    <property name="title" translatable="yes">Безопасность</property>
+    <property name="title" translatable="yes">Безопасность загрузки</property>
     <property name="tag">security</property>
     <property name="child">
       <object class="AdwToolbarView">
@@ -23,27 +23,26 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                 <child>
                   <object class="AdwPreferencesGroup">
                     <property name="title" translatable="yes">Выберите вариант установки</property>
-                    <property name="description" translatable="yes">Настройка механизмов защиты операционной системы</property>
+                    <property name="description" translatable="yes">Настройка механизмов защиты загрузки операционной системы</property>
                     <child>
                       <object class="AdwActionRow">
-                        <property name="title" translatable="yes">Применение всех механизмов защиты</property>
-                        <property name="subtitle" translatable="yes">Доверие собственным ключам Secure Boot. Требует включения Custom Mode.</property>
+                        <property name="title" translatable="yes">Максимальный уровень</property>
+                        <property name="subtitle" translatable="yes">Только если вы знаете, что делаете. Замена ключей Secure Boot на собственные. Риск окирпичивания.</property>
                         <property name="activatable-widget">btn_secure</property>
                         <child type="prefix">
-                          <object class="GtkCheckButton" id="btn_secure">
-                            <property name="active">true</property>
-                          </object>
+                          <object class="GtkCheckButton" id="btn_secure"></object>
                         </child>
                       </object>
                     </child>
                     <child>
                       <object class="AdwActionRow">
-                        <property name="title" translatable="yes">Совместимая защита</property>
-                        <property name="subtitle" translatable="yes">Доверие ключам Microsoft. Менее безопасно, но выше совместимость.</property>
+                        <property name="title" translatable="yes">Стандартная защита</property>
+                        <property name="subtitle" translatable="yes">Доверие ключам Microsoft. Полная совместимость с Windows в dual-boot.</property>
                         <property name="activatable-widget">btn_compat</property>
                         <child type="prefix">
                           <object class="GtkCheckButton" id="btn_compat">
                             <property name="group">btn_secure</property>
+                            <property name="active">true</property>
                           </object>
                         </child>
                       </object>

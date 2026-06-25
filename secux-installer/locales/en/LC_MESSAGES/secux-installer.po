@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: secux-installer 0.5.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-16 19:40+0300\n"
+"POT-Creation-Date: 2026-06-25 16:13+0300\n"
 "PO-Revision-Date: 2025-12-21 11:30+0300\n"
 "Last-Translator: AI Assistant\n"
 "Language-Team: English\n"
@@ -85,35 +85,43 @@ msgstr "INFO: Configuring OS security mechanisms"
 msgid "INFO: Настройка собственного репозитория ПО"
 msgstr "INFO: Setting up secux-repo"
 
-#: main.py:527
+#: main.py:528
 msgid "INFO: Настройка доверенной загрузки"
 msgstr "INFO: Setting up trusted boot"
 
-#: main.py:577
+#: main.py:578
 msgid "INFO: Настройка zRAM..."
 msgstr "INFO: configuring zRAM"
 
-#: main.py:764
+#: main.py:765
 msgid "Установка завершена"
 msgstr "Installation complete"
 
-#: main.py:765
+#: main.py:766
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr "System is ready. Please remove the installation media."
 
-#: main.py:768
+#: main.py:769
 msgid "Ошибка установки"
 msgstr "Installation failed"
 
-#: main.py:769
+#: main.py:770
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr "A critical error occurred. See logs below."
 
-#: main.py:1559
+#: main.py:807 ui/summary.ui:333
+msgid "Включено (LUKS2)"
+msgstr "Enabled (LUKS2)"
+
+#: main.py:809 ui/summary.ui:302
+msgid "Нет"
+msgstr "No"
+
+#: main.py:1567 main.py:1593
 msgid "Внимание"
 msgstr "Warning"
 
-#: main.py:1559
+#: main.py:1567
 msgid ""
 "Для работы системы необходима поддержка UEFI.\n"
 "Установка системы невозможна."
@@ -121,19 +129,40 @@ msgstr ""
 "The system requires UEFI support.\n"
 "System installation is not possible"
 
-#: main.py:1597
+#: main.py:1593
+msgid ""
+"Вы уверены, что хотите полностью заменить ключи Secure Boot? На некоторых "
+"устройствах это может привести к окирпичиванию. Продолжайте только если "
+"знаете, что делаете."
+msgstr "Are you sure you want to completely replace the Secure Boot keys? On some "
+"devices, this could result in a bricked device. Proceed only if "
+"you know what you are doing."
+
+#: main.py:1621
+msgid "Недостаточно места"
+msgstr "Not enough space"
+
+#: main.py:1622
+msgid "На выбранном EFI-разделе доступно только"
+msgstr "Only the following is available on the selected EFI partition "
+
+#: main.py:1623
+msgid "Для установки ядра требуется минимум 80 MB."
+msgstr "A minimum of 80 MB is required to install the kernel."
+
+#: main.py:1634
 msgid "ОШИБКА: отсутствует подключение к интернету!"
 msgstr "ERROR: no internet connection"
 
-#: main.py:1598 main.py:1604
+#: main.py:1635 main.py:1641
 msgid "Ошибка"
 msgstr "Error"
 
-#: main.py:1598
+#: main.py:1635
 msgid "Отсутствует подключение к интернету"
 msgstr "Internet connection required"
 
-#: main.py:1603
+#: main.py:1640
 msgid ""
 "ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты "
 "необходимо включить Setup Mode."
@@ -141,13 +170,13 @@ msgstr ""
 "ERROR: Secure Boot Setup Mode is OFF. For the highest level of protection "
 "you need to turn on Setup Mode."
 
-#: main.py:1604
+#: main.py:1641
 msgid ""
 "Setup Mode отключен, что необходимо для применения всех механизмов защиты."
 msgstr ""
 "Setup Mode is disabled. It must be enabled to apply all security mechanisms"
 
-#: main.py:1655
+#: main.py:1692
 msgid "Текущий язык: русский"
 msgstr "Current language: English"
 
@@ -168,7 +197,7 @@ msgid "Консольный"
 msgstr "Console (Text-only)"
 
 #: ui/desktop.ui:82 ui/encryption.ui:157 ui/kernel.ui:110 ui/partition.ui:242
-#: ui/security.ui:85 ui/software.ui:176 ui/source.ui:115 ui/timezone.ui:75
+#: ui/security.ui:84 ui/software.ui:176 ui/source.ui:115 ui/timezone.ui:75
 #: ui/user.ui:191 ui/welcome.ui:60
 msgid "Далее"
 msgstr "Next"
@@ -390,39 +419,41 @@ msgstr "Reserve in case of insufficient RAM"
 msgid "Размер (ГиБ)"
 msgstr "Size (GiB)"
 
-#: ui/security.ui:10 ui/summary.ui:94
-msgid "Безопасность"
-msgstr "Security"
+#: ui/security.ui:10
+msgid "Безопасность загрузки"
+msgstr "Безопасность загрузки"
 
 #: ui/security.ui:25
 msgid "Выберите вариант установки"
 msgstr "Select Installation Mode"
 
 #: ui/security.ui:26
-msgid "Настройка механизмов защиты операционной системы"
+msgid "Настройка механизмов защиты загрузки операционной системы"
 msgstr "OS security mechanism configuration"
 
 #: ui/security.ui:29
-msgid "Применение всех механизмов защиты"
-msgstr "Apply all security mechanisms"
+msgid "Максимальный уровень"
+msgstr "Maximum level"
 
 #: ui/security.ui:30
-msgid "Доверие собственным ключам Secure Boot. Требует включения Custom Mode."
-msgstr "Trust own Secure Boot keys. Requires Custom Mode enabled."
+msgid ""
+"Только если вы знаете, что делаете. Замена ключей Secure Boot на "
+"собственные. Риск окирпичивания."
+msgstr "Proceed only if you know what you are doing. Replacing Secure Boot keys with custom ones. Risk of bricking."
 
-#: ui/security.ui:41
-msgid "Совместимая защита"
-msgstr "Compatible Security"
+#: ui/security.ui:39
+msgid "Стандартная защита"
+msgstr "Standard protection"
 
-#: ui/security.ui:42
-msgid "Доверие ключам Microsoft. Менее безопасно, но выше совместимость."
-msgstr "Trust Microsoft keys. Less secure, but higher compatibility."
+#: ui/security.ui:40
+msgid "Доверие ключам Microsoft. Полная совместимость с Windows в dual-boot."
+msgstr "Trusting Microsoft keys. Full Windows compatibility in dual-boot."
 
-#: ui/security.ui:53
+#: ui/security.ui:52
 msgid "Без механизмов защиты"
 msgstr "No Security Mechanisms"
 
-#: ui/security.ui:54
+#: ui/security.ui:53
 msgid "Наименее безопасно."
 msgstr "Least secure."
 
@@ -542,6 +573,10 @@ msgstr "System"
 msgid "Онлайн"
 msgstr "Online"
 
+#: ui/summary.ui:94
+msgid "Безопасность"
+msgstr "Security"
+
 #: ui/summary.ui:103
 msgid "Максимальная"
 msgstr "Maximum"
@@ -581,14 +616,6 @@ msgstr "Configured Manually"
 #: ui/summary.ui:293
 msgid "Файл подкачки"
 msgstr "Swap File"
-
-#: ui/summary.ui:302
-msgid "Нет"
-msgstr "No"
-
-#: ui/summary.ui:333
-msgid "Включено (LUKS2)"
-msgstr "Enabled (LUKS2)"
 
 #: ui/summary.ui:346
 msgid "Учетная запись"
@@ -685,6 +712,13 @@ msgstr "Secux Linux Installer 0.0.0"
 #: ui/welcome.ui:39
 msgid "Язык"
 msgstr "Language"
+
+#~ msgid "Применение всех механизмов защиты"
+#~ msgstr "Apply all security mechanisms"
+
+#~ msgid ""
+#~ "Доверие собственным ключам Secure Boot. Требует включения Custom Mode."
+#~ msgstr "Trust own Secure Boot keys. Requires Custom Mode enabled."
 
 #~ msgid "ERROR: Command failed with code "
 #~ msgstr "ERROR: Command failed with code "

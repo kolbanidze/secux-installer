@@ -802,6 +802,13 @@ class SummaryPage(Adw.NavigationPage):
         de_mode = win.desktop_page.get_selected_de()
         self.desktop_stack.set_visible_child_name(de_mode)
 
+        encryption = win.encryption_page.get_is_encryption_enabled()
+        if encryption:
+            self.encryption_label.set_label(_("Включено (LUKS2)"))
+        else:
+            self.encryption_label.set_label(_("Нет"))
+            self.encryption_label.set_css_classes(['error', 'dim-label'])
+
         tz = win.timezone_page.get_timezone()
         self.timezone_label.set_label(tz)
 
@@ -1557,7 +1564,7 @@ class InstallerWindow(Adw.ApplicationWindow):
 
         uefi_support = self.check_secure_boot_and_setup_mode()[0]
         if not uefi_support:
-            self.show_error_dialog(_("Внимание"), _("Для работы системы необходима поддержка UEFI.\nУстановка системы невозможна."))
+            self.show_message_dialog(_("Внимание"), _("Для работы системы необходима поддержка UEFI.\nУстановка системы невозможна."))
             return
 
         self.setup_actions()
@@ -1580,6 +1587,11 @@ class InstallerWindow(Adw.ApplicationWindow):
         if next_index < len(self.steps):
             page_to_open = self.steps[next_index]
             
+            # if isinstance(page_to_open, EncryptionPage):
+
+            if isinstance(page_to_open, DesktopPage) and self.security_page.get_selected_mode() == 'secure_full':
+                self.show_message_dialog(_("Внимание"), _("Вы уверены, что хотите полностью заменить ключи Secure Boot? На некоторых устройствах это может привести к окирпичиванию. Продолжайте только если знаете, что делаете."))
+
             if isinstance(page_to_open, SummaryPage):
                 page_to_open.populate_data(self)
             
@@ -1592,17 +1604,41 @@ class InstallerWindow(Adw.ApplicationWindow):
                 page_to_open.set_no_encryption_group(is_gaming_mode)
             
             if isinstance(page_to_open, InstallPage):
+                config = self.partition_page.get_config()
+                if config["mode"] == "manual":
+                    efi_part = config.get("efi_part")
+                    import tempfile, shutil, os
+                    tmp = tempfile.mkdtemp(prefix="efi-chk-")
+                    res = subprocess.run(["sudo", "mount", "-o", "ro", efi_part, tmp], capture_output=True)
+                    if res.returncode == 0:
+                        free_mb = shutil.disk_usage(tmp).free / (1024 * 1024)
+                        subprocess.run(["sudo", "umount", tmp], capture_output=True)
+                        try: os.rmdir(tmp)
+                        except: pass
+                        
+                        if free_mb < 80.0:
+                            self.show_message_dialog(
+                                _("Недостаточно места"), 
+                                f"{_('На выбранном EFI-разделе доступно только')} {free_mb:.1f} MB.\n"
+                                f"{_('Для установки ядра требуется минимум 80 MB.')}"
+                            )
+                            return
+                    else:
+                        try: os.rmdir(tmp)
+                        except: pass
+
+
                 if self.source_page.get_source_mode() == 'online':
                     is_online = self.check_connectivity()
                     if not is_online:
                         print(_("ОШИБКА: отсутствует подключение к интернету!"))
-                        self.show_error_dialog(_("Ошибка"), _("Отсутствует подключение к интернету"))
+                        self.show_message_dialog(_("Ошибка"), _("Отсутствует подключение к интернету"))
                         return
                 if self.security_page.get_selected_mode() == 'secure_full':
                     is_setup_mode_on = self.check_secure_boot_and_setup_mode()[2]
                     if not is_setup_mode_on:
                         print(_("ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты необходимо включить Setup Mode."))
-                        self.show_error_dialog(_("Ошибка"), _("Setup Mode отключен, что необходимо для применения всех механизмов защиты."))
+                        self.show_message_dialog(_("Ошибка"), _("Setup Mode отключен, что необходимо для применения всех механизмов защиты."))
                         return
                 page_to_open.start_installation(self)
 
@@ -1628,7 +1664,7 @@ class InstallerWindow(Adw.ApplicationWindow):
 
         return [uefi_support, secure_boot, setup_mode]
 
-    def show_error_dialog(self, title, message):
+    def show_message_dialog(self, title, message):
         dialog = Adw.AlertDialog(
             heading=title,
             body=message

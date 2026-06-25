@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-16 19:40+0300\n"
+"POT-Creation-Date: 2026-06-25 16:13+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,64 +85,91 @@ msgstr ""
 msgid "INFO: Настройка собственного репозитория ПО"
 msgstr ""
 
-#: main.py:527
+#: main.py:528
 msgid "INFO: Настройка доверенной загрузки"
 msgstr ""
 
-#: main.py:577
+#: main.py:578
 msgid "INFO: Настройка zRAM..."
 msgstr ""
 
-#: main.py:764
+#: main.py:765
 msgid "Установка завершена"
 msgstr ""
 
-#: main.py:765
+#: main.py:766
 msgid "Система готова к работе. Извлеките установочный носитель."
 msgstr ""
 
-#: main.py:768
+#: main.py:769
 msgid "Ошибка установки"
 msgstr ""
 
-#: main.py:769
+#: main.py:770
 msgid "Произошла критическая ошибка. Смотрите логи ниже."
 msgstr ""
 
-#: main.py:1559
+#: main.py:807 ui/summary.ui:333
+msgid "Включено (LUKS2)"
+msgstr ""
+
+#: main.py:809 ui/summary.ui:302
+msgid "Нет"
+msgstr ""
+
+#: main.py:1567 main.py:1593
 msgid "Внимание"
 msgstr ""
 
-#: main.py:1559
+#: main.py:1567
 msgid ""
 "Для работы системы необходима поддержка UEFI.\n"
 "Установка системы невозможна."
 msgstr ""
 
-#: main.py:1597
+#: main.py:1593
+msgid ""
+"Вы уверены, что хотите полностью заменить ключи Secure Boot? На некоторых "
+"устройствах это может привести к окирпичиванию. Продолжайте только если "
+"знаете, что делаете."
+msgstr ""
+
+#: main.py:1621
+msgid "Недостаточно места"
+msgstr ""
+
+#: main.py:1622
+msgid "На выбранном EFI-разделе доступно только"
+msgstr ""
+
+#: main.py:1623
+msgid "Для установки ядра требуется минимум 80 MB."
+msgstr ""
+
+#: main.py:1634
 msgid "ОШИБКА: отсутствует подключение к интернету!"
 msgstr ""
 
-#: main.py:1598 main.py:1604
+#: main.py:1635 main.py:1641
 msgid "Ошибка"
 msgstr ""
 
-#: main.py:1598
+#: main.py:1635
 msgid "Отсутствует подключение к интернету"
 msgstr ""
 
-#: main.py:1603
+#: main.py:1640
 msgid ""
 "ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты "
 "необходимо включить Setup Mode."
 msgstr ""
 
-#: main.py:1604
+#: main.py:1641
 msgid ""
 "Setup Mode отключен, что необходимо для применения всех механизмов защиты."
 msgstr ""
 
-#: main.py:1655
+#: main.py:1692
 msgid "Текущий язык: русский"
 msgstr ""
 
@@ -163,7 +190,7 @@ msgid "Консольный"
 msgstr ""
 
 #: ui/desktop.ui:82 ui/encryption.ui:157 ui/kernel.ui:110 ui/partition.ui:242
-#: ui/security.ui:85 ui/software.ui:176 ui/source.ui:115 ui/timezone.ui:75
+#: ui/security.ui:84 ui/software.ui:176 ui/source.ui:115 ui/timezone.ui:75
 #: ui/user.ui:191 ui/welcome.ui:60
 msgid "Далее"
 msgstr ""
@@ -377,8 +404,8 @@ msgstr ""
 msgid "Размер (ГиБ)"
 msgstr ""
 
-#: ui/security.ui:10 ui/summary.ui:94
-msgid "Безопасность"
+#: ui/security.ui:10
+msgid "Безопасность загрузки"
 msgstr ""
 
 #: ui/security.ui:25
@@ -386,30 +413,32 @@ msgid "Выберите вариант установки"
 msgstr ""
 
 #: ui/security.ui:26
-msgid "Настройка механизмов защиты операционной системы"
+msgid "Настройка механизмов защиты загрузки операционной системы"
 msgstr ""
 
 #: ui/security.ui:29
-msgid "Применение всех механизмов защиты"
+msgid "Максимальный уровень"
 msgstr ""
 
 #: ui/security.ui:30
-msgid "Доверие собственным ключам Secure Boot. Требует включения Custom Mode."
+msgid ""
+"Только если вы знаете, что делаете. Замена ключей Secure Boot на "
+"собственные. Риск окирпичивания."
 msgstr ""
 
-#: ui/security.ui:41
-msgid "Совместимая защита"
+#: ui/security.ui:39
+msgid "Стандартная защита"
 msgstr ""
 
-#: ui/security.ui:42
-msgid "Доверие ключам Microsoft. Менее безопасно, но выше совместимость."
+#: ui/security.ui:40
+msgid "Доверие ключам Microsoft. Полная совместимость с Windows в dual-boot."
 msgstr ""
 
-#: ui/security.ui:53
+#: ui/security.ui:52
 msgid "Без механизмов защиты"
 msgstr ""
 
-#: ui/security.ui:54
+#: ui/security.ui:53
 msgid "Наименее безопасно."
 msgstr ""
 
@@ -529,6 +558,10 @@ msgstr ""
 msgid "Онлайн"
 msgstr ""
 
+#: ui/summary.ui:94
+msgid "Безопасность"
+msgstr ""
+
 #: ui/summary.ui:103
 msgid "Максимальная"
 msgstr ""
@@ -567,14 +600,6 @@ msgstr ""
 
 #: ui/summary.ui:293
 msgid "Файл подкачки"
-msgstr ""
-
-#: ui/summary.ui:302
-msgid "Нет"
-msgstr ""
-
-#: ui/summary.ui:333
-msgid "Включено (LUKS2)"
 msgstr ""
 
 #: ui/summary.ui:346
