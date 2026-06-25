@@ -372,10 +372,8 @@ class InstallPage(Adw.NavigationPage):
                 self.log("> DE: Console")
             
             if self.config['desktop'] != 'console':
-                pacstrap_packages.extend(['noto-fonts', 'noto-fonts-cjk', 'noto-fonts-extra'])
-                pacstrap_packages.extend(['ttf-ms-win11', 'ttf-ms-win11-japanese', 'ttf-ms-win11-korean',
-                                          'ttf-ms-win11-sea', 'ttf-ms-win11-thai', 'ttf-ms-win11-zh_cn',
-                                          'ttf-ms-win11-zh_tw', 'ttf-ms-win11-other'])
+                pacstrap_packages.extend(['noto-fonts', 'noto-fonts-cjk'])
+                pacstrap_packages.extend(['ttf-ms-win11'])
             
             if self.config['security'] == "secure_full":
                 self.log(_("> Настройка максимального уровня защищённости"))
@@ -526,7 +524,14 @@ ExecStartPost=-/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
             self.log(_("INFO: Настройка доверенной загрузки"))
-            mkinitcpio_conf_content = "MODULES=()\nBINARIES=()\nFILES=(/etc/hostname /etc/systemd/system/systemd-cryptsetup@.service.d/extpcr.conf)\nHOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
+            # Added
+            mkinitcpio_conf_content = "MODULES=()\n"\
+            "BINARIES=()\n"\
+            "FILES=(/etc/hostname "\
+            "/etc/systemd/system/systemd-cryptsetup@.service.d/extpcr.conf "\
+            "/usr/lib/systemd/system/systemd-pcrosseparator.service "\
+            "/usr/lib/systemd/system/sysinit.target.wants/systemd-pcrosseparator.service)\n"\
+            "HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
             if not (self.config["encryption_enabled"] and self.config["encryption_pwd"]):
                 mkinitcpio_conf_content = mkinitcpio_conf_content.replace("sd-encrypt ", "")
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
