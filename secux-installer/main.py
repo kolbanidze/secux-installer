@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.6.9"
+VERSION = "0.7.0"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -528,9 +528,7 @@ ExecStartPost=-/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
             mkinitcpio_conf_content = "MODULES=()\n"\
             "BINARIES=()\n"\
             "FILES=(/etc/hostname "\
-            "/etc/systemd/system/systemd-cryptsetup@.service.d/extpcr.conf "\
-            "/usr/lib/systemd/system/systemd-pcrosseparator.service "\
-            "/usr/lib/systemd/system/sysinit.target.wants/systemd-pcrosseparator.service)\n"\
+            "/etc/systemd/system/systemd-cryptsetup@.service.d/extpcr.conf)\n"\
             "HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
             if not (self.config["encryption_enabled"] and self.config["encryption_pwd"]):
                 mkinitcpio_conf_content = mkinitcpio_conf_content.replace("sd-encrypt ", "")
