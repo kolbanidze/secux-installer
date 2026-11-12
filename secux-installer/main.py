@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.7.0"
+VERSION = "0.7.1"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -348,7 +348,7 @@ class InstallPage(Adw.NavigationPage):
             kernels = self.config["kernels"]
             user_packages = self.config["packages"]
 
-            pacstrap_packages = ['base', 'base-devel', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'bluez', 'bluez-utils', 'clang', 'lld', 'wireless-regdb']
+            pacstrap_packages = ['base', 'base-devel', 'tuned', 'tuned-ppd', 'powertop', 'linux-firmware', 'vim', 'nano', 'efibootmgr', 'sudo', 'plymouth', 'python-pip', 'networkmanager', 'systemd-ukify', 'sbsigntools', 'efitools', 'less', 'git', 'ntfs-3g', 'gvfs', 'gvfs-mtp', 'gvfs-smb' 'xdg-user-dirs', 'fwupd', 'apparmor', 'ufw', 'flatpak', 'mokutil', 'python-argon2-cffi', 'python-pycryptodome', 'tpm2-tools', 'bluez', 'bluez-utils', 'clang', 'lld', 'wireless-regdb']
             pacstrap_packages.extend(self._get_ucode_package())
             pacstrap_packages.extend(kernels)
             pacstrap_packages.extend(user_packages)
@@ -374,6 +374,8 @@ class InstallPage(Adw.NavigationPage):
             if self.config['desktop'] != 'console':
                 pacstrap_packages.extend(['noto-fonts', 'noto-fonts-cjk'])
                 pacstrap_packages.extend(['ttf-ms-win11'])
+                pacstrap_packages.extend(['cups', 'avahi', 'nss-mdns'])
+                pacstrap_packages.extend(['gst-libav'])
             
             if self.config['security'] == "secure_full":
                 self.log(_("> Настройка максимального уровня защищённости"))
@@ -645,6 +647,9 @@ PCRBanks=sha256"""
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'apparmor.service'])
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'ufw.service'])
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'bluetooth.service'])
+            self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'tuned.service'])
+            self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'systemd-oomd'])
+            self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'cups.socket'])
 
             if self.config["desktop"] == "gnome":
                 self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'gdm.service'])
