@@ -1,11 +1,11 @@
 [Trigger]
 Operation = Install
 Operation = Upgrade
-Operation = Remove
-Type = Package
-Target = shim-signed
+Type = Path
+Target = usr/share/shim-signed/shimx64.efi
+Target = usr/share/shim-signed/mmx64.efi
 
 [Action]
-Description = Copying shimx64.efi and mmx64.efi to /efi/EFI/Linux
+Description = Installing shim, MokManager and options.csv in /efi/EFI/secux
 When = PostTransaction
 Exec = /usr/share/shim-copy.sh

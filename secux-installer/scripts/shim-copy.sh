@@ -1,16 +1,15 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 TARGET_DIR="/efi/EFI/secux"
 SOURCE_DIR="/usr/share/shim-signed"
 
-[ -d "$TARGET_DIR" ] || mkdir -p "$TARGET_DIR"
+mountpoint /efi
+mkdir -p "$TARGET_DIR"
+staging_dir=$(mktemp -d "$TARGET_DIR/.shim.XXXXXX")
+trap 'rm -rf -- "$staging_dir"' EXIT
 
-for file in shimx64.efi mmx64.efi; do
-    if [ -f "${SOURCE_DIR}/${file}" ]; then
-        cp -fv "${SOURCE_DIR}/${file}" "${TARGET_DIR}/${file}"
-        echo "${file} was copied to ${TARGET_DIR}"
-    else
-        echo "File ${SOURCE_DIR}/${file} not found!"
-        exit 1
-    fi
-done
+cp "$SOURCE_DIR/shimx64.efi" "$SOURCE_DIR/mmx64.efi" "$staging_dir/"
+# Shim reads the first field of options.csv as a UTF-16LE EFI path.
+printf '%s\n' '\EFI\systemd\systemd-bootx64.efi,' |
+    iconv -f UTF-8 -t UTF-16LE > "$staging_dir/options.csv"
+mv -fv -- "$staging_dir/mmx64.efi" "$staging_dir/shimx64.efi" "$staging_dir/options.csv" "$TARGET_DIR/"

@@ -382,7 +382,7 @@ class InstallPage(Adw.NavigationPage):
                 pacstrap_packages.extend(['sbctl'])
             elif self.config['security'] == "secure_compat":
                 self.log(_("> Настройка защиты с обратной совместимостью"))
-                pacstrap_packages.extend(['shim-signed'])
+                pacstrap_packages.append('shim-signed-bin')
             else:
                 self.log(_("> Отсутствие защиты"))
             
@@ -671,8 +671,16 @@ WantedBy=multi-user.target
 
             elif self.config["desktop"] == "kde":
                 self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'plasmalogin.service'])
-            
-            self.execute(['arch-chroot', mount_point, 'bootctl', 'install', '--esp-path=/efi', '--variables', 'no']) 
+
+            if self.config["security"] == "secure_compat":
+                self.execute(['install', '-d', '-m', '0700', f'{mount_point}/etc/secureboot'])
+                self.execute(['openssl', 'req', '-newkey', 'rsa:4096', '-nodes', '-keyout', f'{mount_point}/etc/secureboot/sb.key', '-new', '-x509', '-sha256', '-days', '3650', '-subj', '/CN=Secux Linux MOK/', '-out', f'{mount_point}/etc/secureboot/sb.crt'])
+                self.execute(['chmod', '400', f'{mount_point}/etc/secureboot/sb.key'])
+                self.execute(['openssl', 'x509', '-outform', 'DER', '-in', f'{mount_point}/etc/secureboot/sb.crt', '-out', f'{mount_point}/etc/secureboot/sb.cer'])
+                self.execute(['install', '-m', '0755', f'{installer_path}/scripts/systemd-boot-sign.sh', f'{mount_point}/usr/share/'])
+                self.execute(['arch-chroot', mount_point, '/usr/share/systemd-boot-sign.sh'])
+
+            self.execute(['arch-chroot', mount_point, 'bootctl', 'install', '--esp-path=/efi', '--variables', 'no'])
 
             default_kernel_conf = ""
             if 'linux-secux' in self.config['kernels']: default_kernel_conf = "secux-linux-secux.conf"
@@ -697,35 +705,22 @@ WantedBy=multi-user.target
                     self.execute(['arch-chroot', mount_point, 'sbctl', 'sign', '--save', f'/efi/EFI/secux/secux-{kernel}.efi'])
 
             elif self.config["security"] == "secure_compat":
-                self.execute(['cp', f'{mount_point}/usr/share/shim-signed/shimx64.efi', f'{mount_point}/efi/EFI/secux/shimx64.efi'])
-                self.execute(['cp', f'{mount_point}/usr/share/shim-signed/mmx64.efi', f'{mount_point}/efi/EFI/secux/mmx64.efi'])
-                self.execute(['mkdir', '-p', f'{mount_point}/etc/secureboot'])
-                self.execute(['openssl', 'req', '-newkey', 'rsa:4096', '-nodes', '-keyout', f'{mount_point}/etc/secureboot/sb.key', '-new', '-x509', '-sha256', '-days', '3650', '-subj', '/CN=Secux Linux MOK/', '-out', f'{mount_point}/etc/secureboot/sb.crt'])
-                self.execute(['chmod', '700', f'{mount_point}/etc/secureboot'])
-                self.execute(['chmod', '400', f'{mount_point}/etc/secureboot/sb.key'])
-                self.execute(['openssl', 'x509', '-outform', 'DER', '-in', f'{mount_point}/etc/secureboot/sb.crt', '-out', f'{mount_point}/etc/secureboot/sb.cer'])
-                self.execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', '/efi/EFI/systemd/systemd-bootx64.efi', '/usr/lib/systemd/boot/efi/systemd-bootx64.efi'])
+                self.execute(['arch-chroot', mount_point, 'sbverify', '--cert', '/etc/secureboot/sb.crt', '/efi/EFI/systemd/systemd-bootx64.efi'])
                 for kernel in self.config['kernels']:
                     self.execute(['arch-chroot', mount_point, 'sbsign', '--key', '/etc/secureboot/sb.key', '--cert', '/etc/secureboot/sb.crt', '--output', f'/efi/EFI/secux/secux-{kernel}.efi', f'/efi/EFI/secux/secux-{kernel}.efi'])
 
                 mok_input = f"{self.config['MOK']}\n{self.config['MOK']}\n"
                 self.execute(['arch-chroot', mount_point, 'mokutil', '--import', '/etc/secureboot/sb.cer'], input_str=mok_input)
 
-                self.execute(['cp', f'{installer_path}/scripts/92-shim-signed.hook', f'{mount_point}/usr/share/libalpm/hooks/'])
-                self.execute(['cp', f'{installer_path}/scripts/shim-copy.sh', f'{mount_point}/usr/share/'])
-                self.execute(['chmod', '+x', f'{mount_point}/usr/share/shim-copy.sh'])
-                self.execute(['cp', f'{installer_path}/scripts/91-systemd-boot.hook', f'{mount_point}/usr/share/libalpm/hooks/'])
-                self.execute(['cp', f'{installer_path}/scripts/systemd-boot-sign.sh', f'{mount_point}/usr/share'])
-                self.execute(['chmod', '+x', f'{mount_point}/usr/share/systemd-boot-sign.sh'])
-                self.execute(['cp', f'{installer_path}/scripts/sign-uki.sh', f'{mount_point}/usr/lib/initcpio/post/'])
-                self.execute(['chmod', '+x', f'{mount_point}/usr/lib/initcpio/post/sign-uki.sh'])
+                self.execute(['install', '-m', '0755', f'{installer_path}/scripts/shim-copy.sh', f'{mount_point}/usr/share/'])
+                self.execute(['arch-chroot', mount_point, '/usr/share/shim-copy.sh'])
+                self.execute(['install', '-m', '0644', f'{installer_path}/scripts/91-systemd-boot.hook', f'{installer_path}/scripts/92-shim-signed.hook', f'{mount_point}/usr/share/libalpm/hooks/'])
+                self.execute(['install', '-m', '0755', f'{installer_path}/scripts/sign-uki.sh', f'{mount_point}/usr/lib/initcpio/post/'])
 
-                self.execute(['cp', f'{mount_point}/efi/EFI/systemd/systemd-bootx64.efi', f'{mount_point}/efi/EFI/secux/grubx64.efi'])
-
-                efi_base_drive, efi_number_str = self.__split_device(efi_partition)
-                efi_part_num = ''.join(filter(str.isdigit, efi_number_str))
-                if efi_base_drive and efi_part_num:
-                    self.execute(['efibootmgr', '--create', '--disk', efi_base_drive, '--part', efi_part_num, '--label', "Secux Linux shim", '--loader', '\\EFI\\secux\\shimx64.efi'])
+                efi_base_drive, efi_part_num = self.__split_device(efi_partition)
+                if not efi_part_num:
+                    raise InstallError(f"Cannot determine the ESP partition number for {efi_partition}")
+                self.execute(['efibootmgr', '--create', '--disk', efi_base_drive, '--part', efi_part_num, '--label', "Secux Linux shim", '--loader', '\\EFI\\secux\\shimx64.efi'])
 
             self.set_progress(0.95)
 

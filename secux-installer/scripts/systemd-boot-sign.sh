@@ -2,26 +2,17 @@
 set -e
 
 SYSTEMD_BOOT_SRC="/usr/lib/systemd/boot/efi/systemd-bootx64.efi"
-TARGET_DIR="/efi/EFI/secux"
-TARGET_FILE="${TARGET_DIR}/grubx64.efi"
+SIGNED_FILE="${SYSTEMD_BOOT_SRC}.signed"
 KEY="/etc/secureboot/sb.key"
 CERT="/etc/secureboot/sb.crt"
-TEMP_SIGNED="/tmp/systemd-bootx64.efi.signed"
 
-if [ ! -f "$SYSTEMD_BOOT_SRC" ]; then
-    echo "systemd-boot wasn't found at ${SYSTEMD_BOOT_SRC}"
-    exit 1
-fi
-
-[ -d "$TARGET_DIR" ] || mkdir -p "$TARGET_DIR"
-
+TEMP_SIGNED=$(mktemp "${SIGNED_FILE}.XXXXXX")
+trap 'rm -f -- "$TEMP_SIGNED"' EXIT
 sbsign --key "$KEY" --cert "$CERT" --output "$TEMP_SIGNED" "$SYSTEMD_BOOT_SRC"
+mv -f -- "$TEMP_SIGNED" "$SIGNED_FILE"
 
-if [ -f "$TEMP_SIGNED" ]; then
-    cp -fv "$TEMP_SIGNED" "$TARGET_FILE"
-    rm -f "$TEMP_SIGNED"
-    echo "systemd-boot signed and copied to ${TARGET_FILE}"
-else
-    echo "An error occured while signing systemd-boot"
-    exit 1
+if [[ ${1:-} == --update ]]; then
+    mountpoint /efi
+    bootctl --esp-path=/efi --variables=no --graceful update
+    sbverify --cert "$CERT" /efi/EFI/systemd/systemd-bootx64.efi
 fi

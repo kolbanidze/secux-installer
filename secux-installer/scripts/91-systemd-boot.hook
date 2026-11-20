@@ -1,11 +1,10 @@
 [Trigger]
 Operation = Install
 Operation = Upgrade
-Operation = Remove
-Type = Package
-Target = systemd
+Type = Path
+Target = usr/lib/systemd/boot/efi/systemd-bootx64.efi
 
 [Action]
-Description = Signing systemd-boot and copying to /efi/EFI/Linux as grubx64.efi
+Description = Signing and updating systemd-boot
 When = PostTransaction
-Exec = /usr/share/systemd-boot-sign.sh
+Exec = /usr/share/systemd-boot-sign.sh --update
