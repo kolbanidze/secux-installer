@@ -73,7 +73,7 @@ template $UserPage: Adw.NavigationPage {
             name: "ascii_host";
 
             child: Gtk.Label {
-              label: _("Имя устройства должно содержать только латинские буквы");
+              label: _("Используйте латинские буквы, цифры, дефис и подчёркивание. Имя устройства не может начинаться с цифры.");
 
               styles [
                 "error",
@@ -116,20 +116,6 @@ template $UserPage: Adw.NavigationPage {
 
             child: Gtk.Label {
               label: _("Имя пользователя не должно содержать пробелов");
-
-              styles [
-                "error",
-              ]
-
-              wrap: true;
-            };
-          }
-
-          Gtk.StackPage {
-            name: "space_host";
-
-            child: Gtk.Label {
-              label: _("Имя устройства не должно содержать пробелов");
 
               styles [
                 "error",

@@ -138,17 +138,43 @@ msgstr "Are you sure you want to completely replace the Secure Boot keys? On som
 "devices, this could result in a bricked device. Proceed only if "
 "you know what you are doing."
 
-#: main.py:1621
-msgid "Недостаточно места"
-msgstr "Not enough space"
+#: main.py:47
+msgid "Не удалось проверить EFI-раздел"
+msgstr "Could not check the EFI partition"
 
-#: main.py:1622
-msgid "На выбранном EFI-разделе доступно только"
-msgstr "Only the following is available on the selected EFI partition "
+#: main.py:48
+#, python-brace-format
+msgid ""
+"Установщик не смог определить свободное место на разделе {device}. Проверьте "
+"выбранный раздел или выберите другой."
+msgstr "The installer could not determine the free space on partition {device}. Check the selected partition or choose another one."
 
-#: main.py:1623
-msgid "Для установки ядра требуется минимум 80 MB."
-msgstr "A minimum of 80 MB is required to install the kernel."
+#: main.py:70
+msgid "Недостаточно места на EFI-разделе"
+msgstr "Not enough space on the EFI partition"
+
+#: main.py:71
+#, python-brace-format
+msgid ""
+"На разделе {device} свободно {available} МиБ. Для выбранных ядер требуется "
+"не менее {required} МиБ. Освободите место или выберите другой EFI-раздел."
+msgstr "Partition {device} has {available} MiB free. The selected kernels require at least {required} MiB. Free up space or select another EFI partition."
+
+#: main.py:101
+msgid "Выберите действительные разделы EFI и root."
+msgstr "Select valid EFI and root partitions."
+
+#: main.py:103
+msgid "Выберите разные разделы для EFI и root."
+msgstr "Select different partitions for EFI and root."
+
+#: main.py:1694
+msgid "Выберите хотя бы одно ядро Linux."
+msgstr "Select at least one Linux kernel."
+
+#: main.py:1706
+msgid "Выберите диск для установки."
+msgstr "Select a disk for installation."
 
 #: main.py:1634
 msgid "ОШИБКА: отсутствует подключение к интернету!"
@@ -682,8 +708,12 @@ msgid "Все поля должны быть заполнены"
 msgstr "All fields must be filled"
 
 #: ui/user.ui:90
-msgid "Имя устройства должно содержать только латинские буквы"
-msgstr "Device name must contain only Latin letters"
+msgid ""
+"Используйте латинские буквы, цифры, дефис и подчёркивание. "
+"Имя устройства не может начинаться с цифры."
+msgstr ""
+"Use only Latin letters, digits, hyphens, and underscores. "
+"The device name cannot start with a digit."
 
 #: ui/user.ui:104
 msgid "Имя пользователя должно быть на английском"
@@ -696,10 +726,6 @@ msgstr "Password must contain only Latin characters and numbers"
 #: ui/user.ui:132
 msgid "Имя пользователя не должно содержать пробелов"
 msgstr "Username must not contain spaces"
-
-#: ui/user.ui:146
-msgid "Имя устройства не должно содержать пробелов"
-msgstr "Device name must not contain spaces"
 
 #: ui/welcome.ui:21
 msgid "Добро пожаловать"

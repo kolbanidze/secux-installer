@@ -17,12 +17,14 @@ from gettext import gettext as _
 import locale
 import time
 import re
+import stat
+import tempfile
 
 TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 'Bamako', 'Bangui', 'Banjul', 'Bissau', 'Blantyre', 'Brazzaville', 'Bujumbura', 'Cairo', 'Casablanca', 'Ceuta', 'Conakry', 'Dakar', 'Dar_es_Salaam', 'Djibouti', 'Douala', 'El_Aaiun', 'Freetown', 'Gaborone', 'Harare', 'Johannesburg', 'Juba', 'Kampala', 'Khartoum', 'Kigali', 'Kinshasa', 'Lagos', 'Libreville', 'Lome', 'Luanda', 'Lubumbashi', 'Lusaka', 'Malabo', 'Maputo', 'Maseru', 'Mbabane', 'Mogadishu', 'Monrovia', 'Nairobi', 'Ndjamena', 'Niamey', 'Nouakchott', 'Ouagadougou', 'Porto-Novo', 'Sao_Tome', 'Tripoli', 'Tunis', 'Windhoek'], 'America': ['Adak', 'Anchorage', 'Anguilla', 'Antigua', 'Araguaina', 'Argentina/Buenos_Aires', 'Argentina/Catamarca', 'Argentina/Cordoba', 'Argentina/Jujuy', 'Argentina/La_Rioja', 'Argentina/Mendoza', 'Argentina/Rio_Gallegos', 'Argentina/Salta', 'Argentina/San_Juan', 'Argentina/San_Luis', 'Argentina/Tucuman', 'Argentina/Ushuaia', 'Aruba', 'Asuncion', 'Atikokan', 'Bahia', 'Bahia_Banderas', 'Barbados', 'Belem', 'Belize', 'Blanc-Sablon', 'Boa_Vista', 'Bogota', 'Boise', 'Cambridge_Bay', 'Campo_Grande', 'Cancun', 'Caracas', 'Cayenne', 'Cayman', 'Chicago', 'Chihuahua', 'Costa_Rica', 'Creston', 'Cuiaba', 'Curacao', 'Danmarkshavn', 'Dawson', 'Dawson_Creek', 'Denver', 'Detroit', 'Dominica', 'Edmonton', 'Eirunepe', 'El_Salvador', 'Fort_Nelson', 'Fortaleza', 'Glace_Bay', 'Godthab', 'Goose_Bay', 'Grand_Turk', 'Grenada', 'Guadeloupe', 'Guatemala', 'Guayaquil', 'Guyana', 'Halifax', 'Havana', 'Hermosillo', 'Indiana/Indianapolis', 'Indiana/Knox', 'Indiana/Marengo', 'Indiana/Petersburg', 'Indiana/Tell_City', 'Indiana/Vevay', 'Indiana/Vincennes', 'Indiana/Winamac', 'Inuvik', 'Iqaluit', 'Jamaica', 'Juneau', 'Kentucky/Louisville', 'Kentucky/Monticello', 'Kralendijk', 'La_Paz', 'Lima', 'Los_Angeles', 'Lower_Princes', 'Maceio', 'Managua', 'Manaus', 'Marigot', 'Martinique', 'Matamoros', 'Mazatlan', 'Menominee', 'Merida', 'Metlakatla', 'Mexico_City', 'Miquelon', 'Moncton', 'Monterrey', 'Montevideo', 'Montserrat', 'Nassau', 'New_York', 'Nipigon', 'Nome', 'Noronha', 'North_Dakota/Beulah', 'North_Dakota/Center', 'North_Dakota/New_Salem', 'Ojinaga', 'Panama', 'Pangnirtung', 'Paramaribo', 'Phoenix', 'Port-au-Prince', 'Port_of_Spain', 'Porto_Velho', 'Puerto_Rico', 'Rainy_River', 'Rankin_Inlet', 'Recife', 'Regina', 'Resolute', 'Rio_Branco', 'Santarem', 'Santiago', 'Santo_Domingo', 'Sao_Paulo', 'Scoresbysund', 'Sitka', 'St_Barthelemy', 'St_Johns', 'St_Kitts', 'St_Lucia', 'St_Thomas', 'St_Vincent', 'Swift_Current', 'Tegucigalpa', 'Thule', 'Thunder_Bay', 'Tijuana', 'Toronto', 'Tortola', 'Vancouver', 'Whitehorse', 'Winnipeg', 'Yakutat', 'Yellowknife'], 'Antarctica': ['Casey', 'Davis', 'DumontDUrville', 'Macquarie', 'Mawson', 'McMurdo', 'Palmer', 'Rothera', 'Syowa', 'Troll', 'Vostok'], 'Arctic': ['Longyearbyen'], 'Asia': ['Aden', 'Almaty', 'Amman', 'Anadyr', 'Aqtau', 'Aqtobe', 'Ashgabat', 'Atyrau', 'Baghdad', 'Bahrain', 'Baku', 'Bangkok', 'Barnaul', 'Beirut', 'Bishkek', 'Brunei', 'Chita', 'Choibalsan', 'Colombo', 'Damascus', 'Dhaka', 'Dili', 'Dubai', 'Dushanbe', 'Famagusta', 'Gaza', 'Hebron', 'Ho_Chi_Minh', 'Hong_Kong', 'Hovd', 'Irkutsk', 'Jakarta', 'Jayapura', 'Jerusalem', 'Kabul', 'Kamchatka', 'Karachi', 'Kathmandu', 'Khandyga', 'Kolkata', 'Krasnoyarsk', 'Kuala_Lumpur', 'Kuching', 'Kuwait', 'Macau', 'Magadan', 'Makassar', 'Manila', 'Muscat', 'Nicosia', 'Novokuznetsk', 'Novosibirsk', 'Omsk', 'Oral', 'Phnom_Penh', 'Pontianak', 'Pyongyang', 'Qatar', 'Qyzylorda', 'Riyadh', 'Sakhalin', 'Samarkand', 'Seoul', 'Shanghai', 'Singapore', 'Srednekolymsk', 'Taipei', 'Tashkent', 'Tbilisi', 'Tehran', 'Thimphu', 'Tokyo', 'Tomsk', 'Ulaanbaatar', 'Urumqi', 'Ust-Nera', 'Vientiane', 'Vladivostok', 'Yakutsk', 'Yangon', 'Yekaterinburg', 'Yerevan'], 'Atlantic': ['Azores', 'Bermuda', 'Canary', 'Cape_Verde', 'Faroe', 'Madeira', 'Reykjavik', 'South_Georgia', 'St_Helena', 'Stanley'], 'Australia': ['Adelaide', 'Brisbane', 'Broken_Hill', 'Currie', 'Darwin', 'Eucla', 'Hobart', 'Lindeman', 'Lord_Howe', 'Melbourne', 'Perth', 'Sydney'], 'Europe': ['Amsterdam', 'Andorra', 'Astrakhan', 'Athens', 'Belgrade', 'Berlin', 'Bratislava', 'Brussels', 'Bucharest', 'Budapest', 'Busingen', 'Chisinau', 'Copenhagen', 'Dublin', 'Gibraltar', 'Guernsey', 'Helsinki', 'Isle_of_Man', 'Istanbul', 'Jersey', 'Kaliningrad', 'Kiev', 'Kirov', 'Lisbon', 'Ljubljana', 'London', 'Luxembourg', 'Madrid', 'Malta', 'Mariehamn', 'Minsk', 'Monaco', 'Moscow', 'Oslo', 'Paris', 'Podgorica', 'Prague', 'Riga', 'Rome', 'Samara', 'San_Marino', 'Sarajevo', 'Saratov', 'Simferopol', 'Skopje', 'Sofia', 'Stockholm', 'Tallinn', 'Tirane', 'Ulyanovsk', 'Uzhgorod', 'Vaduz', 'Vatican', 'Vienna', 'Vilnius', 'Volgograd', 'Warsaw', 'Zagreb', 'Zaporozhye', 'Zurich'], 'Indian': ['Antananarivo', 'Chagos', 'Christmas', 'Cocos', 'Comoro', 'Kerguelen', 'Mahe', 'Maldives', 'Mauritius', 'Mayotte', 'Reunion'], 'Pacific': ['Apia', 'Auckland', 'Bougainville', 'Chatham', 'Chuuk', 'Easter', 'Efate', 'Enderbury', 'Fakaofo', 'Fiji', 'Funafuti', 'Galapagos', 'Gambier', 'Guadalcanal', 'Guam', 'Honolulu', 'Johnston', 'Kiritimati', 'Kosrae', 'Kwajalein', 'Majuro', 'Marquesas', 'Midway', 'Nauru', 'Niue', 'Norfolk', 'Noumea', 'Pago_Pago', 'Palau', 'Pitcairn', 'Pohnpei', 'Port_Moresby', 'Rarotonga', 'Saipan', 'Tahiti', 'Tarawa', 'Tongatapu', 'Wake', 'Wallis']}
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.7.3"
+VERSION = "0.7.4"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -32,6 +34,74 @@ LOCALES_DIR = os.path.join(BASE_DIR, "locales")
 REPO_URL = "https://kolbanidze-secux-repo.hf.space"
 
 class InstallError(Exception): pass
+
+
+class EspCheckError(InstallError):
+    def __init__(self, title, message):
+        super().__init__(message)
+        self.title = title
+
+
+def esp_check_failed(device):
+    return EspCheckError(
+        _("Не удалось проверить EFI-раздел"),
+        _("Установщик не смог определить свободное место на разделе {device}. "
+          "Проверьте выбранный раздел или выберите другой.").format(device=device),
+    )
+
+
+def check_esp_space(device, mount_point, kernel_count, require_writable=False):
+    try:
+        device_info = os.stat(device)
+        if not stat.S_ISBLK(device_info.st_mode) or os.stat(mount_point).st_dev != device_info.st_rdev:
+            raise OSError(f"{mount_point} is not mounted from {device}")
+        space = os.statvfs(mount_point)
+        if require_writable and space.f_flag & os.ST_RDONLY:
+            raise OSError(f"{mount_point} is read-only")
+    except OSError as error:
+        raise esp_check_failed(device) from error
+
+    mib = 1024 ** 2
+    # shortcut: fixed UKI budget until image sizes can be measured before installation.
+    required_mib = 128 + 256 * kernel_count
+    available_bytes = space.f_bavail * space.f_frsize
+    if available_bytes < required_mib * mib:
+        raise EspCheckError(
+            _("Недостаточно места на EFI-разделе"),
+            _("На разделе {device} свободно {available} МиБ. Для выбранных ядер "
+              "требуется не менее {required} МиБ. Освободите место или выберите другой EFI-раздел.").format(
+                device=device, available=available_bytes // mib, required=required_mib,
+            ),
+        )
+
+
+def check_manual_esp(device, kernel_count):
+    try:
+        probe_dir = tempfile.mkdtemp(prefix="efi-chk-")
+        mounted = False
+        try:
+            subprocess.run(["sudo", "mount", "-t", "vfat", "-o", "ro", device, probe_dir], check=True)
+            mounted = True
+            check_esp_space(device, probe_dir, kernel_count)
+        finally:
+            if mounted:
+                subprocess.run(["sudo", "umount", probe_dir], check=True)
+            os.rmdir(probe_dir)
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise esp_check_failed(device) from error
+
+
+def validate_manual_partitions(efi_partition, root_partition):
+    try:
+        esp = os.stat(efi_partition)
+        root = os.stat(root_partition)
+        if not stat.S_ISBLK(esp.st_mode) or not stat.S_ISBLK(root.st_mode):
+            raise OSError("Expected block devices")
+    except OSError as error:
+        raise EspCheckError(_("Ошибка"), _("Выберите действительные разделы EFI и root.")) from error
+    if esp.st_rdev == root.st_rdev:
+        raise EspCheckError(_("Ошибка"), _("Выберите разные разделы для EFI и root."))
+
 
 def get_ui_path(filename):
     return os.path.join(os.path.join(BASE_DIR, "ui"), filename)
@@ -113,7 +183,7 @@ class InstallPage(Adw.NavigationPage):
             app.quit()
         subprocess.run(['systemctl', 'reboot'])
 
-    def start_installation(self, main_window):
+    def start_installation(self, main_window, partition, kernels):
         """
         Метод вызывается из InstallerWindow перед переходом на этот экран.
         Собираем все данные и запускаем поток.
@@ -122,12 +192,12 @@ class InstallPage(Adw.NavigationPage):
         self.config = {
             "source": main_window.source_page.get_source_mode(),
             "user": main_window.user_page.get_user(),
-            "partition": main_window.partition_page.get_config(),
+            "partition": partition,
             "security": main_window.security_page.get_selected_mode(),
             "desktop": main_window.desktop_page.get_selected_de(),
             "timezone": main_window.timezone_page.get_timezone(),
             "encryption_pwd": main_window.encryption_page.get_password(),
-            "kernels": main_window.kernel_page.get_selected_kernels(),
+            "kernels": kernels,
             "packages": main_window.software_page.get_selected_packages(),
             "MOK": main_window.encryption_page.get_mok_password(),
             "gaming_mode": main_window.kernel_page.get_gaming_mode(),
@@ -266,6 +336,7 @@ class InstallPage(Adw.NavigationPage):
                 self.log(_("INFO: Используется ручная разметка."))
                 efi_partition = part_conf["efi_part"]
                 rootfs_partition = part_conf["root_part"]
+                validate_manual_partitions(efi_partition, rootfs_partition)
                 self.log(F"EFI: {efi_partition}, Root: {rootfs_partition}")
 
                 efi_base_drive, efi_number = self.__split_device(efi_partition)
@@ -280,7 +351,8 @@ class InstallPage(Adw.NavigationPage):
             self.log(_("INFO: Размер файла подкаки: ") + str(swap_size))
 
             self.set_progress(0.2)
-            if self.config["encryption_enabled"] and self.config["encryption_pwd"]:
+            encrypted = self.config["encryption_enabled"] and bool(self.config["encryption_pwd"])
+            if encrypted:
                 self.log(_("INFO: Настройка шифрования LUKS2"))
                 self.execute(['cryptsetup', 'luksFormat', rootfs_partition], input_str=self.config["encryption_pwd"]) 
                 self.execute(['cryptsetup', 'luksOpen', rootfs_partition, 'secuxroot'], input_str=self.config["encryption_pwd"])
@@ -328,7 +400,8 @@ class InstallPage(Adw.NavigationPage):
             # Монтирование
             self.set_progress(0.3)
             self.log(_("INFO: Монтирование файловых систем..."))
-            self.execute(['mount', '--mkdir', '-o', 'uid=0,gid=0,fmask=0077,dmask=0077', efi_partition, efi_mount_point])
+            self.execute(['mount', '--mkdir', '-t', 'vfat', '-o', 'uid=0,gid=0,fmask=0077,dmask=0077', efi_partition, efi_mount_point])
+            check_esp_space(efi_partition, efi_mount_point, len(self.config["kernels"]), require_writable=True)
 
             # Настройка репозиториев
             self.set_progress(0.35)
@@ -513,27 +586,30 @@ always-show-log-out=true
                 self.execute(['mkdir', '-p', f"{mount_point}/etc/xdg"])
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e "{kde_config}" >> /etc/xdg/kxkbrc'])
             
-            if self.config["encryption_enabled"] and self.config["encryption_pwd"]:
+            initramfs_files = ["/etc/hostname"]
+            encryption_hook = ""
+            if encrypted:
                 # Adding PCR 15 extend when LUKS unlocked
-                dir = "/etc/systemd/system/systemd-cryptsetup@.service.d"
-                self.execute(['arch-chroot', mount_point, 'mkdir', '-p', dir])
+                pcr_dir = "/etc/systemd/system/systemd-cryptsetup@.service.d"
+                pcr_override = f"{pcr_dir}/extpcr.conf"
+                self.execute(['arch-chroot', mount_point, 'mkdir', '-p', pcr_dir])
                 override = """
 [Service]
 ExecStartPost=/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
 """
-                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{override}\' > {dir}/extpcr.conf'])
+                self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{override}\' > {pcr_override}'])
+                initramfs_files.append(pcr_override)
+                encryption_hook = " sd-encrypt"
             
             self.set_progress(0.7)
             # Creating mkinitcpio.conf
             self.log(_("INFO: Настройка доверенной загрузки"))
-            # Added
-            mkinitcpio_conf_content = "MODULES=()\n"\
-            "BINARIES=()\n"\
-            "FILES=(/etc/hostname "\
-            "/etc/systemd/system/systemd-cryptsetup@.service.d/extpcr.conf)\n"\
-            "HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block sd-encrypt filesystems fsck)\n"
-            if not (self.config["encryption_enabled"] and self.config["encryption_pwd"]):
-                mkinitcpio_conf_content = mkinitcpio_conf_content.replace("sd-encrypt ", "")
+            mkinitcpio_conf_content = (
+                "MODULES=()\n"
+                "BINARIES=()\n"
+                f"FILES=({' '.join(initramfs_files)})\n"
+                f"HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth block{encryption_hook} filesystems fsck)\n"
+            )
             self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{mkinitcpio_conf_content}\' > /etc/mkinitcpio.conf'])
 
             for kernel in self.config['kernels']:
@@ -563,7 +639,7 @@ ExecStartPost=/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
 
             cmdline = []
 
-            if self.config["encryption_enabled"] and self.config["encryption_pwd"]:
+            if encrypted:
                 cmdline.extend([f"rd.luks.name={uuid}=secuxroot", "root=/dev/mapper/secuxroot"])
             else:
                 cmdline.append(f"root=UUID={uuid}")
@@ -636,24 +712,10 @@ PCRBanks=sha256"""
 
             # Hostname
             hostname = self.config['user']["hostname"]
-            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo "{hostname}" > /etc/hostname'])
+            self.execute(['arch-chroot', mount_point, 'tee', '/etc/hostname'], input_str=hostname)
 
             # Instead of mkinitcpio -P
             self.execute(['stdbuf', '-oL', 'pacstrap', mount_point] + kernels)
-
-            powertop_config = """
-[Unit]
-Description=Powertop autotune
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/sbin/powertop --auto-tune
-
-[Install]
-WantedBy=multi-user.target
-"""
-            self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{powertop_config}\' > /etc/systemd/system/powertop.service'])
             
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'NetworkManager.service'])
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'systemd-timesyncd.service'])
@@ -664,7 +726,6 @@ WantedBy=multi-user.target
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'tuned.service'])
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'systemd-oomd'])
             self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'cups.socket'])
-            self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'powertop.service'])
 
             if self.config["desktop"] == "gnome":
                 self.execute(['arch-chroot', mount_point, 'systemctl', 'enable', 'gdm.service'])
@@ -762,6 +823,11 @@ PermitEmptyPasswords no
             # Обновляем UI по завершении
             GLib.idle_add(self._on_install_finished, True)
         
+        except EspCheckError as error:
+            self.log(str(error))
+            if error.__cause__ is not None:
+                self.log(str(error.__cause__))
+            GLib.idle_add(self._on_install_finished, False, str(error))
         except InstallError as e:
             self.log(f"Error: {e}")
             GLib.idle_add(self._on_install_finished, False)
@@ -774,7 +840,7 @@ PermitEmptyPasswords no
     def an_error_occurred(self):
         GLib.idle_add(self._on_install_finished, False)
 
-    def _on_install_finished(self, success):
+    def _on_install_finished(self, success, description=None):
         self.spinner.stop()
         self.spinner.set_visible(False)
         self.btn_finish.set_visible(True)
@@ -785,7 +851,7 @@ PermitEmptyPasswords no
             self.status_page.set_icon_name("object-select-symbolic")
         else:
             self.status_page.set_title(_("Ошибка установки"))
-            self.status_page.set_description(_("Произошла критическая ошибка. Смотрите логи ниже."))
+            self.status_page.set_description(description or _("Произошла критическая ошибка. Смотрите логи ниже."))
             self.status_page.set_icon_name("dialog-error-symbolic")
             self.btn_finish.set_label("Закрыть")
 
@@ -971,7 +1037,7 @@ class UserPage(Adw.NavigationPage):
 
     def on_validate_and_next(self, action, param):
         fullname = self.entry_fullname.get_text().strip()
-        hostname = self.entry_hostname.get_text().strip()
+        hostname = self.entry_hostname.get_text()
         username = self.entry_username.get_text().strip()
         pwd = self.entry_password.get_text()
         confirm = self.entry_confirm.get_text()
@@ -980,7 +1046,7 @@ class UserPage(Adw.NavigationPage):
             self.error_stack.set_visible_child_name("empty")
             return
 
-        if not hostname.isascii() or hostname[0].isdigit() or ';' in hostname:
+        if not re.fullmatch(r"[A-Za-z_-][A-Za-z0-9_-]*", hostname):
             self.error_stack.set_visible_child_name("ascii_host")
             return
             
@@ -995,10 +1061,6 @@ class UserPage(Adw.NavigationPage):
         if " " in username:
             self.error_stack.set_visible_child_name("space_user")
             return
-            
-        if " " in hostname:
-             self.error_stack.set_visible_child_name("space_host")
-             return
 
         if pwd != confirm:
             self.error_stack.set_visible_child_name("mismatch")
@@ -1010,7 +1072,7 @@ class UserPage(Adw.NavigationPage):
     
     def get_user(self):
         fullname = self.entry_fullname.get_text().strip()
-        hostname = self.entry_hostname.get_text().strip()
+        hostname = self.entry_hostname.get_text()
         username = self.entry_username.get_text().strip()
         pwd = self.entry_password.get_text()
 
@@ -1205,19 +1267,19 @@ class PartitionPage(Adw.NavigationPage):
             model = self.disk_combo_auto.get_model()
             index = self.disk_combo_auto.get_selected()
             disk = model.get_string(index) if model else None
-            disk = disk.split(' ')[0]
+            disk = (disk or "").partition(" ")[0]
 
             return {"mode": "auto", "target": disk, 'swap_size': 2, 'fs_type': 'btrfs', 'zram': True}
         else:
             model = self.combo_efi.get_model()
             index = self.combo_efi.get_selected()
             efi_part = model.get_string(index) if model else None
-            efi_part = efi_part.split(' ')[0]
+            efi_part = (efi_part or "").partition(" ")[0]
 
             model = self.combo_root.get_model()
             index = self.combo_root.get_selected()
             root_part = model.get_string(index) if model else None
-            root_part = root_part.split(' ')[0]
+            root_part = (root_part or "").partition(" ")[0]
 
             fs_model = self.combo_fs.get_model()
             fs_idx = self.combo_fs.get_selected()
@@ -1623,28 +1685,22 @@ class InstallerWindow(Adw.ApplicationWindow):
             
             if isinstance(page_to_open, InstallPage):
                 config = self.partition_page.get_config()
+                kernels = self.kernel_page.get_selected_kernels()
+                if not kernels:
+                    self.show_message_dialog(_("Ошибка"), _("Выберите хотя бы одно ядро Linux."))
+                    return
                 if config["mode"] == "manual":
-                    efi_part = config.get("efi_part")
-                    import tempfile, shutil, os
-                    tmp = tempfile.mkdtemp(prefix="efi-chk-")
-                    res = subprocess.run(["sudo", "mount", "-o", "ro", efi_part, tmp], capture_output=True)
-                    if res.returncode == 0:
-                        free_mb = shutil.disk_usage(tmp).free / (1024 * 1024)
-                        subprocess.run(["sudo", "umount", tmp], capture_output=True)
-                        try: os.rmdir(tmp)
-                        except: pass
-                        
-                        if free_mb < 80.0:
-                            self.show_message_dialog(
-                                _("Недостаточно места"), 
-                                f"{_('На выбранном EFI-разделе доступно только')} {free_mb:.1f} MB.\n"
-                                f"{_('Для установки ядра требуется минимум 80 MB.')}"
-                            )
-                            return
-                    else:
-                        try: os.rmdir(tmp)
-                        except: pass
-
+                    try:
+                        validate_manual_partitions(config["efi_part"], config["root_part"])
+                        check_manual_esp(config["efi_part"], len(kernels))
+                    except EspCheckError as error:
+                        if error.__cause__ is not None:
+                            print(error.__cause__)
+                        self.show_message_dialog(error.title, str(error))
+                        return
+                elif not config["target"]:
+                    self.show_message_dialog(_("Ошибка"), _("Выберите диск для установки."))
+                    return
 
                 if self.source_page.get_source_mode() == 'online':
                     is_online = self.check_connectivity()
@@ -1658,7 +1714,7 @@ class InstallerWindow(Adw.ApplicationWindow):
                         print(_("ОШИБКА: Secure Boot Setup Mode отключен. Для максимального уровня защиты необходимо включить Setup Mode."))
                         self.show_message_dialog(_("Ошибка"), _("Setup Mode отключен, что необходимо для применения всех механизмов защиты."))
                         return
-                page_to_open.start_installation(self)
+                page_to_open.start_installation(self, config, kernels)
 
             self.current_step_index = next_index
             self.nav_view.push(page_to_open)

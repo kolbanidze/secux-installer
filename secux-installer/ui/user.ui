@@ -87,7 +87,7 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                         <property name="name">ascii_host</property>
                         <property name="child">
                           <object class="GtkLabel">
-                            <property name="label" translatable="yes">Имя устройства должно содержать только латинские буквы</property>
+                            <property name="label" translatable="yes">Используйте латинские буквы, цифры, дефис и подчёркивание. Имя устройства не может начинаться с цифры.</property>
                             <style>
                               <class name="error"/>
                             </style>
@@ -130,20 +130,6 @@ corresponding .blp file and regenerate this file with blueprint-compiler.
                         <property name="child">
                           <object class="GtkLabel">
                             <property name="label" translatable="yes">Имя пользователя не должно содержать пробелов</property>
-                            <style>
-                              <class name="error"/>
-                            </style>
-                            <property name="wrap">true</property>
-                          </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkStackPage">
-                        <property name="name">space_host</property>
-                        <property name="child">
-                          <object class="GtkLabel">
-                            <property name="label" translatable="yes">Имя устройства не должно содержать пробелов</property>
                             <style>
                               <class name="error"/>
                             </style>
