@@ -22,7 +22,7 @@ TIMEZONES = {'Africa': ['Abidjan', 'Accra', 'Addis_Ababa', 'Algiers', 'Asmara', 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VERSION = "0.7.2"
+VERSION = "0.7.3"
 
 LOG_FILE = "/tmp/secux-install.log"
 
@@ -372,7 +372,7 @@ class InstallPage(Adw.NavigationPage):
                 self.log("> DE: Console")
             
             if self.config['desktop'] != 'console':
-                pacstrap_packages.extend(['noto-fonts', 'noto-fonts-cjk'])
+                pacstrap_packages.extend(['noto-fonts', 'noto-fonts-cjk', 'noto-fonts-emoji'])
                 pacstrap_packages.extend(['ttf-ms-win11'])
                 pacstrap_packages.extend(['cups', 'avahi', 'nss-mdns'])
                 pacstrap_packages.extend(['gst-libav'])
@@ -519,7 +519,7 @@ always-show-log-out=true
                 self.execute(['arch-chroot', mount_point, 'mkdir', '-p', dir])
                 override = """
 [Service]
-ExecStartPost=-/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
+ExecStartPost=/usr/lib/systemd/systemd-pcrextend --pcr=15 "luks-decrypted"
 """
                 self.execute(['arch-chroot', mount_point, 'bash', '-c', f'echo -e \'{override}\' > {dir}/extpcr.conf'])
             
